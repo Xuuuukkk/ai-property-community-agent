@@ -1,10 +1,19 @@
 # AI Property Community Agent
 
-> AI 驱动的物业社区管理智能体（AI Native Property Management Platform）
+> AI 驱动的物业社区管理智能体  
+> AI Native Property Management Platform
+
 
 一个面向真实物业社区场景设计的 AI Agent 平台。
 
-本项目旨在构建一个具备业务执行能力、知识理解能力和多角色协作能力的智能物业管理系统。
+本项目旨在构建一个具备：
+
+- 业务执行能力
+- 知识理解能力
+- 多角色协作能力
+
+的智能物业管理系统。
+
 
 系统通过：
 
@@ -13,7 +22,26 @@
 - 业务服务系统
 - 模拟真实社区数据
 
-实现从业主服务、物业管理到维修处理的完整闭环。
+实现从：
+
+```
+业主服务
+
+↓
+
+物业管理
+
+↓
+
+维修处理
+
+↓
+
+知识咨询
+
+```
+
+的完整智能化闭环。
 
 
 ---
@@ -22,25 +50,42 @@
 
 ## 项目背景
 
+
 传统物业管理系统主要依赖：
 
 - 人工客服
 - 电话报修
 - 物业工作人员处理
-- 人工查询规则和制度
+- 人工查询规章制度
 
-存在以下问题：
 
-- 业主服务入口分散
+存在：
+
+- 服务入口分散
 - 报修流程效率低
 - 物业知识难以快速获取
-- 物业工作人员重复处理大量事务
-- 社区数据价值未被充分利用
+- 重复事务占用大量人工
+- 社区数据价值未充分利用
 
 
-随着大语言模型（LLM）和 Agent 技术的发展，物业管理可以从传统信息系统升级为：
+随着：
 
-> AI 驱动的智能社区服务系统。
+- Large Language Model（LLM）
+- AI Agent
+- RAG
+
+技术的发展，物业管理正在从：
+
+```
+传统信息系统
+
+↓
+
+AI Native 智能服务系统
+
+```
+
+进行升级。
 
 
 ---
@@ -49,9 +94,14 @@
 
 ## 项目愿景
 
-构建一个 AI 社区管家：
+
+构建一个：
+
+> AI 社区管家（AI Community Assistant）
+
 
 让居民可以通过自然语言完成：
+
 
 - 报修
 - 查询物业费用
@@ -62,17 +112,27 @@
 
 让物业工作人员可以：
 
+
 - 管理社区事务
-- 自动生成公告
 - 智能处理工单
-- 利用 AI 辅助决策
+- 自动生成公告
+- 辅助运营决策
+
+
+最终目标：
+
+打造一个：
+
+> 理解社区、连接居民、辅助物业运营的 AI 原生社区管理平台。
 
 
 ---
 
 # 3. Core Features
 
-## 3.1 Owner AI Assistant（业主 AI 助手）
+# 3.1 Owner AI Assistant
+# 业主 AI 助手
+
 
 提供：
 
@@ -83,29 +143,35 @@
 - 社区知识问答
 
 
-示例：
+Example:
 
-用户：
+
+User:
 
 ```
 我家厨房漏水
+
 ```
 
-AI：
+
+AI:
 
 ```
 已识别为维修需求。
 
-正在为您创建维修工单。
+正在创建维修工单。
 
 工单编号：
 R202608001
+
 ```
 
 
 ---
 
-## 3.2 Property Management System（物业管理系统）
+# 3.2 Property Management System
+# 物业管理系统
+
 
 提供：
 
@@ -113,57 +179,76 @@ R202608001
 - 房屋管理
 - 工单管理
 - 公告管理
-- 数据统计
+- 社区数据统计
 
 
 ---
 
-## 3.3 Worker Task System（维修任务系统）
+# 3.3 Worker Task System
+# 维修任务系统
+
 
 提供：
 
-- 任务查看
-- 工单处理
-- 状态更新
-- 维修结果反馈
+- 查看维修任务
+- 接收工单
+- 更新状态
+- 上传维修结果
 
 
 ---
 
-## 3.4 AI Agent System
+# 3.4 AI Agent System
 
-系统包含：
+
+系统采用 Multi-Agent 架构：
+
 
 ```
-Personal Agent
-
-        ↓
-
-Router Agent
-
-        ↓
-
-Domain Agents
+                 User
 
 
-Repair Agent
+                  ↓
 
-Fee Agent
 
-Notice Agent
+            Router Agent
 
-Knowledge Agent
+
+                  ↓
+
+
+        Domain Agent Layer
+
+
+     ┌────────┬────────┬────────┐
+
+     │        │        │        │
+
+ Repair    Fee    Notice   Knowledge
+
+ Agent    Agent   Agent     Agent
+
 
 ```
+
+
+Agent负责：
+
+- 理解用户需求
+- 判断任务类型
+- 调用业务能力
+- 生成结果
 
 
 ---
 
-## 3.5 RAG Knowledge System
+# 3.5 RAG Knowledge System
 
-构建物业知识库：
+系统构建物业知识库。
 
-包括：
+
+知识包括：
+
 
 - 业主管理规约
 - 装修管理制度
@@ -174,53 +259,195 @@ Knowledge Agent
 
 支持：
 
+- 文档解析
 - 知识检索
-- 文档引用
+- 内容引用
 - 准确回答
 
 
 ---
 
-# 4. System Architecture
+# 4. Demo Scenario
+
+## Scenario 1：智能报修
+
+
+用户：
+
+```
+卫生间漏水怎么办？
+
+```
+
+
+系统流程：
+
+```
+User
+
+↓
+
+Router Agent
+
+↓
+
+Repair Agent
+
+↓
+
+Create Repair Order
+
+↓
+
+Notify Worker
+
+```
+
+
+结果：
+
+```
+维修工单创建成功
+
+编号：
+R202608001
+
+状态：
+处理中
+
+```
+
+
+---
+
+## Scenario 2：物业知识问答
+
+
+用户：
+
+```
+装修时间是什么？
+
+```
+
+
+系统流程：
+
+```
+Question
+
+↓
+
+Knowledge Agent
+
+↓
+
+RAG Retrieval
+
+↓
+
+Knowledge Base
+
+↓
+
+Answer
+
+```
+
+
+结果：
+
+```
+工作日施工时间：
+
+9:00-12:00
+
+14:00-18:00
+
+```
+
+---
+
+# 5. System Architecture
+
 
 整体架构：
 
+
 ```
-                 Users
+用户
 
-        ┌────────┼────────┐
 
-      Owner    Admin    Worker
+        Owner     Property     Worker
 
-        │        │        │
 
-        └────────┼────────┘
+                     │
 
-                 │
 
-            API Layer
+              Client Layer
 
-                 │
 
-          AI Agent Layer
+                     │
 
-                 │
 
-        Business Service Layer
+              API Gateway
 
-                 │
 
-        Database + Knowledge Base
+                     │
+
+
+            AI Agent Runtime
+
+
+                     │
+
+
+              Router Agent
+
+
+                     │
+
+
+          Domain Agent Layer
+
+
+    Repair   Fee   Notice   Knowledge
+
+
+                     │
+
+
+                  Tools
+
+
+                     │
+
+
+          Business Service Layer
+
+
+              │              │
+
+
+        PostgreSQL     Vector Database
+
+
+                              ↑
+
+
+                       Knowledge Base
+
 
 ```
 
 
 核心组成：
 
+
 | Layer | Description |
 |---|---|
-| Frontend | 用户交互端 |
-| Backend | 业务服务 |
+| Client Layer | 用户交互端 |
+| Backend Layer | 业务服务 |
 | Agent Layer | AI智能决策 |
 | Database | 业务数据 |
 | RAG System | 知识增强 |
@@ -228,44 +455,102 @@ Knowledge Agent
 
 ---
 
-# 5. Documentation
+# 6. Repository Structure
+
+
+```
+AI-Property-Community-Agent/
+
+
+├── README.md
+
+
+├── frontend/
+
+│   前端应用
+
+
+├── backend/
+
+│   后端业务服务
+
+
+├── agent/
+
+│   AI Agent系统
+
+
+├── knowledge/
+
+│   RAG知识库
+
+
+├── data/
+
+│   模拟社区数据
+
+
+├── docs/
+
+│   项目设计文档
+
+
+└── docker-compose.yml
+
+    部署配置
+
+```
+
+
+---
+
+# 7. Documentation
 
 
 完整项目文档：
+
 
 ```
 docs/
 
 
 00-overview
+
 项目总览
 
 
 01-product
+
 产品设计
 
 
 02-architecture
+
 系统架构
 
 
 03-agent
+
 AI Agent设计
 
 
 04-data-assets
+
 数据资产
 
 
 05-engineering
+
 工程实现
 
 
 06-testing
+
 测试评估
 
 
 07-operation
+
 部署运营
 
 ```
@@ -273,24 +558,30 @@ AI Agent设计
 
 ---
 
-# 6. Development Roadmap
+# 8. Development Roadmap
 
 
-## Phase 0 - Project Foundation
+## Phase 0
+# Project Foundation
+
 
 项目初始化：
 
+
 - Repository建立
 - 技术环境配置
-- 数据库初始化
+- Docker环境
 
 
 ---
 
-## Phase 1 - Core Business System
+## Phase 1
+# Data & Backend Foundation
+
 
 实现：
 
+- 数据库设计
 - 用户系统
 - 房屋系统
 - 报修系统
@@ -300,19 +591,37 @@ AI Agent设计
 
 ---
 
-## Phase 2 - AI Agent Integration
+## Phase 2
+# Client Applications
+
+
+实现：
+
+- 业主端
+- 物业管理端
+- 维修任务端
+
+
+---
+
+## Phase 3
+# AI Agent Integration
+
 
 实现：
 
 - Router Agent
 - Repair Agent
 - Fee Agent
+- Notice Agent
 - Knowledge Agent
 
 
 ---
 
-## Phase 3 - RAG Knowledge System
+## Phase 4
+# RAG Knowledge System
+
 
 实现：
 
@@ -324,32 +633,38 @@ AI Agent设计
 
 ---
 
-## Phase 4 - Client Applications
+## Phase 5
+# Evaluation & Optimization
+
 
 实现：
 
-- 业主端
-- 物业后台
-- 维修端
-
-
----
-
-## Phase 5 - Evaluation & Optimization
-
-实现：
-
-- 功能测试
 - Agent Evaluation
+- Tool Calling Evaluation
 - RAG Evaluation
 
 
 ---
 
-# 7. Tech Stack
+## Phase 6
+# Deployment
+
+
+实现：
+
+- Docker部署
+- 服务监控
+- Demo运行环境
+
+
+---
+
+# 9. Tech Stack
 
 
 ## Backend
+
+推荐：
 
 - Python
 - FastAPI
@@ -360,12 +675,23 @@ AI Agent设计
 
 ## Frontend
 
+支持：
+
+- Web Application
+- Mobile Application
+- Mini Program
+
+
+候选技术：
+
 - Vue3
+- React
+- TypeScript
 - Uni-app
-- 微信小程序
 
 
 ## AI
+
 
 - Large Language Model API
 - LangChain / LangGraph
@@ -373,7 +699,8 @@ AI Agent设计
 - Vector Database
 
 
-## Deployment
+##部署
+
 
 - Docker
 - Linux
@@ -382,17 +709,31 @@ AI Agent设计
 
 ---
 
-# 8. Development Principles
+# 10. Development Principles
 
 
 ## AI First
 
-AI 不只是聊天机器人，而是业务执行入口。
+
+AI不是简单聊天机器人。
+
+
+AI作为：
+
+```
+业务入口
+
++
+
+任务执行智能层
+
+```
 
 
 ---
 
 ## Agent + Service Separation
+
 
 Agent 不直接操作数据库。
 
@@ -421,29 +762,109 @@ Database
 
 ## Data Driven
 
-通过模拟真实社区数据验证 AI 能力。
+
+通过：
+
+模拟真实社区数据
+
+验证：
+
+AI能力和业务流程。
 
 
 ---
 
 ## Evaluation Driven
 
-所有 AI 能力必须可测试。
+
+所有AI能力必须可测试。
 
 
 包括：
 
-- Agent Accuracy
+- Intent Accuracy
 - Tool Calling Accuracy
+- Workflow Success
 - RAG Accuracy
 
 
 ---
 
-# 9. Current Status
+# 11. AI Coding Agent Guide
 
 
-项目阶段：
+如果你是 AI Coding Agent（例如 Codex）：
+
+开始开发前，请阅读：
+
+
+```
+docs/00-overview/
+
+
+docs/01-product/
+
+
+docs/02-architecture/
+
+
+docs/03-agent/
+
+
+docs/05-engineering/codex-handoff.md
+
+```
+
+
+推荐开发顺序：
+
+
+```
+Database
+
+↓
+
+Backend API
+
+↓
+
+Frontend
+
+↓
+
+Agent Integration
+
+↓
+
+RAG
+
+↓
+
+Evaluation
+
+↓
+
+部署
+
+```
+
+
+不要一次生成全部代码。
+
+每个阶段：
+
+- 可运行
+- 可测试
+- 可提交
+
+
+---
+
+# 12. Current Status
+
+
+项目当前阶段：
+
 
 ```
 Documentation Design
@@ -459,22 +880,37 @@ MVP Development
 ```
 
 
-当前已完成：
+已完成：
 
-- 产品设计
-- 系统架构设计
-- Agent设计
-- 数据资产规划
-- 开发规划
+✅ 产品设计  
+✅ 系统架构设计  
+✅ Agent设计  
+✅ 数据资产规划  
+✅ 工程规划  
+✅ 测试体系设计  
 
 
 下一阶段：
 
-进入工程实现。
+进入：
+
+```
+Data Asset Construction
+
+↓
+
+Backend Implementation
+
+↓
+
+AI Agent Development
+
+```
 
 
 ---
 
-# 10. License
+# 13. License
+
 
 To be determined.
