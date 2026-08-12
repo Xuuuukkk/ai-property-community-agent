@@ -199,16 +199,32 @@ def run_notice_agent(db: Session, state: AgentState) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-def run_knowledge_agent(state: AgentState) -> dict[str, Any]:
-    """Handle knowledge intents. RAG implementation is planned for Phase 6."""
+def run_knowledge_agent(db: Session, state: AgentState) -> dict[str, Any]:
+    """Handle knowledge intents using pgvector RAG retrieval."""
     user_text = ""
     for msg in reversed(get_messages(state)):
         if hasattr(msg, "content"):
             user_text = str(msg.content)
             break
 
-    result = agent_tools.search_knowledge(user_text)
+    result = agent_tools.search_knowledge(db, user_text, top_k=5)
+    chunks = result.get("results", [])
+
+    if not chunks:
+        return {
+            "response": result["message"],
+            "tool_results": [result],
+        }
+
+    # Build a concise, cited answer from the retrieved chunks.
+    lines = ["根据知识库相关规定："]
+    for idx, chunk in enumerate(chunks, start=1):
+        source = chunk.get("source_path", "未知来源")
+        content = chunk.get("content", "").replace("\n", " ")
+        lines.append(f"{idx}. {content}（来源：{source}）")
+
+    answer = "\n".join(lines)
     return {
-        "response": result["message"],
+        "response": answer,
         "tool_results": [result],
     }

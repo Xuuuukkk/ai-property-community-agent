@@ -1,9 +1,16 @@
 """Pytest fixtures for API integration tests.
 
+Use a deterministic embedding provider in tests so the suite does not need to
+ download transformer models.
+
 These fixtures provide a ``TestClient`` whose database dependency is swapped
 out for a session that is rolled back after each test, keeping the shared
 seed database clean even when endpoints commit transactions.
 """
+import os
+
+os.environ.setdefault("EMBEDDING_MODEL", "deterministic")
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine

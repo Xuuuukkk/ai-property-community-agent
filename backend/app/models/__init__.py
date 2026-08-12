@@ -6,6 +6,7 @@ from app.models.community import Community
 from app.models.fee_bill import FeeBill
 from app.models.house import House
 from app.models.house_binding import HouseBinding
+from app.models.knowledge import KnowledgeChunk, KnowledgeDocument
 from app.models.notice import Notice
 from app.models.repair_order import RepairOrder
 from app.models.repair_record import RepairRecord
@@ -24,4 +25,6 @@ __all__ = [
     "RepairRecord",
     "FeeBill",
     "Notice",
+    "KnowledgeDocument",
+    "KnowledgeChunk",
 ]

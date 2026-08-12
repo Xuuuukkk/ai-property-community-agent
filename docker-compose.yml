@@ -45,6 +45,7 @@ services:
       - ./backend:/app
       - ./database:/app/database:ro
       - ./data/seed:/app/data/seed:ro
+      - ./knowledge-base:/knowledge-base:ro
     depends_on:
       postgres:
         condition: service_healthy

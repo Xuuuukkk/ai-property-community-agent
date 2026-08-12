@@ -105,7 +105,7 @@ def agent_node(state: AgentState) -> AgentState:
         elif intent == "notice":
             result = run_notice_agent(db, state)
         elif intent == "knowledge":
-            result = run_knowledge_agent(state)
+            result = run_knowledge_agent(db, state)
         else:
             result = {
                 "response": "抱歉，我不太理解您的需求。您可以尝试描述：报修、查物业费、发布公告或咨询社区规定。",

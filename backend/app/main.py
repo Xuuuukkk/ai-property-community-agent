@@ -9,6 +9,7 @@ from app.api.routes import (
     agent_router,
     fee_router,
     health_router,
+    knowledge_router,
     notices_router,
     repair_router,
     users_router,
@@ -37,6 +38,9 @@ def create_app() -> FastAPI:
 
     # Phase 5 AI Agent router
     app.include_router(agent_router, prefix=settings.API_PREFIX)
+
+    # Phase 6 RAG knowledge router
+    app.include_router(knowledge_router, prefix=settings.API_PREFIX)
 
     @app.get("/", tags=["root"])
     def root() -> dict:
