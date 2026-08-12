@@ -13,13 +13,19 @@ from sqlalchemy import engine_from_config, pool
 
 # --- Make backend/app importable -------------------------------------------
 HERE = os.path.dirname(os.path.abspath(__file__))       # .../database
-REPO_ROOT = os.path.dirname(HERE)                        # repo root
+REPO_ROOT = os.path.dirname(HERE)                        # repo root (local) or /app (container)
+
+# Local layout: repo_root/backend and repo_root/database.
+# Container layout: backend code is at /app and database/ is mounted to /app/database.
 BACKEND_DIR = os.path.join(REPO_ROOT, "backend")
+if not os.path.isdir(os.path.join(BACKEND_DIR, "app")):
+    BACKEND_DIR = REPO_ROOT
 if BACKEND_DIR not in sys.path:
     sys.path.insert(0, BACKEND_DIR)
 
 from app.core.config import get_settings  # noqa: E402
-from app.core.database import Base  # noqa: E402  (ORM models attach here in Phase 2)
+from app.core.database import Base  # noqa: E402
+from app.models import *  # noqa: E402,F403  ensures all ORM tables are registered
 
 config = context.config
 

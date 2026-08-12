@@ -41,6 +41,10 @@ services:
       REDIS_URL: redis://redis:6379/0
     ports:
       - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - ./database:/app/database:ro
+      - ./data/seed:/app/data/seed:ro
     depends_on:
       postgres:
         condition: service_healthy
