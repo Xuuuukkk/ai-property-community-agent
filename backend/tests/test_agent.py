@@ -50,13 +50,15 @@ class TestAgentTools:
 
     def test_query_repair_order_tool(self, db) -> None:
         result = query_repair_order(db, user_id=1)
-        assert "total" in result
-        assert "orders" in result
+        assert result["tool"] == "query_repair_order"
+        assert "total" in result["output"]
+        assert "orders" in result["output"]
 
     def test_query_payment_status_tool(self, db) -> None:
         result = query_payment_status(db, user_id=1)
-        assert "total_bills" in result
-        assert "message" in result
+        assert result["tool"] == "query_payment_status"
+        assert "total_bills" in result["output"]
+        assert "message" in result["output"]
 
 
 class TestAgentAPI:

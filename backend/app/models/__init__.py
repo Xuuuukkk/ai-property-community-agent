@@ -3,6 +3,7 @@
 from app.core.database import Base
 from app.models.building import Building
 from app.models.community import Community
+from app.models.conversation import AgentTrace, Conversation, Message
 from app.models.fee_bill import FeeBill
 from app.models.house import House
 from app.models.house_binding import HouseBinding
@@ -27,4 +28,7 @@ __all__ = [
     "Notice",
     "KnowledgeDocument",
     "KnowledgeChunk",
+    "Conversation",
+    "Message",
+    "AgentTrace",
 ]

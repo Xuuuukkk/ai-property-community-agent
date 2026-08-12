@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>AI Agent Evaluation Report</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 2rem; background: #f8f9fa; color: #212529; }
+    h1 { margin-bottom: 0.5rem; }
+    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .card { background: #fff; border-radius: 8px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .card h3 { margin: 0 0 0.5rem; font-size: 0.9rem; color: #6c757d; }
+    .value { font-size: 1.8rem; font-weight: 700; }
+    .pass { color: #198754; }
+    .fail { color: #dc3545; }
+    table { width: 100%; border-collapse: collapse; background: #fff; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.6rem; border-bottom: 1px solid #dee2e6; font-size: 0.9rem; }
+    th { background: #e9ecef; }
+    pre { white-space: pre-wrap; word-break: break-word; margin: 0; }
+    details { margin: 1rem 0; }
+    summary { cursor: pointer; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>AI Agent Evaluation Report</h1>
+  <p>Generated at 2026-08-12 17:19:53 UTC</p>
+  <div class="summary">
+    <div class="card">
+      <h3>Intent Accuracy</h3>
+      <div class="value fail">83.3%</div>
+    </div>
+    <div class="card">
+      <h3>Tool Selection Accuracy</h3>
+      <div class="value fail">85.7%</div>
+    </div>
+    <div class="card">
+      <h3>Parameter Accuracy</h3>
+      <div class="value fail">80.0%</div>
+    </div>
+    <div class="card">
+      <h3>Workflow Success</h3>
+      <div class="value pass">100.0%</div>
+    </div>
+    <div class="card">
+      <h3>RAG Recall@5</h3>
+      <div class="value fail">25.0%</div>
+    </div>
+    <div class="card">
+      <h3>RAG MRR</h3>
+      <div class="value">0.062</div>
+    </div>
+  </div>
+
+  <details open>
+    <summary>Intent Details</summary>
+    <table><thead><tr><th>ID</th><th>Text</th><th>Expected</th><th>Predicted</th><th>Correct</th></tr></thead><tbody><tr><td><pre>intent-001</pre></td><td><pre>我要查一下物业费</pre></td><td><pre>fee</pre></td><td><pre>fee</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>intent-002</pre></td><td><pre>我家厨房漏水了</pre></td><td><pre>repair</pre></td><td><pre>repair</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>intent-003</pre></td><td><pre>小区停水通知什么时候恢复</pre></td><td><pre>notice</pre></td><td><pre>notice</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>intent-004</pre></td><td><pre>装修几点可以施工？</pre></td><td><pre>knowledge</pre></td><td><pre>knowledge</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>intent-005</pre></td><td><pre>你好</pre></td><td><pre>unknown</pre></td><td><pre>unknown</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>intent-006</pre></td><td><pre>帮我查费用账单</pre></td><td><pre>fee</pre></td><td><pre>fee</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>intent-007</pre></td><td><pre>卫生间水管坏了，帮我报修</pre></td><td><pre>repair</pre></td><td><pre>repair</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>intent-008</pre></td><td><pre>发布一条公告</pre></td><td><pre>notice</pre></td><td><pre>notice</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>intent-009</pre></td><td><pre>停车规则是什么？</pre></td><td><pre>knowledge</pre></td><td><pre>knowledge</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>intent-010</pre></td><td><pre>电梯故障</pre></td><td><pre>repair</pre></td><td><pre>unknown</pre></td><td><pre>❌</pre></td></tr><tr><td><pre>intent-011</pre></td><td><pre>物业费欠费了怎么办</pre></td><td><pre>fee</pre></td><td><pre>fee</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>intent-012</pre></td><td><pre>今天有社区活动吗</pre></td><td><pre>notice</pre></td><td><pre>unknown</pre></td><td><pre>❌</pre></td></tr></tbody></table>
+  </details>
+
+  <details>
+    <summary>Tool Details</summary>
+    <table><thead><tr><th>ID</th><th>Text</th><th>Expected Tool</th><th>Actual Tool</th><th>Params</th></tr></thead><tbody><tr><td><pre>tool-001</pre></td><td><pre>我家厨房漏水了</pre></td><td><pre>create_repair_order</pre></td><td><pre></pre></td><td><pre>[
+  {
+    "key": "type",
+    "expected": "water_leak",
+    "actual": null,
+    "matched": false
+  }
+]</pre></td></tr><tr><td><pre>tool-002</pre></td><td><pre>帮我查一下维修进度</pre></td><td><pre>query_repair_order</pre></td><td><pre>query_repair_order</pre></td><td><pre>[]</pre></td></tr><tr><td><pre>tool-003</pre></td><td><pre>物业费多少</pre></td><td><pre>query_payment_status</pre></td><td><pre>query_payment_status</pre></td><td><pre>[]</pre></td></tr><tr><td><pre>tool-004</pre></td><td><pre>生成公告草稿：明日电梯维保</pre></td><td><pre>generate_notice</pre></td><td><pre>generate_notice</pre></td><td><pre>[]</pre></td></tr><tr><td><pre>tool-005</pre></td><td><pre>发布停水通知</pre></td><td><pre>publish_notice</pre></td><td><pre>publish_notice</pre></td><td><pre>[]</pre></td></tr><tr><td><pre>tool-006</pre></td><td><pre>装修几点可以施工？</pre></td><td><pre>search_knowledge</pre></td><td><pre>search_knowledge</pre></td><td><pre>[
+  {
+    "key": "top_k",
+    "expected": 5,
+    "actual": 5,
+    "matched": true
+  }
+]</pre></td></tr><tr><td><pre>tool-007</pre></td><td><pre>房屋：1 厨房漏水严重</pre></td><td><pre>create_repair_order</pre></td><td><pre>create_repair_order</pre></td><td><pre>[
+  {
+    "key": "house_id",
+    "expected": 1,
+    "actual": 1,
+    "matched": true
+  },
+  {
+    "key": "type",
+    "expected": "water_leak",
+    "actual": "water_leak",
+    "matched": true
+  },
+  {
+    "key": "urgency",
+    "expected": "HIGH",
+    "actual": "HIGH",
+    "matched": true
+  }
+]</pre></td></tr></tbody></table>
+  </details>
+
+  <details>
+    <summary>Workflow Details</summary>
+    <table><thead><tr><th>ID</th><th>Text</th><th>Expected Tool</th><th>Actual Tool</th><th>Success</th><th>Response</th></tr></thead><tbody><tr><td><pre>workflow-001</pre></td><td><pre>房屋：1 厨房水管漏水</pre></td><td><pre>create_repair_order</pre></td><td><pre>create_repair_order</pre></td><td><pre>✅</pre></td><td><pre>维修工单已创建，编号：RO20260813011952935D73C2，当前状态：CREATED</pre></td></tr><tr><td><pre>workflow-002</pre></td><td><pre>查一下我的物业费</pre></td><td><pre>query_payment_status</pre></td><td><pre>query_payment_status</pre></td><td><pre>✅</pre></td><td><pre>共 4 笔账单，已缴 2 笔，未缴 2 笔（合计 ¥716.80），逾期 0 笔（合计 ¥0.00）</pre></td></tr><tr><td><pre>workflow-003</pre></td><td><pre>生成公告草稿：本周六社区消防演练</pre></td><td><pre>generate_notice</pre></td><td><pre>generate_notice</pre></td><td><pre>✅</pre></td><td><pre>公告草稿已生成：
+标题：社区通知
+内容：生成公告草稿：本周六社区消防演练
+请确认后发布。</pre></td></tr><tr><td><pre>workflow-004</pre></td><td><pre>装修施工时间规定</pre></td><td><pre>search_knowledge</pre></td><td><pre>search_knowledge</pre></td><td><pre>✅</pre></td><td><pre>根据知识库相关规定：
+1. 一、停电原因区分 1. 外网市政线路检修：物业提前公示停电时段； 2. 园区内部配电房故障、雷雨雷击跳闸：属于突发停电。（来源：knowledge-base/emergency/power-failure.md）
+2. 五、车库通用安全要求 1. 地下车库限速5km/h，禁止超速、鸣笛、倒车长时间占用主干道； 2. 车辆熄火后关闭车灯、拉紧手刹，贵重物品自行带走，物业不承担车内财物保管责任。（来源：knowledge-base/parking/parking-rules.md）
+3. 一、人行门禁管理 1. 小区主大门、各楼栋单元入户门实行24小时门禁刷卡/人脸识别通行，一户配置对应授权权限。 2. 业主家庭成员新增人员可携带房产证、身份证至物业服务中心办理门禁授权；房屋出租后由业主报备开通临时权限，退租立即注销。 3. 单元闭门器、电磁锁出现故障可一键报修，物业工程人员24小时内维修完毕。 4. 禁止用石块、杂物卡住单元门保持常开，避免外来无关人员随意进入楼栋，造成治安隐患。（来源：knowledge-base/security/access-control.md）
+4. 第三章 公共区域与共用设施设备管理 1. **楼道、消防通道、架空层、屋面、电梯厅等全部属于公共区域，禁止堆放私人物品、非机动车、建筑垃圾、闲置家具**； 2. 不得占用消防登高面、消防车道、消防栓操作空间，确保消防通道24小时畅通； 3. 外墙、外立面、空调机位、公共管线不得私自改动、打孔、加装外置晾衣架、阳光房、防盗网等影响建筑外观及安全的设施； 4. 电梯仅限载人及小型家用物品运输，禁止运超长超重建材、砂石水泥，禁止孩童无监护人单独乘坐电梯。（来源：knowledge-base/community-rules/owner-regulation.md）
+5. 三、日常使用消防安全规则 1. 充电过程中车主全程留意设备状态，发现异响、发热、异味立即断电停止使用； 2. 充电桩周边1米范围内不得堆放纸箱、塑料袋、燃油、易燃易爆杂物； 3. 禁止飞线充电、私拉拖线板在地库给电动车、电瓶车补电。（来源：knowledge-base/parking/charging-management.md）</pre></td></tr></tbody></table>
+  </details>
+
+  <details>
+    <summary>RAG Details</summary>
+    <table><thead><tr><th>ID</th><th>Question</th><th>Expected Source</th><th>Rank</th><th>Keywords</th><th>Answer Correct</th></tr></thead><tbody><tr><td><pre>rag-001</pre></td><td><pre>装修几点可以施工？</pre></td><td><pre>decoration/construction-time.md</pre></td><td><pre>-</pre></td><td><pre>❌</pre></td><td><pre>❌</pre></td></tr><tr><td><pre>rag-002</pre></td><td><pre>停车规则是什么？</pre></td><td><pre>parking/parking-rules.md</pre></td><td><pre>4</pre></td><td><pre>✅</pre></td><td><pre>-</pre></td></tr><tr><td><pre>rag-003</pre></td><td><pre>装修需要申请吗？</pre></td><td><pre>decoration/renovation-application.md</pre></td><td><pre>-</pre></td><td><pre>❌</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>rag-004</pre></td><td><pre>访客怎么进小区？</pre></td><td><pre>security/visitor-management.md</pre></td><td><pre>-</pre></td><td><pre>❌</pre></td><td><pre>-</pre></td></tr></tbody></table>
+  </details>
+</body>
+</html>

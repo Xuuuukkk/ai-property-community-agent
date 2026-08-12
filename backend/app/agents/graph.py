@@ -170,27 +170,47 @@ def run_agent(
     user_id: int | None = None,
     conversation_id: str | None = None,
     system_message: str | None = None,
+    db: Session | None = None,
 ) -> AgentResult:
     """Run the agent graph for a single user message.
 
-    This is the main public entry point used by REST API.
+    This is the main public entry point used by REST API. When ``db`` is
+    provided, the conversation and tool traces are persisted for evaluation
+    and debugging.
     """
     messages: list[AnyMessage] = []
     if system_message:
         messages.append(SystemMessage(content=system_message))
     messages.append(HumanMessage(content=user_input))
 
+    session_id = conversation_id or str(uuid.uuid4())
     initial_state: AgentState = {
         "user_id": user_id,
-        "conversation_id": conversation_id or str(uuid.uuid4()),
+        "conversation_id": session_id,
         "messages": messages,
     }
 
     final_state = agent_graph.invoke(initial_state)
-    return AgentResult(
-        conversation_id=final_state.get("conversation_id", ""),
+    result = AgentResult(
+        conversation_id=final_state.get("conversation_id", session_id),
         intent=final_state.get("intent") or "unknown",
         response=final_state.get("final_response") or "",
         tool_results=final_state.get("tool_results", []),
         requires_human=final_state.get("requires_human", False),
     )
+
+    if db is not None:
+        # Imported locally to avoid import cycles at module load time.
+        from app.services.tracing import record_turn
+
+        record_turn(
+            db,
+            session_id=result.conversation_id,
+            user_id=user_id,
+            user_message=user_input,
+            assistant_message=result.response,
+            intent=result.intent,
+            tool_results=result.tool_results,
+        )
+
+    return result

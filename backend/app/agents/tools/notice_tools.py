@@ -20,13 +20,23 @@ def generate_notice(
     notice, but publish_notice must be called explicitly to persist it.
     """
     return {
-        "title": title,
-        "content": content,
-        "notice_type": notice_type,
-        "publisher_id": publisher_id,
-        "is_pinned": is_pinned,
-        "status": "DRAFT",
-        "message": "公告草稿已生成，等待人工审核后发布",
+        "tool": "generate_notice",
+        "input": {
+            "title": title,
+            "content": content,
+            "notice_type": notice_type,
+            "publisher_id": publisher_id,
+            "is_pinned": is_pinned,
+        },
+        "output": {
+            "title": title,
+            "content": content,
+            "notice_type": notice_type,
+            "publisher_id": publisher_id,
+            "is_pinned": is_pinned,
+            "status": "DRAFT",
+            "message": "公告草稿已生成，等待人工审核后发布",
+        },
     }
 
 
@@ -41,8 +51,18 @@ def publish_notice(db: Session, *, title: str, content: str, publisher_id: int, 
     )
     notice = notice_service.create_notice(db, payload=payload)
     return {
-        "notice_id": notice.id,
-        "title": notice.title,
-        "status": notice.status,
-        "message": f"公告《{notice.title}》已发布",
+        "tool": "publish_notice",
+        "input": {
+            "title": title,
+            "content": content,
+            "publisher_id": publisher_id,
+            "notice_type": notice_type,
+            "is_pinned": is_pinned,
+        },
+        "output": {
+            "notice_id": notice.id,
+            "title": notice.title,
+            "status": notice.status,
+            "message": f"公告《{notice.title}》已发布",
+        },
     }

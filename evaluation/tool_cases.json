@@ -1,0 +1,59 @@
+[
+  {
+    "id": "tool-001",
+    "text": "我家厨房漏水了",
+    "expected_intent": "repair",
+    "expected_tool": "create_repair_order",
+    "expected_parameters": {
+      "type": "water_leak"
+    }
+  },
+  {
+    "id": "tool-002",
+    "text": "帮我查一下维修进度",
+    "expected_intent": "repair",
+    "expected_tool": "query_repair_order",
+    "expected_parameters": {}
+  },
+  {
+    "id": "tool-003",
+    "text": "物业费多少",
+    "expected_intent": "fee",
+    "expected_tool": "query_payment_status",
+    "expected_parameters": {}
+  },
+  {
+    "id": "tool-004",
+    "text": "生成公告草稿：明日电梯维保",
+    "expected_intent": "notice",
+    "expected_tool": "generate_notice",
+    "expected_parameters": {}
+  },
+  {
+    "id": "tool-005",
+    "text": "发布停水通知",
+    "expected_intent": "notice",
+    "expected_tool": "publish_notice",
+    "expected_parameters": {}
+  },
+  {
+    "id": "tool-006",
+    "text": "装修几点可以施工？",
+    "expected_intent": "knowledge",
+    "expected_tool": "search_knowledge",
+    "expected_parameters": {
+      "top_k": 5
+    }
+  },
+  {
+    "id": "tool-007",
+    "text": "房屋：1 厨房漏水严重",
+    "expected_intent": "repair",
+    "expected_tool": "create_repair_order",
+    "expected_parameters": {
+      "house_id": 1,
+      "type": "water_leak",
+      "urgency": "HIGH"
+    }
+  }
+]

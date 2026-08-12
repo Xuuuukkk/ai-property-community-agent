@@ -1,0 +1,62 @@
+[
+  {
+    "id": "intent-001",
+    "text": "我要查一下物业费",
+    "expected_intent": "fee"
+  },
+  {
+    "id": "intent-002",
+    "text": "我家厨房漏水了",
+    "expected_intent": "repair"
+  },
+  {
+    "id": "intent-003",
+    "text": "小区停水通知什么时候恢复",
+    "expected_intent": "notice"
+  },
+  {
+    "id": "intent-004",
+    "text": "装修几点可以施工？",
+    "expected_intent": "knowledge"
+  },
+  {
+    "id": "intent-005",
+    "text": "你好",
+    "expected_intent": "unknown"
+  },
+  {
+    "id": "intent-006",
+    "text": "帮我查费用账单",
+    "expected_intent": "fee"
+  },
+  {
+    "id": "intent-007",
+    "text": "卫生间水管坏了，帮我报修",
+    "expected_intent": "repair"
+  },
+  {
+    "id": "intent-008",
+    "text": "发布一条公告",
+    "expected_intent": "notice"
+  },
+  {
+    "id": "intent-009",
+    "text": "停车规则是什么？",
+    "expected_intent": "knowledge"
+  },
+  {
+    "id": "intent-010",
+    "text": "电梯故障",
+    "expected_intent": "repair"
+  },
+  {
+    "id": "intent-011",
+    "text": "物业费欠费了怎么办",
+    "expected_intent": "fee"
+  },
+  {
+    "id": "intent-012",
+    "text": "今天有社区活动吗",
+    "expected_intent": "notice"
+  }
+]

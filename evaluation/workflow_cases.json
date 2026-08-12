@@ -1,0 +1,38 @@
+[
+  {
+    "id": "workflow-001",
+    "text": "房屋：1 厨房水管漏水",
+    "expected_intent": "repair",
+    "expected_tool": "create_repair_order",
+    "success_checks": {
+      "output.order_id": "exists"
+    }
+  },
+  {
+    "id": "workflow-002",
+    "text": "查一下我的物业费",
+    "expected_intent": "fee",
+    "expected_tool": "query_payment_status",
+    "success_checks": {
+      "output.total_bills": "exists"
+    }
+  },
+  {
+    "id": "workflow-003",
+    "text": "生成公告草稿：本周六社区消防演练",
+    "expected_intent": "notice",
+    "expected_tool": "generate_notice",
+    "success_checks": {
+      "output.status": "DRAFT"
+    }
+  },
+  {
+    "id": "workflow-004",
+    "text": "装修施工时间规定",
+    "expected_intent": "knowledge",
+    "expected_tool": "search_knowledge",
+    "success_checks": {
+      "output.results": "non_empty"
+    }
+  }
+]

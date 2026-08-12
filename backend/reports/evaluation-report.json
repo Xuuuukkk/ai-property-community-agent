@@ -1,0 +1,347 @@
+{
+  "intent": {
+    "total": 12,
+    "correct": 10,
+    "accuracy": 0.8333,
+    "details": [
+      {
+        "id": "intent-001",
+        "text": "我要查一下物业费",
+        "expected": "fee",
+        "predicted": "fee",
+        "correct": true
+      },
+      {
+        "id": "intent-002",
+        "text": "我家厨房漏水了",
+        "expected": "repair",
+        "predicted": "repair",
+        "correct": true
+      },
+      {
+        "id": "intent-003",
+        "text": "小区停水通知什么时候恢复",
+        "expected": "notice",
+        "predicted": "notice",
+        "correct": true
+      },
+      {
+        "id": "intent-004",
+        "text": "装修几点可以施工？",
+        "expected": "knowledge",
+        "predicted": "knowledge",
+        "correct": true
+      },
+      {
+        "id": "intent-005",
+        "text": "你好",
+        "expected": "unknown",
+        "predicted": "unknown",
+        "correct": true
+      },
+      {
+        "id": "intent-006",
+        "text": "帮我查费用账单",
+        "expected": "fee",
+        "predicted": "fee",
+        "correct": true
+      },
+      {
+        "id": "intent-007",
+        "text": "卫生间水管坏了，帮我报修",
+        "expected": "repair",
+        "predicted": "repair",
+        "correct": true
+      },
+      {
+        "id": "intent-008",
+        "text": "发布一条公告",
+        "expected": "notice",
+        "predicted": "notice",
+        "correct": true
+      },
+      {
+        "id": "intent-009",
+        "text": "停车规则是什么？",
+        "expected": "knowledge",
+        "predicted": "knowledge",
+        "correct": true
+      },
+      {
+        "id": "intent-010",
+        "text": "电梯故障",
+        "expected": "repair",
+        "predicted": "unknown",
+        "correct": false
+      },
+      {
+        "id": "intent-011",
+        "text": "物业费欠费了怎么办",
+        "expected": "fee",
+        "predicted": "fee",
+        "correct": true
+      },
+      {
+        "id": "intent-012",
+        "text": "今天有社区活动吗",
+        "expected": "notice",
+        "predicted": "unknown",
+        "correct": false
+      }
+    ]
+  },
+  "tool": {
+    "total": 7,
+    "tool_accuracy": 0.8571,
+    "parameter_accuracy": 0.8,
+    "details": [
+      {
+        "id": "tool-001",
+        "text": "我家厨房漏水了",
+        "expected_intent": "repair",
+        "predicted_intent": "repair",
+        "expected_tool": "create_repair_order",
+        "actual_tool": "",
+        "tool_correct": false,
+        "parameter_checks": [
+          {
+            "key": "type",
+            "expected": "water_leak",
+            "actual": null,
+            "matched": false
+          }
+        ],
+        "parameter_hits": 0,
+        "parameter_total": 1
+      },
+      {
+        "id": "tool-002",
+        "text": "帮我查一下维修进度",
+        "expected_intent": "repair",
+        "predicted_intent": "repair",
+        "expected_tool": "query_repair_order",
+        "actual_tool": "query_repair_order",
+        "tool_correct": true,
+        "parameter_checks": [],
+        "parameter_hits": 0,
+        "parameter_total": 0
+      },
+      {
+        "id": "tool-003",
+        "text": "物业费多少",
+        "expected_intent": "fee",
+        "predicted_intent": "fee",
+        "expected_tool": "query_payment_status",
+        "actual_tool": "query_payment_status",
+        "tool_correct": true,
+        "parameter_checks": [],
+        "parameter_hits": 0,
+        "parameter_total": 0
+      },
+      {
+        "id": "tool-004",
+        "text": "生成公告草稿：明日电梯维保",
+        "expected_intent": "notice",
+        "predicted_intent": "notice",
+        "expected_tool": "generate_notice",
+        "actual_tool": "generate_notice",
+        "tool_correct": true,
+        "parameter_checks": [],
+        "parameter_hits": 0,
+        "parameter_total": 0
+      },
+      {
+        "id": "tool-005",
+        "text": "发布停水通知",
+        "expected_intent": "notice",
+        "predicted_intent": "notice",
+        "expected_tool": "publish_notice",
+        "actual_tool": "publish_notice",
+        "tool_correct": true,
+        "parameter_checks": [],
+        "parameter_hits": 0,
+        "parameter_total": 0
+      },
+      {
+        "id": "tool-006",
+        "text": "装修几点可以施工？",
+        "expected_intent": "knowledge",
+        "predicted_intent": "knowledge",
+        "expected_tool": "search_knowledge",
+        "actual_tool": "search_knowledge",
+        "tool_correct": true,
+        "parameter_checks": [
+          {
+            "key": "top_k",
+            "expected": 5,
+            "actual": 5,
+            "matched": true
+          }
+        ],
+        "parameter_hits": 1,
+        "parameter_total": 1
+      },
+      {
+        "id": "tool-007",
+        "text": "房屋：1 厨房漏水严重",
+        "expected_intent": "repair",
+        "predicted_intent": "repair",
+        "expected_tool": "create_repair_order",
+        "actual_tool": "create_repair_order",
+        "tool_correct": true,
+        "parameter_checks": [
+          {
+            "key": "house_id",
+            "expected": 1,
+            "actual": 1,
+            "matched": true
+          },
+          {
+            "key": "type",
+            "expected": "water_leak",
+            "actual": "water_leak",
+            "matched": true
+          },
+          {
+            "key": "urgency",
+            "expected": "HIGH",
+            "actual": "HIGH",
+            "matched": true
+          }
+        ],
+        "parameter_hits": 3,
+        "parameter_total": 3
+      }
+    ]
+  },
+  "workflow": {
+    "total": 4,
+    "success": 4,
+    "success_rate": 1.0,
+    "details": [
+      {
+        "id": "workflow-001",
+        "text": "房屋：1 厨房水管漏水",
+        "expected_intent": "repair",
+        "predicted_intent": "repair",
+        "expected_tool": "create_repair_order",
+        "actual_tool": "create_repair_order",
+        "success": true,
+        "response": "维修工单已创建，编号：RO20260813011952935D73C2，当前状态：CREATED"
+      },
+      {
+        "id": "workflow-002",
+        "text": "查一下我的物业费",
+        "expected_intent": "fee",
+        "predicted_intent": "fee",
+        "expected_tool": "query_payment_status",
+        "actual_tool": "query_payment_status",
+        "success": true,
+        "response": "共 4 笔账单，已缴 2 笔，未缴 2 笔（合计 ¥716.80），逾期 0 笔（合计 ¥0.00）"
+      },
+      {
+        "id": "workflow-003",
+        "text": "生成公告草稿：本周六社区消防演练",
+        "expected_intent": "notice",
+        "predicted_intent": "notice",
+        "expected_tool": "generate_notice",
+        "actual_tool": "generate_notice",
+        "success": true,
+        "response": "公告草稿已生成：\n标题：社区通知\n内容：生成公告草稿：本周六社区消防演练\n请确认后发布。"
+      },
+      {
+        "id": "workflow-004",
+        "text": "装修施工时间规定",
+        "expected_intent": "knowledge",
+        "predicted_intent": "knowledge",
+        "expected_tool": "search_knowledge",
+        "actual_tool": "search_knowledge",
+        "success": true,
+        "response": "根据知识库相关规定：\n1. 一、停电原因区分 1. 外网市政线路检修：物业提前公示停电时段； 2. 园区内部配电房故障、雷雨雷击跳闸：属于突发停电。（来源：knowledge-base/emergency/power-failure.md）\n2. 五、车库通用安全要求 1. 地下车库限速5km/h，禁止超速、鸣笛、倒车长时间占用主干道； 2. 车辆熄火后关闭车灯、拉紧手刹，贵重物品自行带走，物业不承担车内财物保管责任。（来源：knowledge-base/parking/parking-rules.md）\n3. 一、人行门禁管理 1. 小区主大门、各楼栋单元入户门实行24小时门禁刷卡/人脸识别通行，一户配置对应授权权限。 2. 业主家庭成员新增人员可携带房产证、身份证至物业服务中心办理门禁授权；房屋出租后由业主报备开通临时权限，退租立即注销。 3. 单元闭门器、电磁锁出现故障可一键报修，物业工程人员24小时内维修完毕。 4. 禁止用石块、杂物卡住单元门保持常开，避免外来无关人员随意进入楼栋，造成治安隐患。（来源：knowledge-base/security/access-control.md）\n4. 第三章 公共区域与共用设施设备管理 1. **楼道、消防通道、架空层、屋面、电梯厅等全部属于公共区域，禁止堆放私人物品、非机动车、建筑垃圾、闲置家具**； 2. 不得占用消防登高面、消防车道、消防栓操作空间，确保消防通道24小时畅通； 3. 外墙、外立面、空调机位、公共管线不得私自改动、打孔、加装外置晾衣架、阳光房、防盗网等影响建筑外观及安全的设施； 4. 电梯仅限载人及小型家用物品运输，禁止运超长超重建材、砂石水泥，禁止孩童无监护人单独乘坐电梯。（来源：knowledge-base/community-rules/owner-regulation.md）\n5. 三、日常使用消防安全规则 1. 充电过程中车主全程留意设备状态，发现异响、发热、异味立即断电停止使用； 2. 充电桩周边1米范围内不得堆放纸箱、塑料袋、燃油、易燃易爆杂物； 3. 禁止飞线充电、私拉拖线板在地库给电动车、电瓶车补电。（来源：knowledge-base/parking/charging-management.md）"
+      }
+    ]
+  },
+  "rag": {
+    "total": 4,
+    "recall_at_1": 0.0,
+    "recall_at_5": 0.25,
+    "mrr": 0.0625,
+    "keyword_accuracy": 0.25,
+    "answer_accuracy": 0.5,
+    "details": [
+      {
+        "id": "rag-001",
+        "question": "装修几点可以施工？",
+        "expected_source": "decoration/construction-time.md",
+        "sources": [
+          "knowledge-base/property-service/repair-process.md",
+          "knowledge-base/property-service/repair-process.md",
+          "knowledge-base/community-rules/community-management.md",
+          "knowledge-base/parking/charging-management.md",
+          "knowledge-base/property-service/repair-process.md"
+        ],
+        "rank": null,
+        "keyword_hit": false,
+        "expected_answer": "工作日9:00-18:00",
+        "actual_answer": "根据知识库相关规定：\n1. 二、分级响应时效（执行上海住宅物业服务地方标准） （来源：knowledge-base/property-service/repair-process.md）\n2. 三、完整闭环处理步骤 1. 业主提交报修 → 物业后台派单给工程维修人员； 2. 维修人员上门勘查、维修； 3. 维修完毕业主现场签字确认； 4. 后台归档工单，必要时进行电话回访满意度。（来源：knowledge-base/property-service/repair-process.md）\n3. 四、物业服务履约监督 1. 全体业主有权对云溪物业服务有限公司的保洁频次、安保巡逻、设备维保、投诉响应、绿化养护等工作进行抽查监督。 2. 对服务不达标事项，可通过物业服务前台、业委会、属地房管部门三级渠道提出书面整改意见。 3. 连续两个季度服务考评不达标的，业委会有权按物业服务合同约定启动问责程序或启动更换物业的业主大会表决流程。（来源：knowledge-base/community-rules/community-management.md）\n4. 二、物业审核与施工管控 1. 物业现场勘查车库配电负荷、线路走向、消防排烟、排水环境，出具现场勘查意见； 2. 施工必须由具备电力安装资质的单位实施，不得私自破拆车库地坪、桥架、消防管线、通风管道； 3. 施工完成后提交竣工图纸、漏电保护检测报告，物业复核备案后方可正式投用。（来源：knowledge-base/parking/charging-management.md）\n5. 四、费用划分规则 1. 小区公共区域、共用设施设备故障：由物业动用物业费或公共收益承担，业主免费； 2. 业主房屋专有部分内部设施损坏（自家水管、家电、室内电路等）：维修人工费及材料费由业主自行承担。（来源：knowledge-base/property-service/repair-process.md）",
+        "answer_correct": false
+      },
+      {
+        "id": "rag-002",
+        "question": "停车规则是什么？",
+        "expected_source": "parking/parking-rules.md",
+        "sources": [
+          "knowledge-base/emergency/fire-emergency.md",
+          "knowledge-base/decoration/construction-time.md",
+          "knowledge-base/security/access-control.md",
+          "knowledge-base/parking/parking-rules.md",
+          "knowledge-base/parking/visitor-parking.md"
+        ],
+        "rank": 4,
+        "keyword_hit": true,
+        "expected_answer": "",
+        "actual_answer": "根据知识库相关规定：\n1. 二、高层疏散注意事项 1. 起火楼层及楼上住户沿消防楼梯弯腰捂鼻向下疏散，**严禁乘坐电梯逃生**。 2. 房门发烫不要开门，封堵门缝泼水降温，到窗边挥舞衣物等待救援。 3. 物业安保第一时间开启消防水泵、打开园区所有消防通道，引导消防车进入。（来源：knowledge-base/emergency/fire-emergency.md）\n2. 1. 工作日（周一至周五） 允许施工：09:00–12:00，14:00–18:00（来源：knowledge-base/decoration/construction-time.md）\n3. 一、人行门禁管理 1. 小区主大门、各楼栋单元入户门实行24小时门禁刷卡/人脸识别通行，一户配置对应授权权限。 2. 业主家庭成员新增人员可携带房产证、身份证至物业服务中心办理门禁授权；房屋出租后由业主报备开通临时权限，退租立即注销。 3. 单元闭门器、电磁锁出现故障可一键报修，物业工程人员24小时内维修完毕。 4. 禁止用石块、杂物卡住单元门保持常开，避免外来无关人员随意进入楼栋，造成治安隐患。（来源：knowledge-base/security/access-control.md）\n4. 三、禁止停车区域（强制执行） 1. **消防车道、消防登高面、消火栓前方、电梯机房出入口、地下车库人行疏散通道全域禁止停放任何车辆**； 2. 地下车库弯道、下坡口、车库卷帘门下方、排水集水井上方严禁泊车； 3. 不得占用他人专属产权车位，不得一车占用两个划线车位。（来源：knowledge-base/parking/parking-rules.md）\n5. RAG知识库：访客临停收费、停放时长、登记规则、超时处理咨询（来源：knowledge-base/parking/visitor-parking.md）",
+        "answer_correct": null
+      },
+      {
+        "id": "rag-003",
+        "question": "装修需要申请吗？",
+        "expected_source": "decoration/renovation-application.md",
+        "sources": [
+          "knowledge-base/property-service/repair-process.md",
+          "knowledge-base/security/access-control.md",
+          "knowledge-base/faq/community-faq.md",
+          "knowledge-base/community-rules/community-management.md",
+          "knowledge-base/parking/charging-management.md"
+        ],
+        "rank": null,
+        "keyword_hit": false,
+        "expected_answer": "需要",
+        "actual_answer": "根据知识库相关规定：\n1. 1. 紧急维修（2小时内到场处置） 适用场景：水管爆裂、大面积漏水、停电跳闸、电梯困人、燃气泄漏、屋面严重渗水等直接危及人身或财产安全故障。（来源：knowledge-base/property-service/repair-process.md）\n2. 二、车行道闸管控 1. 地下车库道闸绑定业主备案车牌，自动抬杆放行；未备案车辆按访客临时停车规则执行。 2. 道闸起落杆下方禁止行人穿行、儿童追逐玩耍，防止机械夹伤事故。（来源：knowledge-base/security/access-control.md）\n3. RAG直接检索答复楼道堆物、装修时间、外立面、出租报备、公共收益问题  Q1：楼道可以放自行车、鞋柜、纸箱吗？ A：不可以，楼道、消防通道属于全体业主公共区域，严禁堆放任何私人物品，堵塞消防通道涉嫌违法。  Q2：周末几点可以装修？ A：双休日及法定节假日10:00–12:00、14:00–17:00允许施工，其余时间禁止噪音作业。  Q3：阳台外立面可以自己封窗、装外置晾衣架吗？ A：不可以，外立面统一由物业管控，私自改动会影响建筑整体外观及保温防水层，需按规约恢复原状。  Q4：房子出租需要告诉物业吗？ A：需要，业主必须提前报备承租人信息，租客违规由业主承担连带责任。  Q5：小区公共收益去哪里看公示？ A：每季度在园区公告栏、业主微信群发布电梯广告、场地租赁等公共收支明细。（来源：knowledge-base/faq/community-faq.md）\n4. RAG知识库：公共收益、维修资金、业委会运作、物业服务监督等后台兜底咨询（来源：knowledge-base/community-rules/community-management.md）\n5. 四、后期运维与责任划分 1. 充电桩本体、专用线路由业主自行负责检修、维保、更换，电费由供电公司独立分户计量收取； 2. 因设备老化、违规操作、线路短路引发火情、设备损坏、车库损失，由充电桩产权业主承担全部法律与经济赔偿责任； 3. 物业定期对车库配电总柜、消防烟感、喷淋系统巡检，保障公共供电与消防系统正常运行。（来源：knowledge-base/parking/charging-management.md）",
+        "answer_correct": true
+      },
+      {
+        "id": "rag-004",
+        "question": "访客怎么进小区？",
+        "expected_source": "security/visitor-management.md",
+        "sources": [
+          "knowledge-base/decoration/renovation-application.md",
+          "knowledge-base/faq/life-service-faq.md",
+          "knowledge-base/parking/visitor-parking.md",
+          "knowledge-base/community-rules/community-management.md",
+          "knowledge-base/decoration/decoration-policy.md"
+        ],
+        "rank": null,
+        "keyword_hit": false,
+        "expected_answer": "",
+        "actual_answer": "根据知识库相关规定：\n1. 一、装修申请提交材料清单 业主前往物业服务中心办理装修备案，一次性提交以下资料：  1. 房屋不动产权证书/购房合同复印件； 2. 装修平面布局图纸，重点标注墙体拆改、水电走向、厨卫防水改造区域； 3. 施工负责人及所有装修工人身份证正反面复印件； 4. 填写《云溪花园房屋装修申请表》《装修安全承诺书》，签字确认。（来源：knowledge-base/decoration/renovation-application.md）\n2. RAG直接检索答复访客停车、充电桩、电动车、停水停电、宠物问题  Q1：访客车辆可以停多久？收费标准多少？ A：访客免费停放2小时，超时按上海住宅小区临停指导价计费，单日最长停放不超过24小时。  Q2：地下车库可以自己装充电桩吗？ A：自有产权车位或长期租赁人防车位可提交申请，经物业现场配电负荷勘查、资质施工后方可安装。  Q3：电动车能不能推上楼充电？ A：严格禁止，电动车及电池一律不得进入楼栋室内，统一停放至室外非机动车充电棚。  Q4：停水停电会提前通知吗？ A：计划性检修会提前公示；突发故障物业第一时间在业主群同步抢修进度。  Q5：宠物遛狗有什么要求？ A：必须牵绳、及时清理粪便，避免夜间持续吠叫扰民，遵守上海市养犬管理条例。（来源：knowledge-base/faq/life-service-faq.md）\n3. 一、访客准入前置条件 1. 访客车辆进入小区前，需由本小区业主提前在物业前台/客服微信报备房号、到访人员及车牌号码； 2. 未提前报备的临时访客，需经业主电话确认后，方可放行进入地下临时访客停车区域； 3. 货车、大型SUV、商务中巴、冷链货车等大型车辆，仅允许卸货短时停靠，不得过夜停放。（来源：knowledge-base/parking/visitor-parking.md）\n4. 一、住宅专项维修资金管理 1. 小区共用部位、共用设施设备大修、更新、改造项目（外墙整体修缮、电梯大修、屋面防水翻新、消防系统升级等），依法动用住宅专项维修资金。 2. 维修资金使用流程：物业提交方案→业主表决公示→上报住建部门审批→组织施工→竣工审计公示，全程接受全体业主监督。 3. 业主可通过官方渠道查询本人分户维修资金余额及小区整体使用台账。（来源：knowledge-base/community-rules/community-management.md）\n5. RAG知识库文档：答复装修申请、保证金、垃圾清运、违规处罚相关咨询（来源：knowledge-base/decoration/decoration-policy.md）",
+        "answer_correct": null
+      }
+    ]
+  },
+  "answer": {
+    "total": 0,
+    "faithfulness": 0.0,
+    "details": []
+  }
+}

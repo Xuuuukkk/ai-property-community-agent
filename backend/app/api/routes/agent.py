@@ -44,7 +44,8 @@ def agent_chat(
             payload.message,
             user_id=payload.user_id,
             conversation_id=payload.conversation_id,
-            system_message="你是云溪花园小区的 AI 物业助手，负责帮助业主和物业人员处理报修、查费、公告和咨询。",
+            system_message="你是云溪花园小区的 AI 物业助手，负责帮助业主和物业人员处理报修、查费、发布公告和咨询。",
+            db=db,
         )
         return result
     except Exception as exc:

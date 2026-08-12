@@ -14,16 +14,26 @@ from app.services import knowledge as knowledge_service
 
 def search_knowledge(db: Session, query: str, *, top_k: int = 5) -> dict:
     """Search the knowledge base for documents matching the query."""
-    return knowledge_service.retrieve_knowledge(db, query=query, top_k=top_k)
+    result = knowledge_service.retrieve_knowledge(db, query=query, top_k=top_k)
+    return {
+        "tool": "search_knowledge",
+        "input": {"query": query, "top_k": top_k},
+        "output": result,
+    }
 
 
 def search_knowledge_by_category(
     db: Session, query: str, category: str, *, top_k: int = 5
 ) -> dict:
     """Search within a specific knowledge category (e.g. decoration, parking)."""
-    return knowledge_service.retrieve_knowledge(
+    result = knowledge_service.retrieve_knowledge(
         db, query=query, top_k=top_k, category=category
     )
+    return {
+        "tool": "search_knowledge_by_category",
+        "input": {"query": query, "category": category, "top_k": top_k},
+        "output": result,
+    }
 
 
 def retrieve_document(document_id: str) -> dict:
@@ -33,7 +43,11 @@ def retrieve_document(document_id: str) -> dict:
     A full document fetch can be added here when the agent needs it.
     """
     return {
-        "document_id": document_id,
-        "content": None,
-        "message": "请使用 search_knowledge 按问题检索相关片段。",
+        "tool": "retrieve_document",
+        "input": {"document_id": document_id},
+        "output": {
+            "document_id": document_id,
+            "content": None,
+            "message": "请使用 search_knowledge 按问题检索相关片段。",
+        },
     }

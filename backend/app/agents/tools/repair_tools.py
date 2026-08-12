@@ -32,10 +32,20 @@ def create_repair_order(
     )
     order = repair_service.create_repair(db, payload=payload)
     return {
-        "order_id": order.id,
-        "order_no": order.order_no,
-        "status": order.status,
-        "message": f"维修工单已创建，编号：{order.order_no}，当前状态：{order.status}",
+        "tool": "create_repair_order",
+        "input": {
+            "user_id": user_id,
+            "house_id": house_id,
+            "type": type,
+            "description": description,
+            "urgency": urgency,
+        },
+        "output": {
+            "order_id": order.id,
+            "order_no": order.order_no,
+            "status": order.status,
+            "message": f"维修工单已创建，编号：{order.order_no}，当前状态：{order.status}",
+        },
     }
 
 
@@ -48,36 +58,48 @@ def query_repair_order(db: Session, *, order_id: int | None = None, user_id: int
     if order_id:
         order = repair_service.get_repair(db, order_id)
         return {
-            "order_id": order.id,
-            "order_no": order.order_no,
-            "type": order.type,
-            "status": order.status,
-            "urgency": order.urgency,
-            "description": order.description,
-            "worker_id": order.worker_id,
-            "created_at": str(order.created_at),
-            "completed_at": str(order.completed_at) if order.completed_at else None,
+            "tool": "query_repair_order",
+            "input": {"order_id": order_id},
+            "output": {
+                "order_id": order.id,
+                "order_no": order.order_no,
+                "type": order.type,
+                "status": order.status,
+                "urgency": order.urgency,
+                "description": order.description,
+                "worker_id": order.worker_id,
+                "created_at": str(order.created_at),
+                "completed_at": str(order.completed_at) if order.completed_at else None,
+            },
         }
 
     if user_id:
         items, total = repair_service.list_repairs(db, user_id=user_id, page=1, page_size=5)
         return {
-            "total": total,
-            "orders": [
-                {
-                    "order_id": o.id,
-                    "order_no": o.order_no,
-                    "type": o.type,
-                    "status": o.status,
-                    "urgency": o.urgency,
-                    "description": o.description,
-                    "created_at": str(o.created_at),
-                }
-                for o in items
-            ],
+            "tool": "query_repair_order",
+            "input": {"user_id": user_id},
+            "output": {
+                "total": total,
+                "orders": [
+                    {
+                        "order_id": o.id,
+                        "order_no": o.order_no,
+                        "type": o.type,
+                        "status": o.status,
+                        "urgency": o.urgency,
+                        "description": o.description,
+                        "created_at": str(o.created_at),
+                    }
+                    for o in items
+                ],
+            },
         }
 
-    return {"error": "必须提供 order_id 或 user_id"}
+    return {
+        "tool": "query_repair_order",
+        "input": {"order_id": order_id, "user_id": user_id},
+        "output": {"error": "必须提供 order_id 或 user_id"},
+    }
 
 
 def assign_worker(db: Session, *, order_id: int, worker_id: int) -> dict:
@@ -91,11 +113,15 @@ def assign_worker(db: Session, *, order_id: int, worker_id: int) -> dict:
     order.status = "ASSIGNED"
     db.commit()
     return {
-        "order_id": order.id,
-        "order_no": order.order_no,
-        "worker_id": worker_id,
-        "status": order.status,
-        "message": f"工单 {order.order_no} 已指派给维修人员 {worker_id}",
+        "tool": "assign_worker",
+        "input": {"order_id": order_id, "worker_id": worker_id},
+        "output": {
+            "order_id": order.id,
+            "order_no": order.order_no,
+            "worker_id": worker_id,
+            "status": order.status,
+            "message": f"工单 {order.order_no} 已指派给维修人员 {worker_id}",
+        },
     }
 
 
@@ -105,8 +131,12 @@ def update_repair_status(db: Session, *, order_id: int, status: str) -> dict:
     order.status = status
     db.commit()
     return {
-        "order_id": order.id,
-        "order_no": order.order_no,
-        "status": order.status,
-        "message": f"工单 {order.order_no} 状态已更新为 {status}",
+        "tool": "update_repair_status",
+        "input": {"order_id": order_id, "status": status},
+        "output": {
+            "order_id": order.id,
+            "order_no": order.order_no,
+            "status": order.status,
+            "message": f"工单 {order.order_no} 状态已更新为 {status}",
+        },
     }

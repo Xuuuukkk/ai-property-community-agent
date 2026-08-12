@@ -62,6 +62,15 @@ def _extract_urgency(text: str) -> str:
     return "MEDIUM"
 
 
+def _tool_output(result: dict[str, Any]) -> dict[str, Any]:
+    """Return the output payload from a tool result wrapper.
+
+    Tools now return ``{"tool": ..., "input": ..., "output": ...}``; this
+    helper lets domain agents read the wrapped output transparently.
+    """
+    return result.get("output", result) if isinstance(result, dict) else result
+
+
 # ---------------------------------------------------------------------------
 # Repair Agent
 # ---------------------------------------------------------------------------
@@ -81,7 +90,8 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
     # Query path
     if any(k in lowered for k in ("查", "进度", "状态", "处理", "status", "query", "list")):
         result = agent_tools.query_repair_order(db, user_id=user_id)
-        orders = result.get("orders", [])
+        output = _tool_output(result)
+        orders = output.get("orders", [])
         if not orders:
             return {"response": "您当前没有维修工单。", "tool_results": [result]}
         lines = [f"• {o['order_no']} | {o['type']} | {o['status']} | {o['description'] or '无描述'}" for o in orders]
@@ -125,7 +135,7 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
         urgency=urgency,
     )
     return {
-        "response": result["message"],
+        "response": _tool_output(result).get("message", "工单已创建"),
         "tool_results": [result],
     }
 
@@ -146,7 +156,7 @@ def run_fee_agent(db: Session, state: AgentState) -> dict[str, Any]:
     user_id = _extract_user_id_from_state(state) or 1
     result = agent_tools.query_payment_status(db, user_id=user_id)
     return {
-        "response": result["message"],
+        "response": _tool_output(result).get("message", "费用查询完成"),
         "tool_results": [result],
     }
 
@@ -174,8 +184,14 @@ def run_notice_agent(db: Session, state: AgentState) -> dict[str, Any]:
             content=user_text,
             publisher_id=user_id,
         )
+        draft_out = _tool_output(draft)
         return {
-            "response": f"公告草稿已生成：\n标题：{draft['title']}\n内容：{draft['content']}\n请确认后发布。",
+            "response": (
+                f"公告草稿已生成：\n"
+                f"标题：{draft_out.get('title', '社区通知')}\n"
+                f"内容：{draft_out.get('content', user_text)}\n"
+                f"请确认后发布。"
+            ),
             "tool_results": [draft],
             "requires_human": True,
         }
@@ -189,7 +205,7 @@ def run_notice_agent(db: Session, state: AgentState) -> dict[str, Any]:
         notice_type="facility_notice",
     )
     return {
-        "response": result["message"],
+        "response": _tool_output(result).get("message", "公告已发布"),
         "tool_results": [result],
     }
 
@@ -208,11 +224,12 @@ def run_knowledge_agent(db: Session, state: AgentState) -> dict[str, Any]:
             break
 
     result = agent_tools.search_knowledge(db, user_text, top_k=5)
-    chunks = result.get("results", [])
+    output = _tool_output(result)
+    chunks = output.get("results", [])
 
     if not chunks:
         return {
-            "response": result["message"],
+            "response": output.get("message", "知识库中未找到相关内容。"),
             "tool_results": [result],
         }
 
