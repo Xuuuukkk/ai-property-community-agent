@@ -72,9 +72,9 @@ Embedding
         ↓
 
 
-Vector Database
+pgvector
 
-向量数据库
+(PostgreSQL Extension)
 
 
         ↓
@@ -149,7 +149,7 @@ LLM Generation
 根据模拟小区：
 
 ```
-幸福里智慧社区
+云溪花园小区
 
 ```
 
@@ -161,13 +161,13 @@ LLM Generation
 
 
 ```
-幸福里业主公约
+云溪花园业主公约
 
-幸福里装修管理规定
+云溪花园装修管理规定
 
-幸福里停车管理办法
+云溪花园停车管理办法
 
-幸福里物业服务手册
+云溪花园物业服务手册
 
 ```
 
@@ -218,7 +218,7 @@ LLM Generation
 
 
 ```
-knowledge/
+knowledge-base/
 
 
 ├── 01-community-rules/
@@ -365,7 +365,7 @@ category: decoration
 
 source: community_policy
 
-community: 幸福里智慧社区
+community: 云溪花园小区
 
 version: 1.0
 
@@ -474,7 +474,7 @@ Embedding Model
 
 ↓
 
-Vector Store
+pgvector
 
 ```
 
@@ -498,25 +498,23 @@ metadata
 
 ---
 
-# 9. Vector Database Design
-# 向量数据库设计
+# 9. Vector Storage Design
+# 向量存储设计
 
 
 推荐：
 
 
-MVP：
+MVP & 生产：
 
 ```
-Chroma
+pgvector (PostgreSQL Extension)
 
-```
+不额外引入独立 Vector Database。
 
-
-生产：
-
-```
-Milvus
+未来：可根据规模迁移：
+- Milvus
+- Weaviate
 
 ```
 
@@ -639,7 +637,7 @@ Embedding
 
 ↓
 
-Vector Database Update
+pgvector Update
 
 ↓
 
@@ -757,7 +755,7 @@ Embedding
 
         ↓
 
-Vector Database
+pgvector
 
         ↓
 

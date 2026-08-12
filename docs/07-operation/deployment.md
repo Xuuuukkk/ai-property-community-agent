@@ -28,13 +28,11 @@ Frontend
 
 Backend
 
-PostgreSQL
+PostgreSQL 16 + pgvector
 
 Redis
 
-Vector Database
-
-Agent Runtime
+Agent Runtime (内嵌于 Backend)
 
 ```
 
@@ -64,7 +62,9 @@ Agent Runtime
         │         │         │
 
 
-   PostgreSQL   Redis   Vector DB
+   PostgreSQL   Redis   (pgvector
+
+   + pgvector           内嵌)
 
 
                   │
@@ -120,9 +120,9 @@ Docker >= 24
 
 Docker Compose >= 2
 
-Python >= 3.11
+Python >= 3.12
 
-Node.js >= 20
+Node.js >= 22
 
 ```
 
@@ -148,15 +148,30 @@ AI-Property-Community-Agent/
 
 │
 
-├── agent/
+├── ai-agent/
 
 │
 
-├── knowledge/
+├── knowledge-base/
 
 │
 
 ├── data/
+
+│
+├── seed/
+
+│
+
+├── database/
+
+│
+
+├── scripts/
+
+│
+
+├── tests/
 
 │
 
@@ -216,11 +231,7 @@ REDIS_HOST=redis
 
 LLM_API_KEY=xxxx
 
-
-
-# Vector Database
-
-VECTOR_DB_HOST=vector-db
+EMBEDDING_MODEL=text-embedding-3-small
 
 ```
 
@@ -244,15 +255,14 @@ services:
   backend:
 
 
-  postgres:
+  postgres:  # 包含 pgvector 扩展
 
 
   redis:
 
-
-  vector-db:
-
 ```
+
+> 注：pgvector 作为 PostgreSQL 扩展内嵌运行，无需独立 vector-db 容器。
 
 
 ---
@@ -298,13 +308,17 @@ data/seed/
 ```
 community.sql
 
-users.sql
+buildings.sql
 
 houses.sql
 
+users.sql
+
+workers.sql
+
 repair_orders.sql
 
-fees.sql
+fee_bills.sql
 
 notices.sql
 
@@ -341,7 +355,9 @@ Embedding
 
 ↓
 
-Vector Database
+pgvector
+
+(PostgreSQL Extension)
 
 
 ```
@@ -358,7 +374,7 @@ python ingest.py
 
 结果：
 
-Vector DB生成知识索引。
+pgvector 生成知识索引。
 
 
 ---
@@ -630,11 +646,19 @@ Cloud Logging
 ```
 User
 
+Community
+
+Building
+
 House
 
-Repair
+HouseBinding
 
-Fee
+Worker
+
+RepairOrder
+
+FeeBill
 
 Notice
 
@@ -643,13 +667,17 @@ Notice
 
 ---
 
-## Vector Database
 
+## pgvector 向量数据
+
+随 PostgreSQL 一同备份（pgvector 数据存储在 PostgreSQL 中）。
 
 备份：
 
 ```
 Knowledge Embeddings
+
+Knowledge Chunks
 
 ```
 
@@ -666,9 +694,9 @@ Knowledge Embeddings
 |-|-|
 |Frontend|页面访问|
 |Backend|/health|
-|Database|Connection|
+|PostgreSQL|Connection|
+|pgvector|Vector Query|
 |Redis|Ping|
-|Vector DB|Query|
 
 
 ---

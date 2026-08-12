@@ -535,7 +535,7 @@ PostgreSQL
 存储：
 
 ```
-Vector Database
+pgvector (PostgreSQL Extension)
 
 ```
 
@@ -852,15 +852,17 @@ Embedding Model
 ```
 
 
-Vector Database:
+Vector Storage:
 
 
 ```
-Chroma
+pgvector (PostgreSQL Extension)
 
-or
+不额外引入独立 Vector Database。
 
-Milvus
+未来：可根据规模迁移：
+- Milvus
+- Weaviate
 
 ```
 
@@ -891,7 +893,7 @@ Agent代码与业务代码分离。
 结构：
 
 ```
-agent/
+ai-agent/
 
 service/
 

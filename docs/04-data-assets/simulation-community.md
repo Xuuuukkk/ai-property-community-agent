@@ -38,7 +38,9 @@
 社区名称：
 
 ```
-幸福里智慧社区
+云溪花园小区
+
+(Yunxi Garden Community)
 
 ```
 
@@ -47,13 +49,15 @@
 
 | 项目 | 数据 |
 |-|-|
-| 城市 | 深圳 |
-| 建成年份 | 2020 |
+| 城市 | 上海市浦东新区 |
+| 详细地址 | 张江路1268号 |
+| 建成年份 | 2018 |
 | 社区类型 | 商品住宅 |
-| 总户数 | 600户 |
-| 楼栋数量 | 6栋 |
-| 地下停车位 | 350个 |
-| 物业公司 | 幸福里物业服务有限公司 |
+| 总户数 | 1200户 |
+| 楼栋数量 | 8栋高层住宅楼 |
+| 地下停车位 | 800个 |
+| 物业公司 | 云溪物业服务有限公司 |
+| 物业费标准 | 2.8元/㎡/月 |
 
 
 ---
@@ -65,27 +69,28 @@
 整体结构：
 
 ```
-幸福里智慧社区
+云溪花园小区
 
 
-├── 1栋
+├── 1号楼
 
 │   ├── 1单元
 
-│   ├── 2单元
+│   └── 2单元
 
-│   └── 3单元
+├── 2号楼
 
+├── 3号楼
 
-├── 2栋
+├── 4号楼
 
-├── 3栋
+├── 5号楼
 
-├── 4栋
+├── 6号楼
 
-├── 5栋
+├── 7号楼
 
-└── 6栋
+└── 8号楼
 
 
 ```
@@ -101,7 +106,7 @@
 
 
 ```
-20层
+26层
 
 2个单元
 
@@ -113,11 +118,11 @@
 计算：
 
 ```
-20 × 2 × 4
+26 × 2 × 4
 
 =
 
-160户/栋
+208户/栋
 
 ```
 
@@ -125,11 +130,13 @@
 实际模拟：
 
 ```
-6栋 × 100户
+8栋 × 208户
 
 =
 
-600户
+1664户（含空置房源）
+
+实际入住约1200户
 
 ```
 
@@ -138,9 +145,10 @@
 
 ```json
 {
-"building_no":"3栋",
-"floors":20,
-"units":2
+"building_no":"1号楼",
+"floors":26,
+"unit_count":2,
+"elevator_config":"2部/单元"
 }
 
 ```
@@ -171,9 +179,9 @@
 
 ```json
 {
-"house_no":"3-2-502",
+"room_no":"1-2-502",
 "area":89,
-"type":"三室两厅"
+"house_type":"三室两厅"
 }
 
 ```
@@ -188,11 +196,11 @@
 模拟：
 
 ```
-600户
+1200户
 
 ≈
 
-1500居民
+3000居民
 
 ```
 
@@ -209,9 +217,9 @@ OWNER
 
 ```json
 {
-"name":"张伟",
-"phone":"138xxxx",
-"house":"3-502"
+"real_name":"张伟",
+"phone":"138****1234",
+"house":"1-2-502"
 }
 
 ```
@@ -227,15 +235,15 @@ OWNER
 
 
 ```
-物业经理 1人
+物业管理员 10人
 
-客服人员 5人
+工程维修人员 15人
 
-工程人员 8人
+保洁人员 20人
 
-保安 12人
+安保秩序人员 30人
 
-保洁 10人
+合计 75人
 
 ```
 
@@ -244,15 +252,13 @@ OWNER
 
 
 ```
-PROPERTY_MANAGER
+ADMIN
 
-CUSTOMER_SERVICE
-
-ENGINEER
-
-SECURITY
+WORKER
 
 CLEANER
+
+SECURITY
 
 ```
 
@@ -263,28 +269,32 @@ CLEANER
 # 维修人员数据
 
 
-维修团队：
+维修团队（15人）：
 
 
 |人员|技能|
 |-|-|
 |李师傅|水电维修|
-|王师傅|空调维修|
-|赵师傅|电梯维护|
-|陈师傅|门窗维修|
+|王师傅|电梯维保|
+|赵师傅|管道疏通|
+|陈师傅|弱电维修|
+|刘师傅|门窗维修|
+|...|...|
 
 
 技能分类：
 
 
 ```
-water
+water_electric
 
-electric
+elevator_maintenance
 
-air_condition
+pipeline_dredging
 
-elevator
+weak_current
+
+door_window_repair
 
 ```
 
@@ -305,7 +315,7 @@ elevator
 过去6个月：
 
 ```
-3000条工单
+50条工单（种子数据）
 
 ```
 
@@ -315,13 +325,14 @@ elevator
 工单类型：
 
 
-|类型|比例|
-|-|-|
-|漏水|30%|
-|电路问题|25%|
-|空调维修|20%|
-|门窗维修|15%|
-|其他|10%|
+|类型|枚举值|说明|
+|-|-|-|
+|厨卫漏水|water_leak|水管破裂、下水道堵塞|
+|电梯故障|elevator_fault|电梯停运、异响|
+|门禁损坏|access_control|门禁系统失效|
+|水电跳闸|power_trip|断电、跳闸|
+|墙面渗水|wall_seepage|外墙渗水、返潮|
+|公共设施损坏|public_facility|路灯、健身器材等|
 
 
 ---
@@ -332,22 +343,27 @@ elevator
 ```
 COMPLETED
 
-80%
+已完成
 
 
 PROCESSING
 
-10%
+维修中
+
+
+ASSIGNED
+
+已派单
 
 
 CREATED
 
-5%
+待派单
 
 
 CLOSED
 
-5%
+已关闭
 
 ```
 
@@ -358,10 +374,12 @@ CLOSED
 
 ```json
 {
-"order_no":"R202607001",
-"type":"water",
-"description":"厨房水管漏水",
-"status":"COMPLETED"
+"order_no":"R202507001",
+"type":"water_leak",
+"description":"厨房水管漏水，地板都泡了",
+"urgency":"NORMAL",
+"status":"COMPLETED",
+"cost":150.00
 }
 
 ```
@@ -379,11 +397,13 @@ CLOSED
 
 
 ```
-物业费
+物业费 (property_fee)
 
-停车费
+车位租赁费 (parking_fee)
 
-维修基金
+公摊水电费 (utility_fee)
+
+专项维修费 (maintenance_fee)
 
 ```
 
@@ -396,6 +416,8 @@ CLOSED
 ```
 house_id
 
+bill_type
+
 period
 
 amount
@@ -403,6 +425,8 @@ amount
 status
 
 due_date
+
+paid_at
 
 ```
 
@@ -414,10 +438,12 @@ due_date
 
 ```json
 {
-"house":"3-502",
-"fee":"物业费",
-"amount":720,
-"status":"UNPAID"
+"house":"1-2-502",
+"bill_type":"property_fee",
+"amount":249.20,
+"period":"2025-07",
+"status":"UNPAID",
+"due_date":"2025-08-15"
 }
 
 ```
@@ -435,7 +461,7 @@ due_date
 数量：
 
 ```
-200条
+24条（种子数据）
 
 ```
 
@@ -443,12 +469,16 @@ due_date
 类型：
 
 
-|类型|示例|
-|-|-|
-|停水通知|管道维修|
-|停电通知|设备维护|
-|活动公告|社区活动|
-|安全提醒|消防检查|
+|类型|枚举值|示例|
+|-|-|-|
+|停水停电通知|water_power_outage|管道维修、设备维护|
+|电梯季度维保|elevator_maintenance|电梯定期保养|
+|消防巡检|fire_inspection|消防设备检查|
+|社区活动|community_activity|中秋活动、迎新春|
+|公共收益公示|public_revenue|半年公共收益公示|
+|业委会通知|committee_notice|业委会换届|
+|高温温馨提示|weather_alert|防暑降温提醒|
+|设施通知|facility_notice|电动车充电规范|
 
 
 ---
@@ -457,8 +487,9 @@ due_date
 
 ```json
 {
-"title":"关于3栋停水维修通知",
-"category":"maintenance"
+"title":"关于1号楼停水维修通知",
+"notice_type":"water_power_outage",
+"is_pinned":true
 }
 
 ```
@@ -579,7 +610,15 @@ PostgreSQL
 ```
 User
 
+Community
+
+Building
+
 House
+
+HouseBinding
+
+Worker
 
 RepairOrder
 
@@ -598,7 +637,7 @@ Notice
 存储：
 
 ```
-Vector Database
+pgvector (PostgreSQL Extension)
 
 ```
 
@@ -624,17 +663,21 @@ Management Documents
 项目提供：
 
 ```
-seed/
+data/seed/
 
 ├── community.sql
 
-├── users.sql
+├── buildings.sql
 
 ├── houses.sql
 
-├── repairs.sql
+├── users.sql
 
-├── fees.sql
+├── workers.sql
+
+├── repair_orders.sql
+
+├── fee_bills.sql
 
 └── notices.sql
 

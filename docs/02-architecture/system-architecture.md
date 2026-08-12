@@ -105,9 +105,9 @@ AI Property Community Agent 采用：
         ┌──────────────┼──────────────┐
 
 
-   PostgreSQL          Vector Database
+   PostgreSQL 16           pgvector
 
-   业务数据库            向量数据库
+   业务数据库 + 向量存储 (PostgreSQL Extension)
 
 
 ```
@@ -413,7 +413,7 @@ Embedding
 
 ↓
 
-Vector Database
+pgvector
 
 ↓
 
@@ -465,7 +465,13 @@ User
 
 Community
 
+Building
+
 House
+
+HouseBinding
+
+Worker
 
 RepairOrder
 
@@ -473,14 +479,16 @@ FeeBill
 
 Notice
 
+AgentTrace
+
 ```
 
 
 ---
 
-## Vector Database
+## pgvector (PostgreSQL Extension)
 
-向量数据库。
+向量存储（内嵌于 PostgreSQL，不独立部署）。
 
 
 存储：
@@ -600,7 +608,7 @@ Retriever
 
 ↓
 
-Vector Database
+pgvector
 
 
 ↓

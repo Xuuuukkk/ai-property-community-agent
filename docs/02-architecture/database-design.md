@@ -154,12 +154,17 @@ community
 
 字段：
 
-
 | 字段 | 类型 | 描述 |
 |-|-|-|
 | id | bigint | 主键 |
 | name | varchar | 小区名称 |
+| name_en | varchar | 小区英文名称 |
 | address | varchar | 地址 |
+| built_year | int | 建成年份 |
+| building_count | int | 楼栋总数 |
+| total_households | int | 总户数 |
+| parking_spaces | int | 地下停车位数量 |
+| property_company | varchar | 物业服务公司全称 |
 | description | text | 描述 |
 | created_at | timestamp | 创建时间 |
 
@@ -170,8 +175,14 @@ Example:
 ```json
 {
 "id":1,
-"name":"幸福花园社区",
-"address":"XX市XX区"
+"name":"云溪花园小区",
+"name_en":"Yunxi Garden Community",
+"address":"上海市浦东新区张江路1268号",
+"built_year":2018,
+"building_count":8,
+"total_households":1200,
+"parking_spaces":800,
+"property_company":"云溪物业服务有限公司"
 }
 
 ```
@@ -200,6 +211,8 @@ building
 | community_id | bigint | 小区ID |
 | building_no | varchar | 楼栋编号 |
 | floors | int | 楼层数量 |
+| unit_count | int | 单元数量 |
+| elevator_config | varchar | 电梯配置 |
 
 
 关系：
@@ -232,6 +245,8 @@ house
 | id | bigint | 主键 |
 | building_id | bigint | 楼栋ID |
 | room_no | varchar | 房号 |
+| unit_no | int | 单元号 |
+| floor_no | int | 楼层号 |
 | area | decimal | 面积 |
 | house_type | varchar | 户型 |
 | status | varchar | 状态 |
@@ -271,7 +286,8 @@ user
 | 字段 | 类型 | 描述 |
 |-|-|-|
 | id | bigint | 主键 |
-| username | varchar | 用户名 |
+| username | varchar | 用户名（登录用） |
+| real_name | varchar | 真实姓名 |
 | phone | varchar | 手机 |
 | password_hash | varchar | 密码 |
 | role | varchar | 角色 |
@@ -357,8 +373,11 @@ worker
 |-|-|-|
 |id|bigint|主键|
 |user_id|bigint|用户|
-|skill_type|varchar|技能|
+|department|varchar|部门（management/engineering/cleaning/security）|
+|position|varchar|岗位|
+|skill_type|varchar|技能 |
 |status|varchar|状态|
+|hire_date|date|入职时间|
 
 
 Example:
@@ -403,7 +422,9 @@ repair_order
 |description|text|描述|
 |urgency|varchar|紧急程度|
 |status|varchar|状态|
+|cost|decimal|维修费用（自费维修填写，公共设施为0）|
 |created_at|timestamp|创建时间|
+|completed_at|timestamp|完成时间|
 
 
 ---
@@ -495,10 +516,13 @@ fee_bill
 |-|-|-|
 |id|bigint|主键|
 |house_id|bigint|房屋|
+|user_id|bigint|缴费人|
+|bill_type|varchar|账单类型（property_fee/parking_fee/utility_fee/maintenance_fee）|
 |period|varchar|周期|
 |amount|decimal|金额|
 |status|varchar|状态|
 |due_date|date|截止日期|
+|paid_at|timestamp|实际缴费时间|
 
 
 状态：
@@ -510,6 +534,20 @@ PAID
 UNPAID
 
 OVERDUE
+
+```
+
+账单类型：
+
+
+```
+property_fee        物业费
+
+parking_fee          车位租赁费
+
+utility_fee          公摊水电费
+
+maintenance_fee      专项维修费
 
 ```
 
@@ -537,6 +575,8 @@ notice
 |title|varchar|标题|
 |content|text|正文|
 |publisher_id|bigint|发布人|
+|notice_type|varchar|公告类型|
+|is_pinned|boolean|是否置顶|
 |status|varchar|状态|
 |created_at|timestamp|时间|
 
@@ -550,6 +590,21 @@ DRAFT
 PUBLISHED
 
 ARCHIVED
+
+```
+
+公告类型：
+
+
+```
+water_power_outage    停水停电通知
+elevator_maintenance  电梯维保
+fire_inspection       消防巡检
+community_activity    社区活动
+public_revenue        公共收益公示
+committee_notice      业委会通知
+weather_alert         气象温馨提示
+facility_notice       设施公告
 
 ```
 
