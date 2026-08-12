@@ -5,7 +5,13 @@ Business routers (user/repair/fee/notice) are added in Phase 3.
 """
 from fastapi import FastAPI
 
-from app.api.routes import health
+from app.api.routes import (
+    fee_router,
+    health_router,
+    notices_router,
+    repair_router,
+    users_router,
+)
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -20,7 +26,13 @@ def create_app() -> FastAPI:
     )
 
     # Health & readiness under /api
-    app.include_router(health.router, prefix=settings.API_PREFIX)
+    app.include_router(health_router, prefix=settings.API_PREFIX)
+
+    # Phase 3 business routers
+    app.include_router(users_router, prefix=settings.API_PREFIX)
+    app.include_router(repair_router, prefix=settings.API_PREFIX)
+    app.include_router(fee_router, prefix=settings.API_PREFIX)
+    app.include_router(notices_router, prefix=settings.API_PREFIX)
 
     @app.get("/", tags=["root"])
     def root() -> dict:

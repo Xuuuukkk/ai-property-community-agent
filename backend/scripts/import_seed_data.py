@@ -46,6 +46,21 @@ SEED_FILES = [
     "notices.sql",
 ]
 
+# Table names whose id sequences must be reset to MAX(id) after seed import.
+# "user" must be quoted because it is a PostgreSQL reserved word.
+SEQUENCE_TABLES = [
+    "community",
+    "building",
+    "house",
+    '"user"',
+    "house_binding",
+    "worker",
+    "repair_order",
+    "repair_record",
+    "fee_bill",
+    "notice",
+]
+
 
 def get_seed_dir() -> Path:
     """Locate data/seed relative to the repo root."""
@@ -80,6 +95,22 @@ def import_seed() -> None:
             session.execute(text(sql))
             session.commit()
             print(f"  -> {filename} done", flush=True)
+
+    # Reset PostgreSQL serial sequences so newly inserted records do not collide
+    # with the explicit ids used in the seed files.
+    with Session() as session:
+        print("Resetting id sequences ...", flush=True)
+        for table in SEQUENCE_TABLES:
+            reset_sql = text(
+                f"SELECT setval(pg_get_serial_sequence('{table}', 'id'), "
+                f"COALESCE((SELECT MAX(id) FROM {table}), 1))"
+            )
+            try:
+                session.execute(reset_sql)
+            except Exception as exc:  # pragma: no cover - defensive logging
+                print(f"  Warning: could not reset sequence for {table}: {exc}", flush=True)
+        session.commit()
+        print("  -> sequences reset", flush=True)
 
     print("Seed data import completed successfully.")
 
