@@ -1,0 +1,214 @@
+"""Domain agents invoked by the router.
+
+Each agent extracts parameters from the user's message and calls the relevant
+business tools. The current implementation is deterministic and rule-based so
+it works without an LLM API key, while preserving the LangGraph structure for
+future LLM-based upgrades.
+"""
+
+from __future__ import annotations
+
+import re
+from typing import Any
+
+from sqlalchemy.orm import Session
+
+from app.agents import tools as agent_tools
+from app.agents.state import AgentState, get_messages, get_user_id
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _extract_user_id_from_state(state: AgentState) -> int | None:
+    """Return explicit user_id from state if present."""
+    return get_user_id(state)
+
+
+def _extract_house_id(text: str) -> int | None:
+    """Try to find a house id in the user message."""
+    match = re.search(r"房屋\s*[:：]?\s*(\d+)", text)
+    if match:
+        return int(match.group(1))
+    return None
+
+
+def _extract_repair_type(text: str) -> str:
+    """Map Chinese keywords to repair type enum values."""
+    lowered = text.lower()
+    if any(k in lowered for k in ("漏水", "水管", "water", "leak")):
+        return "water_leak"
+    if any(k in lowered for k in ("电梯", "elevator")):
+        return "elevator_fault"
+    if any(k in lowered for k in ("门禁", "access", "door")):
+        return "access_control"
+    if any(k in lowered for k in ("跳闸", "电", "power", "electric")):
+        return "power_trip"
+    if any(k in lowered for k in ("渗水", "墙面", "wall", "seepage")):
+        return "wall_seepage"
+    return "public_facility"
+
+
+def _extract_urgency(text: str) -> str:
+    lowered = text.lower()
+    if any(k in lowered for k in ("紧急", " urgent", "urgent", "马上", "立刻")):
+        return "URGENT"
+    if any(k in lowered for k in ("严重", "high", "很急")):
+        return "HIGH"
+    if any(k in lowered for k in ("轻微", "low", "不急")):
+        return "LOW"
+    return "MEDIUM"
+
+
+# ---------------------------------------------------------------------------
+# Repair Agent
+# ---------------------------------------------------------------------------
+
+
+def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
+    """Handle repair intents: create or query repair orders."""
+    user_text = ""
+    for msg in reversed(get_messages(state)):
+        if hasattr(msg, "content"):
+            user_text = str(msg.content)
+            break
+
+    user_id = _extract_user_id_from_state(state) or 1
+    lowered = user_text.lower()
+
+    # Query path
+    if any(k in lowered for k in ("查", "进度", "状态", "处理", "status", "query", "list")):
+        result = agent_tools.query_repair_order(db, user_id=user_id)
+        orders = result.get("orders", [])
+        if not orders:
+            return {"response": "您当前没有维修工单。", "tool_results": [result]}
+        lines = [f"• {o['order_no']} | {o['type']} | {o['status']} | {o['description'] or '无描述'}" for o in orders]
+        return {
+            "response": f"您最近的维修工单：\n" + "\n".join(lines),
+            "tool_results": [result],
+        }
+
+    # Create path
+    house_id = _extract_house_id(user_text)
+    repair_type = _extract_repair_type(user_text)
+    urgency = _extract_urgency(user_text)
+
+    # Extract a simple description: remove common prefixes and trailing punctuation.
+    description = user_text
+    for prefix in ("我要报修", "帮我报修", "报修", "repair", "维修"):
+        if description.lower().startswith(prefix):
+            description = description[len(prefix):].strip("，,。.:： ")
+    if not description:
+        description = "业主报修"
+
+    missing = []
+    if house_id is None:
+        missing.append("房屋 ID")
+    if not description:
+        missing.append("问题描述")
+
+    if missing:
+        return {
+            "response": f"请补充以下信息以便创建工单：{', '.join(missing)}",
+            "tool_results": [],
+            "requires_human": False,
+        }
+
+    result = agent_tools.create_repair_order(
+        db,
+        user_id=user_id,
+        house_id=house_id,
+        type=repair_type,
+        description=description,
+        urgency=urgency,
+    )
+    return {
+        "response": result["message"],
+        "tool_results": [result],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Fee Agent
+# ---------------------------------------------------------------------------
+
+
+def run_fee_agent(db: Session, state: AgentState) -> dict[str, Any]:
+    """Handle fee intents: query bills or payment status."""
+    user_text = ""
+    for msg in reversed(get_messages(state)):
+        if hasattr(msg, "content"):
+            user_text = str(msg.content)
+            break
+
+    user_id = _extract_user_id_from_state(state) or 1
+    result = agent_tools.query_payment_status(db, user_id=user_id)
+    return {
+        "response": result["message"],
+        "tool_results": [result],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Notice Agent
+# ---------------------------------------------------------------------------
+
+
+def run_notice_agent(db: Session, state: AgentState) -> dict[str, Any]:
+    """Handle notice intents: generate or publish community notices."""
+    user_text = ""
+    for msg in reversed(get_messages(state)):
+        if hasattr(msg, "content"):
+            user_text = str(msg.content)
+            break
+
+    lowered = user_text.lower()
+    user_id = _extract_user_id_from_state(state) or 1
+
+    # Simple rule: if the message only contains event info, generate a draft.
+    if any(k in lowered for k in ("生成", "草稿", "draft", "生成公告")):
+        draft = agent_tools.generate_notice(
+            title="社区通知",
+            content=user_text,
+            publisher_id=user_id,
+        )
+        return {
+            "response": f"公告草稿已生成：\n标题：{draft['title']}\n内容：{draft['content']}\n请确认后发布。",
+            "tool_results": [draft],
+            "requires_human": True,
+        }
+
+    # Otherwise publish directly (production should require explicit confirmation).
+    result = agent_tools.publish_notice(
+        db,
+        title="社区通知",
+        content=user_text,
+        publisher_id=user_id,
+        notice_type="facility_notice",
+    )
+    return {
+        "response": result["message"],
+        "tool_results": [result],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Knowledge Agent
+# ---------------------------------------------------------------------------
+
+
+def run_knowledge_agent(state: AgentState) -> dict[str, Any]:
+    """Handle knowledge intents. RAG implementation is planned for Phase 6."""
+    user_text = ""
+    for msg in reversed(get_messages(state)):
+        if hasattr(msg, "content"):
+            user_text = str(msg.content)
+            break
+
+    result = agent_tools.search_knowledge(user_text)
+    return {
+        "response": result["message"],
+        "tool_results": [result],
+    }

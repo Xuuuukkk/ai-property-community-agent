@@ -9,6 +9,11 @@ psycopg2-binary>=2.9
 redis>=5.0
 python-dotenv>=1.0
 
+# ---- AI Agent ----
+langgraph>=1.0
+langchain>=0.3
+langchain-openai>=0.2
+
 # ---- Test (kept here so the image can run the suite) ----
 pytest>=8.0
 httpx>=0.27

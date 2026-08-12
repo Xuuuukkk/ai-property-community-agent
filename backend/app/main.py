@@ -6,6 +6,7 @@ Business routers (user/repair/fee/notice) are added in Phase 3.
 from fastapi import FastAPI
 
 from app.api.routes import (
+    agent_router,
     fee_router,
     health_router,
     notices_router,
@@ -33,6 +34,9 @@ def create_app() -> FastAPI:
     app.include_router(repair_router, prefix=settings.API_PREFIX)
     app.include_router(fee_router, prefix=settings.API_PREFIX)
     app.include_router(notices_router, prefix=settings.API_PREFIX)
+
+    # Phase 5 AI Agent router
+    app.include_router(agent_router, prefix=settings.API_PREFIX)
 
     @app.get("/", tags=["root"])
     def root() -> dict:
