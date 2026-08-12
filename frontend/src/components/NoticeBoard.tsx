@@ -1,12 +1,27 @@
 import { useEffect, useState } from 'react'
 import { api, Notice, NoticeListResponse } from '../api/client'
 
+const NOTICE_TYPES = [
+  { value: 'facility_notice', label: '设施通知' },
+  { value: 'water_power_outage', label: '停水停电' },
+  { value: 'elevator_maintenance', label: '电梯维保' },
+  { value: 'fire_inspection', label: '消防检查' },
+  { value: 'community_activity', label: '社区活动' },
+  { value: 'public_revenue', label: '公共收益' },
+  { value: 'committee_notice', label: '业委会公告' },
+  { value: 'weather_alert', label: '天气预警' },
+]
+
+const NOTICE_TYPE_LABELS = NOTICE_TYPES.reduce<Record<string, string>>((acc, item) => {
+  acc[item.value] = item.label
+  return acc
+}, {})
+
 export default function NoticeBoard() {
   const [list, setList] = useState<NoticeListResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [createMsg, setCreateMsg] = useState<string | null>(null)
-
   const [form, setForm] = useState({
     title: '',
     content: '',
@@ -51,14 +66,19 @@ export default function NoticeBoard() {
   }
 
   return (
-    <div>
-      <div className="card">
-        <h2>发布公告</h2>
+    <div className="stack">
+      <section className="panel">
+        <div className="panel-header">
+          <div>
+            <span className="eyebrow">Publish</span>
+            <h3>发布公告</h3>
+          </div>
+        </div>
+
         <div className="form-row">
-          <label style={{ flex: 1 }}>
+          <label className="fill">
             标题
             <input
-              style={{ width: '100%' }}
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder="公告标题"
@@ -66,78 +86,89 @@ export default function NoticeBoard() {
           </label>
         </div>
         <div className="form-row">
-          <label style={{ flex: 1 }}>
+          <label className="fill">
             内容
             <textarea
-              rows={3}
-              style={{ width: '100%' }}
+              rows={4}
               value={form.content}
               onChange={(e) => setForm({ ...form, content: e.target.value })}
               placeholder="公告内容"
             />
           </label>
         </div>
-        <div className="form-row">
+        <div className="form-grid notice-form-grid">
           <label>
             发布者 ID
             <input
               type="number"
               value={form.publisher_id}
               onChange={(e) => setForm({ ...form, publisher_id: Number(e.target.value) })}
+              min={1}
             />
           </label>
           <label>
             类型
             <select value={form.notice_type} onChange={(e) => setForm({ ...form, notice_type: e.target.value })}>
-              <option value="facility_notice">设施通知</option>
-              <option value="water_power_outage">停水停电</option>
-              <option value="elevator_maintenance">电梯维保</option>
-              <option value="fire_inspection">消防检查</option>
-              <option value="community_activity">社区活动</option>
-              <option value="public_revenue">公共收益</option>
-              <option value="committee_notice">业委会公告</option>
-              <option value="weather_alert">天气预警</option>
+              {NOTICE_TYPES.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
             </select>
           </label>
-          <label>
+          <label className="checkbox-field">
             <input
               type="checkbox"
               checked={form.is_pinned}
               onChange={(e) => setForm({ ...form, is_pinned: e.target.checked })}
-            />{' '}
-            置顶
+            />
+            置顶公告
           </label>
-          <button onClick={handleCreate}>发布公告</button>
+          <button onClick={handleCreate} type="button">
+            发布公告
+          </button>
         </div>
-        {createMsg && <div className={createMsg.startsWith('发布失败') ? 'error' : 'success'}>{createMsg}</div>}
-      </div>
 
-      <div className="card">
-        <h2>公告列表</h2>
+        {createMsg && <div className={createMsg.startsWith('发布失败') ? 'error' : 'success'}>{createMsg}</div>}
+      </section>
+
+      <section className="panel">
+        <div className="panel-header">
+          <div>
+            <span className="eyebrow">Timeline</span>
+            <h3>公告列表</h3>
+          </div>
+          <button className="secondary" onClick={fetchNotices} disabled={loading} type="button">
+            {loading ? '刷新中...' : '刷新'}
+          </button>
+        </div>
+
         {error && <div className="error">{error}</div>}
-        <button className="secondary" onClick={fetchNotices} disabled={loading}>
-          {loading ? '刷新中...' : '刷新'}
-        </button>
 
         {list && (
-          <>
+          <div className="notice-list">
             {list.items.map((notice: Notice) => (
-              <div key={notice.id} style={{ marginTop: '1rem', paddingBottom: '1rem', borderBottom: '1px solid #e5e7eb' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <h3 style={{ margin: 0, fontSize: '1rem' }}>{notice.title}</h3>
-                  {notice.is_pinned && <span className="badge status-PUBLISHED">置顶</span>}
-                  <span className={`badge status-${notice.status}`}>{notice.status}</span>
+              <article key={notice.id} className="notice-item">
+                <div className="notice-heading">
+                  <div>
+                    <h4>{notice.title}</h4>
+                    <span>
+                      {NOTICE_TYPE_LABELS[notice.notice_type] || notice.notice_type} · 发布者 {notice.publisher_id} ·{' '}
+                      {new Date(notice.created_at).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="notice-tags">
+                    {notice.is_pinned && <span className="badge status-PUBLISHED">置顶</span>}
+                    <span className={`badge status-${notice.status}`}>{notice.status}</span>
+                  </div>
                 </div>
-                <p style={{ margin: '0.5rem 0', color: '#4b5563' }}>{notice.content || '无内容'}</p>
-                <small style={{ color: '#9ca3af' }}>
-                  {notice.notice_type} · 发布者 {notice.publisher_id} · {new Date(notice.created_at).toLocaleString()}
-                </small>
-              </div>
+                <p>{notice.content || '暂无内容'}</p>
+              </article>
             ))}
-            {list.items.length === 0 && <div className="empty">暂无公告</div>}
-          </>
+            {list.items.length === 0 && <div className="empty-state">暂无公告</div>}
+          </div>
         )}
-      </div>
+      </section>
     </div>
   )
 }

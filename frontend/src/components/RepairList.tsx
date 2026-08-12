@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api, RepairOrder, RepairListResponse } from '../api/client'
+import { api, RepairListResponse, RepairOrder } from '../api/client'
 
 const STATUS_OPTIONS = ['全部', 'CREATED', 'ASSIGNED', 'PROCESSING', 'COMPLETED', 'CLOSED']
 const URGENCY_OPTIONS = ['LOW', 'MEDIUM', 'HIGH', 'URGENT']
@@ -12,14 +12,17 @@ const TYPE_OPTIONS = [
   { label: '公共设施', value: 'public_facility' },
 ]
 
+const TYPE_LABELS = TYPE_OPTIONS.reduce<Record<string, string>>((acc, item) => {
+  acc[item.value] = item.label
+  return acc
+}, {})
+
 export default function RepairList() {
   const [list, setList] = useState<RepairListResponse | null>(null)
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState('全部')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  // Form state for creating a new repair order
   const [form, setForm] = useState({
     user_id: 1,
     house_id: '',
@@ -69,16 +72,24 @@ export default function RepairList() {
   }
 
   return (
-    <div>
-      <div className="card">
-        <h2>创建维修工单</h2>
-        <div className="form-row">
+    <div className="stack">
+      <section className="panel">
+        <div className="panel-header">
+          <div>
+            <span className="eyebrow">Create</span>
+            <h3>创建维修工单</h3>
+          </div>
+          <span className="panel-note">字段会按现有后端契约提交</span>
+        </div>
+
+        <div className="form-grid">
           <label>
             用户 ID
             <input
               type="number"
               value={form.user_id}
               onChange={(e) => setForm({ ...form, user_id: Number(e.target.value) })}
+              min={1}
             />
           </label>
           <label>
@@ -93,9 +104,9 @@ export default function RepairList() {
           <label>
             类型
             <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
-              {TYPE_OPTIONS.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
+              {TYPE_OPTIONS.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
                 </option>
               ))}
             </select>
@@ -103,97 +114,116 @@ export default function RepairList() {
           <label>
             紧急程度
             <select value={form.urgency} onChange={(e) => setForm({ ...form, urgency: e.target.value })}>
-              {URGENCY_OPTIONS.map((u) => (
-                <option key={u} value={u}>
-                  {u}
+              {URGENCY_OPTIONS.map((urgency) => (
+                <option key={urgency} value={urgency}>
+                  {urgency}
                 </option>
               ))}
             </select>
           </label>
         </div>
+
         <div className="form-row">
-          <label style={{ flex: 1 }}>
+          <label className="fill">
             问题描述
             <input
-              style={{ width: '100%' }}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="请描述具体问题"
+              placeholder="请描述具体问题、位置或补充信息"
             />
           </label>
-          <button onClick={handleCreate}>提交工单</button>
+          <button onClick={handleCreate} type="button">
+            提交工单
+          </button>
         </div>
-        {createMsg && <div className={createMsg.startsWith('创建失败') ? 'error' : 'success'}>{createMsg}</div>}
-      </div>
 
-      <div className="card">
-        <h2>维修工单列表</h2>
-        <div className="form-row">
+        {createMsg && <div className={createMsg.startsWith('创建失败') ? 'error' : 'success'}>{createMsg}</div>}
+      </section>
+
+      <section className="panel">
+        <div className="panel-header">
+          <div>
+            <span className="eyebrow">Queue</span>
+            <h3>维修工单列表</h3>
+          </div>
+          <button className="secondary" onClick={() => fetchList()} disabled={loading} type="button">
+            {loading ? '刷新中...' : '刷新'}
+          </button>
+        </div>
+
+        <div className="toolbar">
           <label>
             状态筛选
-            <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}>
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value)
+                setPage(1)
+              }}
+            >
+              {STATUS_OPTIONS.map((status) => (
+                <option key={status} value={status}>
+                  {status}
                 </option>
               ))}
             </select>
           </label>
-          <button className="secondary" onClick={() => fetchList()} disabled={loading}>
-            {loading ? '刷新中...' : '刷新'}
-          </button>
+          {list && <span className="table-summary">共 {list.pagination.total} 条记录</span>}
         </div>
 
         {error && <div className="error">{error}</div>}
 
         {list && (
           <>
-            <table>
-              <thead>
-                <tr>
-                  <th>工单号</th>
-                  <th>类型</th>
-                  <th>紧急程度</th>
-                  <th>状态</th>
-                  <th>描述</th>
-                  <th>创建时间</th>
-                </tr>
-              </thead>
-              <tbody>
-                {list.items.map((item: RepairOrder) => (
-                  <tr key={item.id}>
-                    <td>{item.order_no}</td>
-                    <td>{item.type}</td>
-                    <td>{item.urgency}</td>
-                    <td>
-                      <span className={`badge status-${item.status}`}>{item.status}</span>
-                    </td>
-                    <td>{item.description || '-'}</td>
-                    <td>{new Date(item.created_at).toLocaleString()}</td>
+            <div className="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>工单号</th>
+                    <th>类型</th>
+                    <th>紧急程度</th>
+                    <th>状态</th>
+                    <th>描述</th>
+                    <th>创建时间</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {list.items.map((item: RepairOrder) => (
+                    <tr key={item.id}>
+                      <td className="mono">{item.order_no}</td>
+                      <td>{TYPE_LABELS[item.type] || item.type}</td>
+                      <td>
+                        <span className={`badge urgency-${item.urgency}`}>{item.urgency}</span>
+                      </td>
+                      <td>
+                        <span className={`badge status-${item.status}`}>{item.status}</span>
+                      </td>
+                      <td className="description-cell">{item.description || '-'}</td>
+                      <td>{new Date(item.created_at).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {list.items.length === 0 && <div className="empty-state">暂无工单</div>}
             <div className="pagination">
-              <button
-                disabled={page <= 1 || loading}
-                onClick={() => setPage((p) => p - 1)}
-              >
+              <button disabled={page <= 1 || loading} onClick={() => setPage((p) => p - 1)} type="button">
                 上一页
               </button>
               <span>
-                第 {page} / {list.pagination.pages || 1} 页（共 {list.pagination.total} 条）
+                第 {page} / {list.pagination.pages || 1} 页
               </span>
               <button
                 disabled={page >= list.pagination.pages || loading}
                 onClick={() => setPage((p) => p + 1)}
+                type="button"
               >
                 下一页
               </button>
             </div>
           </>
         )}
-      </div>
+      </section>
     </div>
   )
 }

@@ -24,38 +24,83 @@ export default function UserSearch() {
   }
 
   return (
-    <div className="card">
-      <h2>业主查询</h2>
-      <div className="form-row">
-        <label>
-          用户 ID
-          <input
-            type="number"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-            placeholder="输入用户 ID"
-            min={1}
-          />
-        </label>
-        <button onClick={handleSearch} disabled={loading}>
-          {loading ? '查询中...' : '查询'}
-        </button>
-      </div>
+    <div className="page-grid">
+      <section className="panel query-panel">
+        <div className="panel-header">
+          <div>
+            <span className="eyebrow">Search</span>
+            <h3>业主 ID 查询</h3>
+          </div>
+        </div>
 
-      {error && <div className="error">{error}</div>}
+        <div className="form-row">
+          <label>
+            用户 ID
+            <input
+              type="number"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+              placeholder="输入用户 ID"
+              min={1}
+            />
+          </label>
+          <button onClick={handleSearch} disabled={loading} type="button">
+            {loading ? '查询中...' : '查询'}
+          </button>
+        </div>
 
-      {user && (
-        <table>
-          <tbody>
-            <tr><th>ID</th><td>{user.id}</td></tr>
-            <tr><th>用户名</th><td>{user.username}</td></tr>
-            <tr><th>姓名</th><td>{user.real_name || '-'}</td></tr>
-            <tr><th>电话</th><td>{user.phone || '-'}</td></tr>
-            <tr><th>角色</th><td>{user.role}</td></tr>
-            <tr><th>注册时间</th><td>{new Date(user.created_at).toLocaleString()}</td></tr>
-          </tbody>
-        </table>
-      )}
+        {error && <div className="error">{error}</div>}
+      </section>
+
+      <section className="panel">
+        <div className="panel-header">
+          <div>
+            <span className="eyebrow">Profile</span>
+            <h3>业主档案</h3>
+          </div>
+        </div>
+
+        {user ? (
+          <div className="profile-layout">
+            <div className="avatar-card">
+              <div className="avatar">{(user.real_name || user.username || '业').slice(0, 1)}</div>
+              <strong>{user.real_name || user.username}</strong>
+              <span className={`badge status-${user.role}`}>{user.role}</span>
+            </div>
+            <dl className="detail-list">
+              <div>
+                <dt>ID</dt>
+                <dd>{user.id}</dd>
+              </div>
+              <div>
+                <dt>用户名</dt>
+                <dd>{user.username}</dd>
+              </div>
+              <div>
+                <dt>姓名</dt>
+                <dd>{user.real_name || '-'}</dd>
+              </div>
+              <div>
+                <dt>电话</dt>
+                <dd>{user.phone || '-'}</dd>
+              </div>
+              <div>
+                <dt>角色</dt>
+                <dd>{user.role}</dd>
+              </div>
+              <div>
+                <dt>注册时间</dt>
+                <dd>{new Date(user.created_at).toLocaleString()}</dd>
+              </div>
+            </dl>
+          </div>
+        ) : (
+          <div className="empty-state">
+            <strong>等待查询</strong>
+            <span>输入用户 ID 后，这里会展示业主基础信息。</span>
+          </div>
+        )}
+      </section>
     </div>
   )
 }

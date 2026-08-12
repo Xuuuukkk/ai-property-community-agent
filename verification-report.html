@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 物业社区智能体 - Phase 1-4 验证报告</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --success: #16a34a;
+            --success-light: #dcfce7;
+            --warning: #ca8a04;
+            --warning-light: #fef9c3;
+            --border: #e2e8f0;
+            --accent: #2563eb;
+            --accent-light: #eff6ff;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            padding: 32px 16px;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 28px;
+            margin: 0 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .subtitle {
+            color: var(--muted);
+            font-size: 15px;
+            margin-bottom: 28px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success { background: var(--success-light); color: var(--success); }
+        .badge-warning { background: var(--warning-light); color: var(--warning); }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .card h2 {
+            font-size: 16px;
+            margin: 0 0 14px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .metric {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0;
+        }
+        .metric-label {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--accent-light);
+            color: var(--accent);
+            font-weight: 600;
+        }
+        tr:last-child td { border-bottom: none; }
+        .status-up { color: var(--success); font-weight: 600; }
+        .status-warn { color: var(--warning); font-weight: 600; }
+        .json {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 14px;
+            border-radius: 8px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+        .link-list a {
+            display: inline-block;
+            margin-right: 16px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .link-list a:hover { text-decoration: underline; }
+        .footer {
+            margin-top: 32px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 13px;
+        }
+        .test-pass { color: var(--success); font-weight: 600; }
+        .test-name { font-family: monospace; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>
+            <span>AI 物业社区智能体平台</span>
+            <span class="badge badge-success">● Phase 1-4 验证通过</span>
+        </h1>
+        <p class="subtitle">生成时间：2026-08-12 23:08 &nbsp;|&nbsp; 验证目标：后端 / 数据库 / API / 前端 全链路</p>
+
+        <div class="grid">
+            <div class="card">
+                <h2>容器状态</h2>
+                <p class="metric">4/4</p>
+                <p class="metric-label">postgres / redis / backend / frontend 全部运行</p>
+            </div>
+            <div class="card">
+                <h2>后端测试</h2>
+                <p class="metric">16/16</p>
+                <p class="metric-label">pytest 全部通过</p>
+            </div>
+            <div class="card">
+                <h2>数据表</h2>
+                <p class="metric">11</p>
+                <p class="metric-label">10 业务表 + alembic_version</p>
+            </div>
+            <div class="card">
+                <h2>种子数据</h2>
+                <p class="metric">2,954</p>
+                <p class="metric-label">community / building / house / user / fee_bill 等已导入</p>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 24px;">
+            <h2>可访问地址</h2>
+            <div class="link-list">
+                <a href="http://127.0.0.1:3000" target="_blank">前端首页 http://127.0.0.1:3000</a>
+                <a href="http://127.0.0.1:8000/docs" target="_blank">后端 Swagger http://127.0.0.1:8000/docs</a>
+                <a href="http://127.0.0.1:8000/api/health" target="_blank">健康检查 /api/health</a>
+                <a href="http://127.0.0.1:8000/api/health/ready" target="_blank">就绪检查 /api/health/ready</a>
+            </div>
+        </div>
+
+        <div class="grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="card">
+                <h2>容器明细</h2>
+                <table>
+                    <thead>
+                        <tr><th>名称</th><th>状态</th><th>端口</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>property-postgres</td><td class="status-up">Up (healthy)</td><td>5432</td></tr>
+                        <tr><td>property-redis</td><td class="status-up">Up (healthy)</td><td>6379</td></tr>
+                        <tr><td>property-backend</td><td class="status-up">Up</td><td>8000</td></tr>
+                        <tr><td>property-frontend</td><td class="status-up">Up</td><td>3000</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>数据库统计</h2>
+                <table>
+                    <thead>
+                        <tr><th>表名</th><th>行数</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>community</td><td>1</td></tr>
+                        <tr><td>building</td><td>8</td></tr>
+                        <tr><td>house</td><td>1,664</td></tr>
+                        <tr><td>user</td><td>275</td></tr>
+                        <tr><td>house_binding</td><td>200</td></tr>
+                        <tr><td>worker</td><td>75</td></tr>
+                        <tr><td>repair_order</td><td>51</td></tr>
+                        <tr><td>repair_record</td><td>0</td></tr>
+                        <tr><td>fee_bill</td><td>746</td></tr>
+                        <tr><td>notice</td><td>25</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 24px;">
+            <h2>API 实时响应示例</h2>
+            <p style="color: var(--muted); font-size: 13px; margin-bottom: 16px;">以下 JSON 均为刚刚从本机服务实时抓取</p>
+
+            <h3 style="font-size: 14px; margin: 16px 0 8px;">GET /api/health/ready</h3>
+            <div class="json">{"status":"ready","components":{"database":"up","redis":"up"}}</div>
+
+            <h3 style="font-size: 14px; margin: 16px 0 8px;">GET /api/users/1</h3>
+            <div class="json">{"id":1,"username":"guoyi378","real_name":"GuoYi","phone":"135****2789","role":"OWNER","created_at":"2020-12-19T11:15:03"}</div>
+
+            <h3 style="font-size: 14px; margin: 16px 0 8px;">GET /api/repair/list?user_id=1&page=1&page_size=3</h3>
+            <div class="json">{"items":[{"id":54,"order_no":"RO202608121505236A918119","user_id":1,"house_id":1,"worker_id":null,"type":"water_leak","description":"test","urgency":"HIGH","status":"CREATED","cost":"0.00","created_at":"2026-08-12T15:05:23.618919","completed_at":null}],"pagination":{"page":1,"page_size":3,"total":1,"pages":1}}</div>
+
+            <h3 style="font-size: 14px; margin: 16px 0 8px;">GET /api/fee/1?page=1&page_size=3</h3>
+            <div class="json">{"items":[{"id":620,"house_id":577,"user_id":1,"bill_type":"parking_fee","period":"2025-06","amount":"400.00","status":"PAID","due_date":"2025-06-15","paid_at":"2025-06-18T10:09:18"},{"id":3,"house_id":577,"user_id":1,"bill_type":"property_fee","period":"2026-04","amount":"358.40","status":"UNPAID","due_date":"2026-04-15","paid_at":null},{"id":2,"house_id":577,"user_id":1,"bill_type":"property_fee","period":"2025-05","amount":"358.40","status":"PAID","due_date":"2025-05-15","paid_at":"2025-05-20T16:39:09"}],"pagination":{"page":1,"page_size":3,"total":4,"pages":2}}</div>
+        </div>
+
+        <div class="card" style="margin-bottom: 24px;">
+            <h2>测试明细（16 passed）</h2>
+            <table>
+                <thead>
+                    <tr><th>测试用例</th><th>结果</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td class="test-name">tests/test_api.py::test_get_user</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_api.py::test_get_user_not_found</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_api.py::test_list_repairs</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_api.py::test_list_repairs_with_filters</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_api.py::test_get_repair</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_api.py::test_get_repair_not_found</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_api.py::test_create_repair</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_api.py::test_list_fees_by_user</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_api.py::test_list_notices</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_api.py::test_create_notice</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_health.py::test_root</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_health.py::test_liveness</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_health.py::test_readiness_reports_components</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_models.py::test_all_core_tables_registered</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_models.py::test_repair_status_matches_seed_data</td><td class="test-pass">PASSED</td></tr>
+                    <tr><td class="test-name">tests/test_models.py::test_enum_values_cover_seed_data</td><td class="test-pass">PASSED</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card" style="margin-bottom: 24px;">
+            <h2>已交付清单</h2>
+            <table>
+                <thead>
+                    <tr><th>阶段</th><th>核心内容</th><th>状态</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Phase 1</td><td>FastAPI 后端骨架、Docker Compose、PostgreSQL 连接、Redis、Alembic 初始化</td><td class="status-up">完成</td></tr>
+                    <tr><td>Phase 2</td><td>10 张业务表 SQLAlchemy 模型、Alembic 迁移、种子数据导入</td><td class="status-up">完成</td></tr>
+                    <tr><td>Phase 3</td><td>User / Repair / Fee / Notice REST API（Router → Schema → Service → Repository → DB）</td><td class="status-up">完成</td></tr>
+                    <tr><td>Phase 4</td><td>React + Vite + TypeScript 前端，含维修/费用/公告/业主查询页面</td><td class="status-up">完成</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--warning);">
+            <h2>⚠️ 注意事项</h2>
+            <ul style="margin: 0; padding-left: 18px; color: var(--text);">
+                <li>用 curl 直接粘贴含中文的 JSON 时可能报 parse error，改用文件或管道方式即可。</li>
+                <li>repair_order 表当前 51 条、notice 表 25 条，比原始种子各多 1 条，是验证时 POST 测试创建的。</li>
+                <li>GitHub 尚未 push，目前所有提交都在本地 <code>D:\Projects\ai-property-community-agent</code>。</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            本报告中的数据全部从本机运行的 Docker 服务实时抓取。如需重新生成，可运行 <code>docker compose exec backend pytest -v</code> 或刷新各 API 端点。
+        </div>
+    </div>
+</body>
+</html>
