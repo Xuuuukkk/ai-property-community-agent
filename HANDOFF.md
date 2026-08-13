@@ -29,7 +29,7 @@
 
 **关键验证结果：**
 
-- 后端测试：**42/42 通过**（已在 Docker 容器内验证）
+- 后端测试：**54/54 通过**（已在 Docker 容器内验证）
 - 前端构建通过，`npm audit` 0 漏洞
 - 容器内 4 服务可正常启动
 - RAG 已索引 22 文档 / 99 切片
@@ -81,14 +81,10 @@
 ### 5.3 数据库与迁移
 
 - Alembic 配置文件在顶层 `database/alembic.ini`，`script_location = database`。
-- 升级迁移命令（容器外）：
-  ```bash
-  alembic -c database/alembic.ini upgrade head
-  ```
-- 容器内升级：
-  ```bash
-  docker compose exec backend alembic -c /app/database/alembic.ini upgrade head
-  ```
+- **必须在仓库根目录运行 alembic**，因为 `script_location = database` 是相对于当前工作目录解析的；在 `backend/` 下运行会找不到 `database/versions`。
+  - 容器外：`alembic -c database/alembic.ini upgrade head`
+  - 容器内：`docker compose exec backend alembic -c /app/database/alembic.ini upgrade head`
+- CI 中曾经因 `working-directory: backend` 导致 alembic 报错 `Path doesn't exist: database`，已修复为在 migrations 步骤显式指定 `working-directory: .`。
 - 种子数据导入了显式 id 后，**必须重置序列**，否则新插入会报主键冲突。已有脚本处理，不要手动乱改序列。
 
 ### 5.3 RAG / Embedding
