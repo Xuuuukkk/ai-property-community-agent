@@ -172,3 +172,79 @@ docker compose -f docker-compose.monitoring.yml up -d
 - CI/CD：`.github/workflows/ci.yml`
 - 监控：`docker-compose.monitoring.yml`
 - 部署文档：`docs/07-operation/deployment.md`
+
+---
+
+## 8. 本次交接重点
+
+> 由小七整理，2026-08-13。交给队员接手前必读。
+
+### 8.1 本次会话完成的核心内容
+
+1. **业主端首页上线**
+   - 文件：`frontend/src/pages/owner/OwnerHome.tsx` + `OwnerHome.css`
+   - 路由：`/owner`
+   - 设计稿：`docs/08-ui-design/owner-home-v3.html`
+   - 已按 UI 规范收敛色彩体系，支持移动端底部 Tab + 桌面端左侧边栏响应式布局。
+
+2. **路由拆分**
+   - 物业端：`/admin/*`（原 `App.tsx` 内容迁至 `frontend/src/pages/admin/AdminApp.tsx`）
+   - 业主端：`/owner`
+   - 根路径 `/` 默认跳转到 `/admin`
+
+3. **Agent 公告意图拆分**
+   - `notice` 拆为 `notice_query`（查询）和 `notice_publish`（发布）
+   - 新增 `list_notices` 工具，避免误发公告
+
+4. **CI 已全绿**
+   - 修复了 alembic 工作目录、REPO_ROOT 导入等导致 Actions 失败的问题
+
+### 8.2 当前代码状态
+
+- 工作区：**干净**（`git status --short` 无输出）
+- 最新 commit：`8339ecb docs(handoff): mark owner home page as completed and update next steps`
+- 远端 `main` 已同步，可直接 `git pull`
+- 后端测试：**56/56 通过**
+- 前端构建：**通过**，`npm audit` 0 漏洞
+
+### 8.3 队员接手后如何验证
+
+```bash
+# 1. 启动全栈
+docker compose up -d --build
+
+# 2. 业主端首页
+open http://localhost:3000/owner
+
+# 3. 物业端后台
+open http://localhost:3000/admin
+
+# 4. 后端健康检查
+curl http://localhost:8000/api/health
+
+# 5. 后端测试
+cd backend
+pytest tests/ -q
+
+# 6. 前端构建
+cd ../frontend
+npm run build
+```
+
+### 8.4 建议下一步优先级
+
+按业务闭环和依赖顺序，建议先做：
+
+1. **业主端 AI 助手聊天页**（`/owner/ai`）—— 复用 `/api/agent/chat` 即可快速闭环
+2. **业主端报修页**（`/owner/repair`）—— 调用现有报修 API
+3. **业主端查费页**（`/owner/fees`）—— 调用费用 API
+4. **权限认证**（JWT + 角色）—— 在子页面多起来之前引入，避免返工
+5. **维修人员端**（`/worker`）—— 独立角色，依赖认证
+
+### 8.5 需要队员注意的风险点
+
+- **前端路由**：使用了 `BrowserRouter`，Nginx 已配置 `try_files`，直接访问 `/owner` 不会 404。
+- **图标统一**：业主端所有图标来自 `frontend/src/components/owner/icons.tsx`，新增页面请复用。
+- **业主端样式隔离**：业主端样式写在 `OwnerHome.css` 中，变量以 `--owner-` 为前缀，避免和 `index.css` 的物业端样式冲突。
+- **API 暂未接入**：当前业主端首页数据是静态的（费用、公告），后续需连接真实 API。
+- **真实 LLM 未配置**：`.env` 里 `LLM_API_KEY` 为空时自动走规则 fallback，不影响测试。
