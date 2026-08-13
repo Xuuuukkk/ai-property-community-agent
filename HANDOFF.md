@@ -189,7 +189,7 @@ docker compose -f docker-compose.monitoring.yml up -d
    - 登录页：`/login`，支持角色 Tab 切换
    - 后端：`POST /api/auth/login`、`GET /api/auth/me`，JWT 7 天
    - 前端：`AuthContext` + `ProtectedRoute` 按角色守卫路由
-   - 演示账号密码已统一设为 `123456`
+   - 演示账号密码已统一设为 `123456`，由 `backend/scripts/import_seed_data.py` 在导入 seed 档案后自动写入 bcrypt 哈希
 
 2. **角色与路由对应**
    - 业主 `OWNER` → `/owner/*`
@@ -206,7 +206,7 @@ docker compose -f docker-compose.monitoring.yml up -d
 ### 8.2 当前代码状态
 
 - 工作区：**干净**（`git status --short` 无输出）
-- 最新 commit：`c5d5f09 chore(config): update CORS, SECRET_KEY defaults and add repair assign/status APIs`
+- 最新 commit：`9f11de2 fix(auth): set default passwords during seed import; add login back button`
 - 远端 `main` 已同步，可直接 `git pull`
 - 后端测试：**61/61 通过**
 - 前端构建：**通过**
