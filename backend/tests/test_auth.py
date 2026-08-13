@@ -12,16 +12,6 @@ class TestAuthFlow:
         assert verify_password("demo-password", hashed)
         assert not verify_password("wrong-password", hashed)
 
-    def test_login_with_seed_password(self, client) -> None:
-        # After seed import, demo passwords are set to "123456".
-        response = client.post("/api/auth/login", json={
-            "username": "guoyi378",
-            "password": "123456",
-        })
-        assert response.status_code == 200
-        data = response.json()
-        assert data["user"]["role"] == "OWNER"
-
     def test_login_with_set_password(self, client, db) -> None:
         user = db.query(User).filter(User.username == "guoyi378").first()
         assert user
@@ -43,6 +33,19 @@ class TestAuthFlow:
         me_response = client.get("/api/auth/me", headers=headers)
         assert me_response.status_code == 200
         assert me_response.json()["username"] == "guoyi378"
+
+    def test_login_unset_password_fails(self, client, db) -> None:
+        # Ensure a user with no password_hash cannot log in.
+        user = db.query(User).filter(User.username == "guoyi378").first()
+        assert user
+        user.password_hash = ""
+        db.commit()
+
+        response = client.post("/api/auth/login", json={
+            "username": "guoyi378",
+            "password": "123456",
+        })
+        assert response.status_code == 401
 
     def test_me_without_token(self, client) -> None:
         response = client.get("/api/auth/me")
