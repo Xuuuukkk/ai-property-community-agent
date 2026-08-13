@@ -66,3 +66,17 @@ export interface NoticeListResponse {
   items: Notice[]
   pagination: PageInfo
 }
+
+export interface AgentChatRequest {
+  message: string
+  user_id?: number | null
+  conversation_id?: string | null
+}
+
+export interface AgentChatResponse {
+  conversation_id: string
+  intent: string
+  response: string
+  tool_results: Record<string, unknown>[]
+  requires_human: boolean
+}

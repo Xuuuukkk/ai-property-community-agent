@@ -22,6 +22,20 @@ export const ArrowRightIcon = ({ className }: { className?: string }): JSX.Eleme
   </svg>
 )
 
+export const ArrowLeftIcon = ({ className }: { className?: string }): JSX.Element => (
+  <svg className={className} viewBox="0 0 24 24">
+    <path d="M19 12H5" />
+    <path d="M12 19l-7-7 7-7" />
+  </svg>
+)
+
+export const SendIcon = ({ className }: { className?: string }): JSX.Element => (
+  <svg className={className} viewBox="0 0 24 24">
+    <path d="M22 2 11 13" />
+    <path d="m22 2-7 20-4-9-9-4 20-7z" />
+  </svg>
+)
+
 export const RepairIcon = ({ className }: { className?: string }): JSX.Element => (
   <svg className={className} viewBox="0 0 24 24">
     <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.55-3.55a3 3 0 0 1 0 4.24l-6.4 6.4a3 3 0 0 1-4.24 0l-1.6-1.6a1 1 0 0 0-1.4 0L3.8 18.2a1 1 0 0 0 0 1.4l2.4 2.4a1 1 0 0 0 1.4 0l5.65-5.65" />

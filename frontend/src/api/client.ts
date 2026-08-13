@@ -6,6 +6,8 @@ import type {
   RepairOrder,
   RepairListResponse,
   User,
+  AgentChatRequest,
+  AgentChatResponse,
 } from './types'
 
 const API_BASE = '' // Vite dev proxy forwards /api to backend
@@ -77,7 +79,20 @@ export const api = {
     notice_type: string
     is_pinned?: boolean
   }) => fetchJson<Notice>('/api/notices', { method: 'POST', body: JSON.stringify(payload) }),
+
+  chatAgent: (payload: AgentChatRequest) =>
+    fetchJson<AgentChatResponse>('/api/agent/chat', { method: 'POST', body: JSON.stringify(payload) }),
 }
 
 // Re-export types for convenience
-export type { User, RepairOrder, RepairListResponse, FeeBill, FeeListResponse, Notice, NoticeListResponse } from './types'
+export type {
+  AgentChatRequest,
+  AgentChatResponse,
+  User,
+  RepairOrder,
+  RepairListResponse,
+  FeeBill,
+  FeeListResponse,
+  Notice,
+  NoticeListResponse,
+} from './types'
