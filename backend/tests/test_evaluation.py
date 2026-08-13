@@ -22,10 +22,9 @@ from app.agents.evaluation.runner import (
     evaluate_workflows,
 )
 from app.core.database import SessionLocal
+from app.core.paths import KNOWLEDGE_BASE_DIR as KNOWLEDGE_DIR
 from app.models.knowledge import KnowledgeChunk
 from app.services.knowledge_indexer import index_documents
-
-REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -36,7 +35,7 @@ def _ensure_knowledge_indexed() -> None:
     try:
         count = db.query(KnowledgeChunk).count()
         if count == 0:
-            knowledge_dir = REPO_ROOT / "knowledge-base"
+            knowledge_dir = KNOWLEDGE_DIR
             index_documents(db, knowledge_dir, repo_root=REPO_ROOT, clear_existing=True)
     finally:
         db.close()

@@ -2,21 +2,16 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.agents.domain_agents import run_knowledge_agent
 from app.agents.state import AgentState
 from app.core.embeddings import get_embedding_provider
+from app.core.paths import KNOWLEDGE_BASE_DIR as KNOWLEDGE_DIR, REPO_ROOT
 from app.models.knowledge import EMBEDDING_DIMENSION, KnowledgeChunk, KnowledgeDocument
 from app.services.knowledge import get_index_stats, retrieve_knowledge
 from app.services.knowledge_indexer import index_documents
-
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-KNOWLEDGE_DIR = REPO_ROOT / "knowledge-base"
 
 
 def test_embedding_provider_dimension() -> None:

@@ -6,14 +6,11 @@ import json
 from pathlib import Path
 from typing import Any
 
-
-def _repo_root() -> Path:
-    """Return the repository root directory."""
-    return Path(__file__).resolve().parents[4]
+from app.core.paths import EVALUATION_DIR
 
 
 def _load_json(filename: str) -> list[dict[str, Any]]:
-    path = _repo_root() / "evaluation" / filename
+    path = EVALUATION_DIR / filename
     if not path.exists():
         return []
     with path.open("r", encoding="utf-8") as f:

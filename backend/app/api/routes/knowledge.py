@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.database import get_db
+from app.core.paths import KNOWLEDGE_BASE_DIR as KNOWLEDGE_DIR, REPO_ROOT
 from app.services import knowledge as knowledge_service
 from app.services.knowledge_indexer import index_documents
 
@@ -57,13 +58,12 @@ def reindex_knowledge(
     background job.  For the MVP it is exposed as a simple management endpoint.
     """
     settings = get_settings()
-    repo_root = Path(__file__).resolve().parents[4]
-    knowledge_dir = repo_root / "knowledge-base"
+    knowledge_dir = KNOWLEDGE_DIR
 
     if not knowledge_dir.is_dir():
         raise HTTPException(status_code=500, detail="Knowledge base directory not found")
 
-    stats = index_documents(db, knowledge_dir, repo_root=repo_root)
+    stats = index_documents(db, knowledge_dir, repo_root=REPO_ROOT)
     return stats
 
 
