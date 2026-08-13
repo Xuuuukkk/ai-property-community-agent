@@ -1,27 +1,58 @@
 import type {
   FeeBill,
   FeeListResponse,
+  LoginRequest,
+  LoginResponse,
   Notice,
   NoticeListResponse,
   RepairOrder,
   RepairListResponse,
   User,
+  UserProfile,
   AgentChatRequest,
   AgentChatResponse,
 } from './types'
 
 const API_BASE = '' // Vite dev proxy forwards /api to backend
 
+let authToken: string | null = null
+
+export function setAuthToken(token: string | null) {
+  authToken = token
+  if (token) {
+    localStorage.setItem('property_agent_token', token)
+  } else {
+    localStorage.removeItem('property_agent_token')
+  }
+}
+
+export function loadAuthToken(): string | null {
+  authToken = localStorage.getItem('property_agent_token')
+  return authToken
+}
+
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+  if (init?.headers) {
+    const provided = init.headers as Record<string, string>
+    Object.assign(headers, provided)
+  }
+  const token = authToken ?? loadAuthToken()
+  if (token) {
+    headers.Authorization = `Bearer ${token}`
+  }
+
   const response = await fetch(`${API_BASE}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(init?.headers || {}),
-    },
     ...init,
+    headers,
   })
 
   if (!response.ok) {
+    if (response.status === 401) {
+      setAuthToken(null)
+    }
     let message = `HTTP ${response.status}`
     try {
       const body = await response.json()
@@ -36,7 +67,13 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  login: (payload: LoginRequest) =>
+    fetchJson<LoginResponse>('/api/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
+
+  getMe: () => fetchJson<User>('/api/auth/me'),
+
   getUser: (id: number) => fetchJson<User>(`/api/users/${id}`),
+  getWorkerUser: (id: number) => fetchJson<UserProfile>(`/api/users/${id}`),
 
   listRepairs: (params: { page?: number; page_size?: number; user_id?: number; status?: string } = {}) => {
     const search = new URLSearchParams()
@@ -48,6 +85,12 @@ export const api = {
   },
 
   getRepair: (id: number) => fetchJson<RepairOrder>(`/api/repair/${id}`),
+
+  assignRepair: (repairId: number, payload: { worker_id: number }) =>
+    fetchJson<RepairOrder>(`/api/repair/${repairId}/assign`, { method: 'POST', body: JSON.stringify(payload) }),
+
+  updateRepairStatus: (repairId: number, payload: { status: string }) =>
+    fetchJson<RepairOrder>(`/api/repair/${repairId}/status`, { method: 'POST', body: JSON.stringify(payload) }),
 
   createRepair: (payload: {
     user_id: number
@@ -88,6 +131,8 @@ export const api = {
 export type {
   AgentChatRequest,
   AgentChatResponse,
+  LoginRequest,
+  LoginResponse,
   User,
   RepairOrder,
   RepairListResponse,
@@ -95,4 +140,5 @@ export type {
   FeeListResponse,
   Notice,
   NoticeListResponse,
+  UserProfile,
 } from './types'

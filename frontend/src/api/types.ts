@@ -29,6 +29,15 @@ export interface RepairOrder {
   completed_at: string | null
 }
 
+export interface UserProfile {
+  id: number
+  username: string
+  real_name: string | null
+  phone: string | null
+  role: string
+  created_at: string
+}
+
 export interface RepairListResponse {
   items: RepairOrder[]
   pagination: PageInfo
@@ -65,6 +74,18 @@ export interface Notice {
 export interface NoticeListResponse {
   items: Notice[]
   pagination: PageInfo
+}
+
+export interface LoginRequest {
+  username: string
+  password: string
+}
+
+export interface LoginResponse {
+  access_token: string
+  token_type: string
+  expires_in: number
+  user: User
 }
 
 export interface AgentChatRequest {

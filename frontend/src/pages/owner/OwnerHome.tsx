@@ -1,20 +1,16 @@
-import { useMemo, useState, type JSX } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   AiIcon,
   ArrowRightIcon,
   BellIcon,
-  ChatIcon,
   FeeIcon,
-  HomeIcon,
   NoticeIcon,
-  ProfileIcon,
   RepairIcon,
   TicketIcon,
 } from '../../components/owner/icons'
+import OwnerShell from './OwnerShell'
 import './OwnerHome.css'
-
-type TabKey = 'home' | 'ai' | 'repair' | 'notice' | 'profile'
 
 const QUICK_SERVICES = [
   { key: 'repair', label: '报修', icon: RepairIcon },
@@ -22,14 +18,6 @@ const QUICK_SERVICES = [
   { key: 'notice', label: '公告', icon: NoticeIcon },
   { key: 'ticket', label: '我的工单', icon: TicketIcon },
 ] as const
-
-const BOTTOM_TABS: { key: TabKey; label: string; icon: ({ className }: { className?: string }) => JSX.Element }[] = [
-  { key: 'home', label: '首页', icon: HomeIcon },
-  { key: 'ai', label: 'AI', icon: ChatIcon },
-  { key: 'repair', label: '报修', icon: RepairIcon },
-  { key: 'notice', label: '公告', icon: NoticeIcon },
-  { key: 'profile', label: '我的', icon: ProfileIcon },
-]
 
 const NOTICES = [
   {
@@ -50,7 +38,6 @@ const NOTICES = [
 
 export default function OwnerHome() {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<TabKey>('home')
   const [unpaidAmount] = useState<number>(716.8)
   const [overdueAmount] = useState<number>(0)
 
@@ -73,20 +60,15 @@ export default function OwnerHome() {
       navigate('/owner/tickets')
       return
     }
+    if (key === 'notice') {
+      navigate('/owner/notices')
+      return
+    }
     navigate(`/owner/${key}`)
   }
 
-  const handleTabClick = (key: TabKey) => {
-    setActiveTab(key)
-    if (key === 'home') {
-      navigate('/owner')
-    } else {
-      navigate(`/owner/${key}`)
-    }
-  }
-
   return (
-    <div className="owner-page">
+    <OwnerShell activeTab="home">
       <header className="owner-header">
         <div className="owner-header-deco owner-header-deco-1" />
         <div className="owner-header-deco owner-header-deco-2" />
@@ -214,25 +196,6 @@ export default function OwnerHome() {
           </div>
         ))}
       </section>
-
-      <nav className="owner-bottom-tab" aria-label="底部导航">
-        {BOTTOM_TABS.map((tab) => {
-          const Icon = tab.icon
-          return (
-            <button
-              key={tab.key}
-              className={`owner-tab-item ${activeTab === tab.key ? 'active' : ''}`}
-              type="button"
-              onClick={() => handleTabClick(tab.key)}
-            >
-              <span className="owner-tab-icon">
-                <Icon />
-              </span>
-              <span>{tab.label}</span>
-            </button>
-          )
-        })}
-      </nav>
-    </div>
+    </OwnerShell>
   )
 }
