@@ -36,13 +36,19 @@ class TestAuthFlow:
 
     def test_login_unset_password_fails(self, client, db) -> None:
         # Ensure a user with no password_hash cannot log in.
-        user = db.query(User).filter(User.username == "guoyi378").first()
-        assert user
-        user.password_hash = ""
+        from app.core.enums import UserRole
+        user = User(
+            username="no_password_user",
+            real_name="NoPassword",
+            phone="138****0000",
+            password_hash="",
+            role=UserRole.OWNER,
+        )
+        db.add(user)
         db.commit()
 
         response = client.post("/api/auth/login", json={
-            "username": "guoyi378",
+            "username": "no_password_user",
             "password": "123456",
         })
         assert response.status_code == 401

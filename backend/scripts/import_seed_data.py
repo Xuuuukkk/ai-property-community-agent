@@ -33,6 +33,7 @@ if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
 from app.core.config import get_settings  # noqa: E402
+from app.core.security import get_password_hash  # noqa: E402
 
 
 SEED_FILES = [
@@ -111,6 +112,19 @@ def import_seed() -> None:
                 print(f"  Warning: could not reset sequence for {table}: {exc}", flush=True)
         session.commit()
         print("  -> sequences reset", flush=True)
+
+    # Set a default bcrypt password for every seed user so the authentication
+    # system works out of the box in local and CI environments.
+    # In production, users should reset or change these passwords.
+    with Session() as session:
+        print("Setting default passwords for seed users ...", flush=True)
+        default_hash = get_password_hash("123456")
+        session.execute(
+            text("UPDATE \"user\" SET password_hash = :hash WHERE password_hash IS NULL OR password_hash = ''"),
+            {"hash": default_hash},
+        )
+        session.commit()
+        print("  -> default passwords set", flush=True)
 
     print("Seed data import completed successfully.")
 

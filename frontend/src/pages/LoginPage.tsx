@@ -70,6 +70,29 @@ export default function LoginPage() {
             boxShadow: '0 4px 24px rgba(10, 37, 64, 0.06)',
           }}
         >
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 0',
+              marginBottom: 16,
+              background: 'transparent',
+              border: 'none',
+              color: '#6b7280',
+              fontSize: 14,
+              cursor: 'pointer',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5" />
+              <path d="M12 19l-7-7 7-7" />
+            </svg>
+            返回
+          </button>
+
           <div style={{ textAlign: 'center', marginBottom: 32 }}>
             <div style={{ fontSize: 12, color: '#8b95a5', fontWeight: 500, letterSpacing: 1 }}>YUNXI GARDEN</div>
             <h1 style={{ fontSize: 24, color: '#0a2540', margin: '8px 0 4px' }}>欢迎回家</h1>
