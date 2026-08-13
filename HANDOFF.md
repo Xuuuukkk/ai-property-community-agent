@@ -28,7 +28,7 @@
 
 **关键验证结果：**
 
-- 后端测试：**42/42 通过**（当前 Docker 未运行，需启动后复测）
+- 后端测试：**42/42 通过**（已在 Docker 容器内验证）
 - 前端构建通过，`npm audit` 0 漏洞
 - 容器内 4 服务可正常启动
 - RAG 已索引 22 文档 / 99 切片
@@ -74,7 +74,12 @@
   ```
 - 运行任何 `docker compose` 前，**先确认 Docker Desktop 已启动**。
 
-### 5.2 数据库与迁移
+### 5.2 路径与挂载
+
+- 容器内项目根目录是 `/app`，本地是 `D:\Projects\ai-property-community-agent`。
+- `knowledge-base/` 和 `evaluation/` 都已挂载到 `/app/...`，代码通过 `app.core.paths` 统一发现，不要硬编码 `parents[N]`。
+
+### 5.3 数据库与迁移
 
 - Alembic 配置文件在顶层 `database/alembic.ini`，`script_location = database`。
 - 升级迁移命令（容器外）：
