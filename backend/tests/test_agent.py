@@ -28,9 +28,13 @@ class TestAgentGraph:
         result = run_agent("查一下物业费", user_id=1)
         assert result.intent == "fee"
 
-    def test_notice_intent_classification(self) -> None:
+    def test_notice_query_intent_classification(self) -> None:
         result = run_agent("明天停水维修", user_id=1)
-        assert result.intent == "notice"
+        assert result.intent == "notice_query"
+
+    def test_notice_publish_intent_classification(self) -> None:
+        result = run_agent("发布停水通知", user_id=1)
+        assert result.intent == "notice_publish"
 
     def test_knowledge_intent_classification(self) -> None:
         result = run_agent("装修可以施工到几点？", user_id=1)

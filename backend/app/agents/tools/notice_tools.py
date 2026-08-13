@@ -40,6 +40,42 @@ def generate_notice(
     }
 
 
+def list_notices(
+    db: Session,
+    *,
+    page: int = 1,
+    page_size: int = 10,
+    status: str = "PUBLISHED",
+) -> dict:
+    """List published community notices."""
+    notices, total = notice_service.list_notices(
+        db, page=page, page_size=page_size, status=status
+    )
+    items = [
+        {
+            "id": n.id,
+            "title": n.title,
+            "content": n.content,
+            "notice_type": n.notice_type,
+            "status": n.status,
+            "is_pinned": n.is_pinned,
+            "created_at": n.created_at.isoformat() if n.created_at else None,
+        }
+        for n in notices
+    ]
+    return {
+        "tool": "list_notices",
+        "input": {"page": page, "page_size": page_size, "status": status},
+        "output": {
+            "notices": items,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "message": f"找到 {total} 条公告" if total else "暂无公告",
+        },
+    }
+
+
 def publish_notice(db: Session, *, title: str, content: str, publisher_id: int, notice_type: str = "facility_notice", is_pinned: bool = False) -> dict:
     """Publish a community notice."""
     payload = NoticeCreate(

@@ -3,7 +3,7 @@
 The graph coordinates:
 
 1. Router node: classify user intent into one of
-   [repair, fee, notice, knowledge, unknown].
+   [repair, fee, notice_query, notice_publish, knowledge, unknown].
 2. Domain agent node: extract parameters and call the appropriate tools.
 3. Response node: format the final answer for the user.
 
@@ -25,7 +25,8 @@ from sqlalchemy.orm import Session
 from app.agents.domain_agents import (
     run_fee_agent,
     run_knowledge_agent,
-    run_notice_agent,
+    run_notice_publish_agent,
+    run_notice_query_agent,
     run_repair_agent,
 )
 from app.agents.intent import INTENTS, classify_intent
@@ -76,8 +77,10 @@ def agent_node(state: AgentState) -> AgentState:
             result = run_repair_agent(db, state)
         elif intent == "fee":
             result = run_fee_agent(db, state)
-        elif intent == "notice":
-            result = run_notice_agent(db, state)
+        elif intent == "notice_query":
+            result = run_notice_query_agent(db, state)
+        elif intent == "notice_publish":
+            result = run_notice_publish_agent(db, state)
         elif intent == "knowledge":
             result = run_knowledge_agent(db, state)
         else:
@@ -147,7 +150,8 @@ _builder.add_conditional_edges(
     {
         "repair": "agent",
         "fee": "agent",
-        "notice": "agent",
+        "notice_query": "agent",
+        "notice_publish": "agent",
         "knowledge": "agent",
         "unknown": "agent",
         "agent_node": "agent",

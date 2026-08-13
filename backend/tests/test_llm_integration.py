@@ -36,8 +36,12 @@ def test_rule_classifier_fee() -> None:
     assert classify_intent_rule("查物业费") == "fee"
 
 
-def test_rule_classifier_notice() -> None:
-    assert classify_intent_rule("明天停水通知") == "notice"
+def test_rule_classifier_notice_query() -> None:
+    assert classify_intent_rule("明天停水通知") == "notice_query"
+
+
+def test_rule_classifier_notice_publish() -> None:
+    assert classify_intent_rule("发布停水通知") == "notice_publish"
 
 
 def test_rule_classifier_knowledge() -> None:

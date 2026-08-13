@@ -20,7 +20,7 @@
   {
     "id": "workflow-003",
     "text": "生成公告草稿：本周六社区消防演练",
-    "expected_intent": "notice",
+    "expected_intent": "notice_publish",
     "expected_tool": "generate_notice",
     "success_checks": {
       "output.status": "DRAFT"

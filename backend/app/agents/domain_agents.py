@@ -166,8 +166,47 @@ def run_fee_agent(db: Session, state: AgentState) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-def run_notice_agent(db: Session, state: AgentState) -> dict[str, Any]:
-    """Handle notice intents: generate or publish community notices."""
+def run_notice_query_agent(db: Session, state: AgentState) -> dict[str, Any]:
+    """Handle notice_query intents: list or search community notices."""
+    user_text = ""
+    for msg in reversed(get_messages(state)):
+        if hasattr(msg, "content"):
+            user_text = str(msg.content)
+            break
+
+    lowered = user_text.lower()
+    page_size = 10
+    # Allow the user to ask for a specific number of recent notices.
+    match = re.search(r"(\d+)\s*条", user_text)
+    if match:
+        page_size = min(int(match.group(1)), 20)
+
+    status = "PUBLISHED"
+    if any(k in lowered for k in ("草稿", "draft")):
+        status = "DRAFT"
+
+    result = agent_tools.list_notices(db, page=1, page_size=page_size, status=status)
+    output = _tool_output(result)
+    notices = output.get("notices", [])
+    if not notices:
+        return {
+            "response": output.get("message", "暂无公告"),
+            "tool_results": [result],
+        }
+
+    lines = ["最新公告："]
+    for n in notices:
+        pinned = "【置顶】" if n.get("is_pinned") else ""
+        lines.append(f"{pinned}{n.get('title', '无标题')}\n  {n.get('content', '')}")
+
+    return {
+        "response": "\n\n".join(lines),
+        "tool_results": [result],
+    }
+
+
+def run_notice_publish_agent(db: Session, state: AgentState) -> dict[str, Any]:
+    """Handle notice_publish intents: generate or publish community notices."""
     user_text = ""
     for msg in reversed(get_messages(state)):
         if hasattr(msg, "content"):
@@ -177,7 +216,7 @@ def run_notice_agent(db: Session, state: AgentState) -> dict[str, Any]:
     lowered = user_text.lower()
     user_id = _extract_user_id_from_state(state) or 1
 
-    # Simple rule: if the message only contains event info, generate a draft.
+    # Simple rule: if the message asks for a draft, generate one without persisting.
     if any(k in lowered for k in ("生成", "草稿", "draft", "生成公告")):
         draft = agent_tools.generate_notice(
             title="社区通知",
@@ -208,6 +247,10 @@ def run_notice_agent(db: Session, state: AgentState) -> dict[str, Any]:
         "response": _tool_output(result).get("message", "公告已发布"),
         "tool_results": [result],
     }
+
+
+# Backwards-compatible alias.
+run_notice_agent = run_notice_publish_agent
 
 
 # ---------------------------------------------------------------------------

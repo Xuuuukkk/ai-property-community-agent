@@ -12,7 +12,7 @@
   {
     "id": "intent-003",
     "text": "小区停水通知什么时候恢复",
-    "expected_intent": "notice"
+    "expected_intent": "notice_query"
   },
   {
     "id": "intent-004",
@@ -37,7 +37,7 @@
   {
     "id": "intent-008",
     "text": "发布一条公告",
-    "expected_intent": "notice"
+    "expected_intent": "notice_publish"
   },
   {
     "id": "intent-009",
@@ -57,6 +57,6 @@
   {
     "id": "intent-012",
     "text": "今天有社区活动吗",
-    "expected_intent": "notice"
+    "expected_intent": "notice_query"
   }
 ]

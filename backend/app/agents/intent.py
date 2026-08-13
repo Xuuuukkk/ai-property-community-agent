@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-INTENTS = {"repair", "fee", "notice", "knowledge", "unknown"}
+INTENTS = {"repair", "fee", "notice_query", "notice_publish", "knowledge", "unknown"}
 
 
 def classify_intent_rule(text: str) -> str:
@@ -27,10 +27,16 @@ def classify_intent_rule(text: str) -> str:
     """
     lowered = text.lower()
 
-    # Notice: community announcements / outage notifications (checked before
+    # Notice: split into query (read) and publish (write) intents.
+    # Publish verbs must be checked first because a phrase like "发布停水通知"
+    # contains both "发布" and "通知".
+    if any(k in lowered for k in ("发布", "发公告", "发通知", "公布", "贴出", "张贴", "publish", "post")):
+        return "notice_publish"
+
+    # Query: community announcements / outage notifications (checked before
     # repair because phrases like "停水维修" are announcements).
-    if any(k in lowered for k in ("公告", "通知", "停水", "停电", "notice", "announcement")):
-        return "notice"
+    if any(k in lowered for k in ("公告", "通知", "停水", "停电", "notice", "announcement", "社区活动")):
+        return "notice_query"
 
     # Fee: billing and payment queries.
     if any(k in lowered for k in ("物业费", "费用", "账单", "缴费", "欠费", "fee", "bill", "payment")):
@@ -83,7 +89,10 @@ def classify_intent(text: str, llm: "ChatOpenAI | None" = None) -> str:
 
     system_prompt = (
         "You are an intent classifier for a property community AI assistant. "
-        "Classify the user's message into exactly one of: repair, fee, notice, knowledge, unknown.\n"
+        "Classify the user's message into exactly one of: "
+        "repair, fee, notice_query, notice_publish, knowledge, unknown.\n"
+        "- notice_query: the user wants to READ or CHECK community notices.\n"
+        "- notice_publish: the user wants to CREATE or SEND a community notice.\n"
         "Respond with a JSON object: {\"intent\": \"...\"}. No other text."
     )
 

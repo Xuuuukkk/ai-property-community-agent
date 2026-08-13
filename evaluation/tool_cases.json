@@ -25,14 +25,14 @@
   {
     "id": "tool-004",
     "text": "生成公告草稿：明日电梯维保",
-    "expected_intent": "notice",
+    "expected_intent": "notice_publish",
     "expected_tool": "generate_notice",
     "expected_parameters": {}
   },
   {
     "id": "tool-005",
     "text": "发布停水通知",
-    "expected_intent": "notice",
+    "expected_intent": "notice_publish",
     "expected_tool": "publish_notice",
     "expected_parameters": {}
   },
