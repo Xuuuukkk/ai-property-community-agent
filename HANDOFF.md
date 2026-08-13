@@ -76,6 +76,7 @@
 
 - 容器内项目根目录是 `/app`，本地是 `D:\Projects\ai-property-community-agent`。
 - `knowledge-base/` 和 `evaluation/` 都已挂载到 `/app/...`，代码通过 `app.core.paths` 统一发现，不要硬编码 `parents[N]`。
+- Docker 挂载可能在 `backend/` 下生成空的 `knowledge-base/` / `evaluation/` 影子目录，仓库根发现已改为检查目录非空（含 `*.md` / `*.json`）。
 
 ### 5.3 数据库与迁移
 
