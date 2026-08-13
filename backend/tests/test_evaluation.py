@@ -22,7 +22,7 @@ from app.agents.evaluation.runner import (
     evaluate_workflows,
 )
 from app.core.database import SessionLocal
-from app.core.paths import KNOWLEDGE_BASE_DIR as KNOWLEDGE_DIR
+from app.core.paths import KNOWLEDGE_BASE_DIR as KNOWLEDGE_DIR, REPO_ROOT
 from app.models.knowledge import KnowledgeChunk
 from app.services.knowledge_indexer import index_documents
 
