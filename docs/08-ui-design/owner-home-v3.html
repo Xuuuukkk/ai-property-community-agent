@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>业主端首页设计稿 v3 - 云溪花园</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #2E4A66;
+      --primary-light: #3A5A7A;
+      --primary-soft: #E8EDF3;
+      --bg: #F7F8FA;
+      --card: #F8F9FA;
+      --card-inner: #F0F1F3;
+      --text-title: #1A2A3A;
+      --text-body: #6B7A8A;
+      --text-muted: #8A96A5;
+      --white: #FFFFFF;
+      --success: #2E7D52;
+      --danger: #B84A4A;
+      --radius-sm: 12px;
+      --radius-md: 16px;
+      --radius-lg: 20px;
+      --shadow-soft: 0 2px 12px rgba(10, 37, 64, 0.06);
+      --shadow-card: 0 2px 16px rgba(10, 37, 64, 0.04);
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #E5E7EB;
+      padding: 40px;
+      color: var(--text-title);
+    }
+    .wrap {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .phone {
+      width: 390px;
+      height: 844px;
+      background: var(--bg);
+      border-radius: 40px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+      position: relative;
+      flex-shrink: 0;
+    }
+    .screen {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding-bottom: 90px;
+    }
+    .screen::-webkit-scrollbar { display: none; }
+
+    /* Header */
+    .header {
+      background: linear-gradient(180deg, var(--primary) 0%, var(--primary-light) 100%);
+      height: 260px;
+      padding: 52px 20px 0;
+      position: relative;
+      color: var(--white);
+    }
+    .header-deco-1, .header-deco-2 {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+    .header-deco-1 { width: 180px; height: 180px; top: 30px; right: -40px; }
+    .header-deco-2 { width: 100px; height: 100px; bottom: 40px; left: -20px; }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      position: relative;
+      z-index: 1;
+    }
+    .brand-tag {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      opacity: 0.8;
+      margin-bottom: 4px;
+    }
+    .brand-name { font-size: 24px; font-weight: 700; }
+    .brand-slogan {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+    .header-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .bell {
+      width: 24px;
+      height: 24px;
+      position: relative;
+      cursor: pointer;
+    }
+    .bell svg {
+      width: 100%;
+      height: 100%;
+      stroke: var(--white);
+      stroke-width: 1.6;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .bell-dot {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 8px;
+      height: 8px;
+      background: var(--white);
+      border-radius: 50%;
+    }
+    .header-date {
+      font-size: 11px;
+      opacity: 0.75;
+      text-align: right;
+    }
+
+    /* User card */
+    .user-card {
+      margin: -128px 20px 0;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(12px);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      z-index: 2;
+    }
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--primary-soft);
+      border: 2px solid var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .user-info h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-title);
+    }
+    .user-info p {
+      font-size: 12px;
+      color: var(--text-body);
+      margin-top: 2px;
+    }
+
+    /* Card common */
+    .card {
+      margin: 16px 20px 0;
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 16px;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-title);
+    }
+    .card-link {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--primary);
+      cursor: pointer;
+    }
+
+    /* AI Card */
+    .ai-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+    }
+    .ai-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--primary-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .ai-icon svg { width: 24px; height: 24px; }
+    .ai-text h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-title);
+    }
+    .ai-text p {
+      font-size: 13px;
+      color: var(--text-body);
+      margin-top: 2px;
+    }
+    .ai-arrow {
+      margin-left: auto;
+      color: var(--primary);
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Quick services */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .service-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      cursor: pointer;
+    }
+    .service-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: var(--primary-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .service-icon svg {
+      width: 26px;
+      height: 26px;
+      stroke: var(--primary);
+      stroke-width: 1.8;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .service-item span {
+      font-size: 13px;
+      color: var(--text-body);
+    }
+
+    /* Fee overview */
+    .fee-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .fee-box {
+      background: var(--card-inner);
+      border-radius: var(--radius-md);
+      padding: 14px;
+    }
+    .fee-label {
+      font-size: 12px;
+      color: var(--text-body);
+      margin-bottom: 10px;
+    }
+    .fee-amount {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-title);
+    }
+    .fee-amount.primary { color: var(--primary); }
+    .fee-amount.zero { color: var(--text-body); }
+    .fee-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* Notice list */
+    .notice-item {
+      display: flex;
+      gap: 10px;
+      padding: 10px 0;
+    }
+    .notice-item:first-child { padding-top: 0; }
+    .notice-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .notice-dot.read { background: var(--text-muted); }
+    .notice-content h4 {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-title);
+    }
+    .notice-content p {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .notice-divider {
+      height: 1px;
+      background: var(--primary-soft);
+      margin: 4px 0;
+    }
+
+    /* Bottom tab */
+    .bottom-tab {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: var(--white);
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      padding-top: 10px;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
+    }
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      min-width: 56px;
+    }
+    .tab-item.active .tab-icon { background: var(--primary); }
+    .tab-item.active .tab-icon svg { stroke: var(--white); }
+    .tab-item.active span { color: var(--primary); }
+    .tab-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tab-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--text-body);
+      stroke-width: 1.8;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .tab-item span {
+      font-size: 10px;
+      color: var(--text-body);
+    }
+
+    /* Spec panel */
+    .spec-panel {
+      max-width: 420px;
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-soft);
+    }
+    .spec-panel h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text-title);
+    }
+    .spec-section { margin-bottom: 22px; }
+    .spec-section h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-title);
+      margin-bottom: 10px;
+    }
+    .color-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .color-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-body);
+    }
+    .color-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+    .spec-list {
+      list-style: none;
+      font-size: 12px;
+      color: var(--text-body);
+      line-height: 1.8;
+    }
+    .spec-list li { padding-left: 12px; position: relative; }
+    .spec-list li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="phone">
+      <div class="screen">
+        <!-- Header -->
+        <div class="header">
+          <div class="header-deco-1"></div>
+          <div class="header-deco-2"></div>
+          <div class="header-top">
+            <div>
+              <div class="brand-tag">YUNXI GARDEN</div>
+              <div class="brand-name">云溪花园</div>
+              <div class="brand-slogan">智慧社区 · 美好生活</div>
+            </div>
+            <div class="header-actions">
+              <div class="bell" style="min-height: 44px; min-width: 44px; display: flex; align-items: center; justify-content: center;">
+                <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                <div class="bell-dot"></div>
+              </div>
+              <div class="header-date">8月13日 星期四</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User card -->
+        <div class="user-card">
+          <div class="avatar">张</div>
+          <div class="user-info">
+            <h3>张先生，欢迎回家</h3>
+            <p>3栋2单元 1201 · 业主</p>
+          </div>
+        </div>
+
+        <!-- AI Assistant -->
+        <div class="card">
+          <div class="ai-card">
+            <div class="ai-icon">
+              <svg viewBox="0 0 24 24" stroke="#2E4A66" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 15h6"/></svg>
+            </div>
+            <div class="ai-text">
+              <h3>AI 社区助手</h3>
+              <p>报修、查费、公告，一句话搞定</p>
+            </div>
+            <div class="ai-arrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick services -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">快捷服务</span>
+          </div>
+          <div class="services-grid">
+            <div class="service-item">
+              <div class="service-icon">
+                <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.55-3.55a3 3 0 0 1 0 4.24l-6.4 6.4a3 3 0 0 1-4.24 0l-1.6-1.6a1 1 0 0 0-1.4 0L3.8 18.2a1 1 0 0 0 0 1.4l2.4 2.4a1 1 0 0 0 1.4 0l5.65-5.65"/></svg>
+              </div>
+              <span>报修</span>
+            </div>
+            <div class="service-item">
+              <div class="service-icon">
+                <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M6 10h12M6 14h8"/></svg>
+              </div>
+              <span>查费</span>
+            </div>
+            <div class="service-item">
+              <div class="service-icon">
+                <svg viewBox="0 0 24 24"><path d="M4 4h16v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><path d="M8 11h8M8 15h5"/></svg>
+              </div>
+              <span>公告</span>
+            </div>
+            <div class="service-item">
+              <div class="service-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              </div>
+              <span>我的工单</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fee overview -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">费用概览</span>
+            <span class="card-link">明细 →</span>
+          </div>
+          <div class="fee-grid">
+            <div class="fee-box">
+              <div class="fee-label">未缴账单</div>
+              <div class="fee-amount primary">¥716.80</div>
+              <div class="fee-desc">2 笔待缴</div>
+            </div>
+            <div class="fee-box">
+              <div class="fee-label">逾期</div>
+              <div class="fee-amount zero">¥0.00</div>
+              <div class="fee-desc">暂无逾期</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent notices -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">最近公告</span>
+            <span class="card-link">全部 →</span>
+          </div>
+          <div class="notice-item">
+            <div class="notice-dot"></div>
+            <div class="notice-content">
+              <h4>本周六下午社区消防演练</h4>
+              <p>2026-08-12 · 安全</p>
+            </div>
+          </div>
+          <div class="notice-divider"></div>
+          <div class="notice-item">
+            <div class="notice-dot read"></div>
+            <div class="notice-content">
+              <h4>电梯维保通知：8月15日上午停梯</h4>
+              <p>2026-08-11 · 设施</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom tab -->
+      <div class="bottom-tab">
+        <div class="tab-item active">
+          <div class="tab-icon">
+            <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+          </div>
+          <span>首页</span>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 13h8M9 9h6M8 17h8"/></svg>
+          </div>
+          <span>AI</span>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">
+            <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.55-3.55a3 3 0 0 1 0 4.24l-6.4 6.4a3 3 0 0 1-4.24 0l-1.6-1.6a1 1 0 0 0-1.4 0L3.8 18.2a1 1 0 0 0 0 1.4l2.4 2.4a1 1 0 0 0 1.4 0l5.65-5.65"/></svg>
+          </div>
+          <span>报修</span>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4z"/><path d="M8 11h8M8 15h5"/></svg>
+          </div>
+          <span>公告</span>
+        </div>
+        <div class="tab-item">
+          <div class="tab-icon">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span>我的</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-panel">
+      <h2>设计规范 v3</h2>
+      <div class="spec-section">
+        <h4>色彩体系</h4>
+        <div class="color-row">
+          <div class="color-chip"><div class="color-swatch" style="background:#2E4A66"></div>#2E4A66 主色</div>
+          <div class="color-chip"><div class="color-swatch" style="background:#3A5A7A"></div>#3A5A7A 辅深蓝</div>
+          <div class="color-chip"><div class="color-swatch" style="background:#E8EDF3"></div>#E8EDF3 浅底</div>
+          <div class="color-chip"><div class="color-swatch" style="background:#F8F9FA"></div>#F8F9FA 卡片</div>
+          <div class="color-chip"><div class="color-swatch" style="background:#F7F8FA"></div>#F7F8FA 页面底</div>
+          <div class="color-chip"><div class="color-swatch" style="background:#1A2A3A"></div>#1A2A3A 标题</div>
+          <div class="color-chip"><div class="color-swatch" style="background:#6B7A8A"></div>#6B7A8A 正文</div>
+          <div class="color-chip"><div class="color-swatch" style="background:#8A96A5"></div>#8A96A5 辅助字</div>
+        </div>
+      </div>
+      <div class="spec-section">
+        <h4>圆角 & 阴影</h4>
+        <ul class="spec-list">
+          <li>卡片圆角 20px</li>
+          <li>图标容器圆角 16px</li>
+          <li>按钮/标签圆角 12px</li>
+          <li>卡片阴影：0 2px 16px rgba(10,37,64,0.04)</li>
+          <li>用户卡毛玻璃：backdrop-blur + rgba(255,255,255,0.88)</li>
+        </ul>
+      </div>
+      <div class="spec-section">
+        <h4>文字层级</h4>
+        <ul class="spec-list">
+          <li>大标题：#1A2A3A，SemiBold</li>
+          <li>次要说明：#6B7A8A，Regular</li>
+          <li>辅助小字：#8A96A5，Regular</li>
+          <li>避免使用纯黑 #000000</li>
+        </ul>
+      </div>
+      <div class="spec-section">
+        <h4>快捷服务区</h4>
+        <ul class="spec-list">
+          <li>统一品牌浅靛蓝底 #E8EDF3</li>
+          <li>图标统一品牌主色 #2E4A66</li>
+          <li>只靠图形区分功能</li>
+          <li>触摸目标 56×56px</li>
+        </ul>
+      </div>
+      <div class="spec-section">
+        <h4>费用概览</h4>
+        <ul class="spec-list">
+          <li>逾期金额 > 0 时显示警示绿</li>
+          <li>逾期金额 = 0 时用中性灰</li>
+          <li>未缴账单金额使用品牌主色</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
