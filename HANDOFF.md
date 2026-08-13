@@ -196,17 +196,26 @@ docker compose -f docker-compose.monitoring.yml up -d
    - 维修人员 `WORKER` → `/worker/*`
    - 物业人员 `PROPERTY_STAFF` / 管理员 `ADMIN` → `/admin/*`
 
-3. **业主端完整子页面**
-   - 首页 `/owner`、AI 助手 `/owner/ai`、报修 `/owner/repair`、查费 `/owner/fees`、公告 `/owner/notices`、工单 `/owner/tickets`
-   - 统一使用 `OwnerShell`，显示真实用户名，支持退出登录
+3. **业主端按新设计系统重绘**
+   - 启动页 `/`、角色选择 `/role-select`、登录 `/login`
+   - 业主首页 `/owner`：用户信息卡、待缴费用、报事服务、社区公告、AI 助手入口
+   - 服务聚合页 `/owner/services`、AI 助手 `/owner/ai`、我的 `/owner/profile`
+   - 子页面保留：`/owner/repair`、 `/owner/fees`、 `/owner/notices`、 `/owner/tickets`
+   - 底部导航：首页 / 服务 / AI助手 / 我的
+   - 设计系统：`frontend/src/styles/design-system.css`，主色 `#0E1B33`，辅色 `#BFA46A`
 
-4. **维修人员端工单处理台**
+4. **物业管理端新首页**
+   - 物业首页 `/admin`：管理员信息卡、数据概览、数据服务、公告、AI 助手
+   - 底部导航：首页 / 工单 / 公告 / 我的
+   - 原桌面端运营台保留在 `/admin/desk`
+
+5. **维修人员端工单处理台**
    - 路由 `/worker`，支持接单、切换状态（ASSIGNED/PROCESSING/COMPLETED/CLOSED）
 
 ### 8.2 当前代码状态
 
 - 工作区：**干净**（`git status --short` 无输出）
-- 最新 commit：`9f11de2 fix(auth): set default passwords during seed import; add login back button`
+- 最新 commit：`1662561 feat(frontend): implement new design for portal, role select, login, owner and admin home`
 - 远端 `main` 已同步，可直接 `git pull`
 - 后端测试：**61/61 通过**
 - 前端构建：**通过**
