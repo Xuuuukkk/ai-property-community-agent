@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import (
     agent_router,
+    auth_router,
     fee_router,
     health_router,
     knowledge_router,
@@ -46,6 +47,9 @@ def create_app() -> FastAPI:
 
     # Health & readiness under /api
     app.include_router(health_router, prefix=settings.API_PREFIX)
+
+    # Authentication
+    app.include_router(auth_router, prefix=settings.API_PREFIX)
 
     # Phase 3 business routers
     app.include_router(users_router, prefix=settings.API_PREFIX)

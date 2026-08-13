@@ -43,7 +43,9 @@ class Settings(BaseSettings):
 
     # ---- Security ----
     # Used for signed tokens / session cookies when authentication is enabled.
-    SECRET_KEY: str = "change-me-in-production"
+    SECRET_KEY: str = "change-me-in-production-please-generate-a-32-byte-key"
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
     # ---- CORS ----
     # Comma-separated list of origins allowed to call the API.
