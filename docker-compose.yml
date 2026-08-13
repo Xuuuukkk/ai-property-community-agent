@@ -1,22 +1,22 @@
-# Phase 1 compose: backend + postgres(pgvector) + redis.
-# The `frontend` service is intentionally omitted until Phase 4 (its Dockerfile
-# does not exist yet) so that `docker compose up` works today.
+# Docker Compose — Development
+# Reads environment variables from the `.env` file in the project root.
+# Copy `.env.example` to `.env` and adjust values before running.
 services:
   postgres:
     image: pgvector/pgvector:pg16
     container_name: property-postgres
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: property_agent
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-property_agent}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       # First-boot init scripts (e.g. CREATE EXTENSION vector)
       - ./database/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d property_agent"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-property_agent}"]
       interval: 5s
       timeout: 5s
       retries: 12
@@ -25,7 +25,7 @@ services:
     image: redis:7-alpine
     container_name: property-redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -36,11 +36,19 @@ services:
     build: ./backend
     container_name: property-backend
     environment:
-      APP_ENV: docker
-      DATABASE_URL: postgresql+psycopg2://admin:password@postgres:5432/property_agent
-      REDIS_URL: redis://redis:6379/0
+      APP_ENV: ${APP_ENV:-docker}
+      API_PREFIX: ${API_PREFIX:-/api}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg2://admin:password@postgres:5432/property_agent}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      OPENAI_API_BASE: ${OPENAI_API_BASE:-https://api.openai.com/v1}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-deterministic}
+      HF_TOKEN: ${HF_TOKEN:-}
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8000}:8000"
     volumes:
       - ./backend:/app
       - ./database:/app/database:ro
@@ -56,7 +64,7 @@ services:
     build: ./frontend
     container_name: property-frontend
     ports:
-      - "3000:80"
+      - "${FRONTEND_PORT:-3000}:80"
     depends_on:
       - backend
 

@@ -1,10 +1,12 @@
-"""Health & readiness endpoints.
+"""Health, readiness, and metrics endpoints.
 
 - ``GET /api/health``        liveness  — process is up, no external deps.
 - ``GET /api/health/ready``  readiness — checks PostgreSQL and Redis wiring.
+- ``GET /api/metrics``       Prometheus metrics.
 """
 from fastapi import APIRouter, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from sqlalchemy import text
 
 from app.core.database import engine
@@ -48,4 +50,13 @@ def readiness() -> JSONResponse:
             "status": "ready" if ready else "not_ready",
             "components": components,
         },
+    )
+
+
+@router.get("/metrics")
+def metrics() -> PlainTextResponse:
+    """Prometheus exposition endpoint."""
+    return PlainTextResponse(
+        content=generate_latest().decode("utf-8"),
+        media_type=CONTENT_TYPE_LATEST,
     )

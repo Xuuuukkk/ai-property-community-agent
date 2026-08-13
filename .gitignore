@@ -225,3 +225,8 @@ frontend/tsconfig.*.tsbuildinfo
 frontend/vite.config.js
 frontend/vite.config.d.ts
 frontend/.npm-cache/
+
+# Deployment
+ssl/*.pem
+ssl/*.key
+backups/

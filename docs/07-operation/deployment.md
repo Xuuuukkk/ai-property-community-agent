@@ -1,794 +1,259 @@
-# Deployment Guide
-# 系统部署说明
+# Deployment Guide / 系统部署说明
 
-
-> AI Property Community Agent  
-> Deployment Specification
-
+> AI Property Community Agent — Deployment Specification
 
 ---
 
-# 1. Deployment Overview
-# 部署概述
+## 1. Deployment Overview / 部署概述
 
+本项目采用容器化部署。生产环境由 4 个核心服务组成：
 
-本项目采用容器化部署方式。
-
-
-目标：
-
-通过 Docker Compose 一键启动完整系统。
-
-
-部署组件：
-
-
-```
-Frontend
-
-Backend
-
-PostgreSQL 16 + pgvector
-
-Redis
-
-Agent Runtime (内嵌于 Backend)
-
-```
-
-
-整体结构：
-
+- **Frontend** — React + Vite 静态站点，Nginx 提供反向代理 + SSL
+- **Backend** — FastAPI 后端（含 Agent Runtime）
+- **PostgreSQL 16 + pgvector** — 业务数据与向量索引
+- **Redis** — 缓存
 
 ```
                  User
-
-
                   │
-
-
-             Frontend
-
-
+             Frontend (Nginx + SSL)
                   │
-
-
               Backend
-
-
         ┌─────────┼─────────┐
-
-
         │         │         │
-
-
    PostgreSQL   Redis   (pgvector
-
    + pgvector           内嵌)
-
-
-                  │
-
-
-             Agent Runtime
-
-
 ```
-
 
 ---
 
-# 2. Deployment Environment
-# 环境要求
+## 2. Environment Requirements / 环境要求
 
+### Minimum Hardware
 
-## Minimum Hardware
+| 环境 | CPU | Memory | Storage |
+|------|-----|--------|---------|
+| 开发 | 4 Core+ | 8GB+ | 20GB+ |
+| 生产 | 4 Core+ | 8GB+ | 40GB+ |
 
+### Software
 
-开发环境：
-
-
-|资源|要求|
-|-|-|
-|CPU|4 Core+|
-|Memory|8GB+|
-|Storage|20GB+|
-
+- Docker >= 24
+- Docker Compose >= 2
+- Git
 
 ---
 
-## Software
+## 3. Quick Start / 快速启动
 
+### 3.1 Clone and configure
 
-需要：
+```bash
+git clone https://github.com/Xuuuukkk/ai-property-community-agent.git
+cd ai-property-community-agent
 
-```
-Docker
-
-Docker Compose
-
-Git
-
+cp .env.example .env
+# Edit .env with your real values
 ```
 
+### 3.2 Development environment
 
-版本建议：
+```bash
+# Start all services
+docker compose up -d --build
 
+# Apply migrations
+docker compose exec backend alembic -c /app/database/alembic.ini upgrade head
 
+# Import seed data
+docker compose exec backend python scripts/import_seed_data.py
+
+# Index knowledge base (uses deterministic embedding by default)
+docker compose exec backend python -m scripts.index_knowledge_base --embedding-model deterministic
 ```
-Docker >= 24
 
-Docker Compose >= 2
+Access:
 
-Python >= 3.12
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API docs: http://localhost:8000/docs
 
-Node.js >= 22
+### 3.3 Production environment
 
+> Production requires valid SSL certificates. Place `cert.pem` and `key.pem`
+> under `./ssl/` before starting, or temporarily use the HTTP-only nginx block
+> documented in `nginx/nginx.prod.conf`.
+
+```bash
+cp .env.example .env
+# Fill in production values
+
+docker compose -f docker-compose.prod.yml up -d --build
+
+# Apply migrations (one-time)
+docker compose -f docker-compose.prod.yml exec backend alembic -c /app/database/alembic.ini upgrade head
+
+# Import seed data (one-time)
+docker compose -f docker-compose.prod.yml exec backend python scripts/import_seed_data.py
+
+# Index knowledge base
+docker compose -f docker-compose.prod.yml exec backend python -m scripts.index_knowledge_base
 ```
 
+Access:
+
+- Frontend + API: https://your-domain.com
+- Health: https://your-domain.com/api/health
+- Metrics: https://your-domain.com/api/metrics
 
 ---
 
-# 3. Project Deployment Structure
-# 部署目录结构
+## 4. Configuration / 配置说明
 
+All configuration lives in the root `.env` file. See `.env.example` for the
+full template.
 
-最终项目：
+Key variables:
 
-
-```
-AI-Property-Community-Agent/
-
-
-├── frontend/
-
-│
-
-├── backend/
-
-│
-
-├── ai-agent/
-
-│
-
-├── knowledge-base/
-
-│
-
-├── data/
-
-│
-├── seed/
-
-│
-
-├── database/
-
-│
-
-├── scripts/
-
-│
-
-├── tests/
-
-│
-
-├── docker-compose.yml
-
-│
-
-├── .env
-
-│
-
-└── docs/
-
-```
-
+| Variable | Description |
+|----------|-------------|
+| `APP_ENV` | `local`, `docker`, or `production` |
+| `DATABASE_URL` | SQLAlchemy connection URL |
+| `REDIS_URL` | Redis connection URL |
+| `SECRET_KEY` | Secret for signed tokens / sessions |
+| `BACKEND_CORS_ORIGINS` | Allowed frontend origins |
+| `LLM_API_KEY` | OpenAI-compatible API key (optional) |
+| `EMBEDDING_MODEL` | Embedding model name or `deterministic` |
+| `VITE_API_BASE_URL` | Frontend API base URL |
+| `DOMAIN` | Public domain for SSL |
 
 ---
 
-# 4. Environment Configuration
-# 环境配置
+## 5. Docker Compose Files
 
-
-配置文件：
-
-
-```
-.env
-
-```
-
-
-示例：
-
-
-```env
-# Database
-
-POSTGRES_HOST=postgres
-
-POSTGRES_PORT=5432
-
-POSTGRES_DB=property_agent
-
-POSTGRES_USER=admin
-
-POSTGRES_PASSWORD=password
-
-
-
-# Redis
-
-REDIS_HOST=redis
-
-
-
-# AI
-
-LLM_API_KEY=xxxx
-
-EMBEDDING_MODEL=text-embedding-3-small
-
-```
-
+| File | Purpose |
+|------|---------|
+| `docker-compose.yml` | Development with hot-reload |
+| `docker-compose.prod.yml` | Production with SSL, restart policies, resource limits |
+| `docker-compose.monitoring.yml` | Optional Prometheus + Grafana stack |
 
 ---
 
-# 5. Docker Compose Architecture
-# Docker服务设计
+## 6. SSL Certificates / SSL 证书
 
+For production, obtain certificates from Let's Encrypt or another CA and place
+them at:
 
-服务：
+```
+ssl/cert.pem
+ssl/key.pem
+```
 
+Then mount them in `docker-compose.prod.yml`:
 
 ```yaml
-services:
-
-
-  frontend:
-
-
-  backend:
-
-
-  postgres:  # 包含 pgvector 扩展
-
-
-  redis:
-
+volumes:
+  - ./ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
+  - ./ssl/key.pem:/etc/nginx/ssl/key.pem:ro
 ```
 
-> 注：pgvector 作为 PostgreSQL 扩展内嵌运行，无需独立 vector-db 容器。
-
+For local demo without certificates, use the HTTP-only server block in
+`nginx/nginx.prod.conf`.
 
 ---
 
-# 6. Database Initialization
-# 数据库初始化
+## 7. Database Initialization / 数据库初始化
 
+Sequence:
 
-启动：
+1. Start PostgreSQL container
+2. Run Alembic migrations
+3. Import seed data from `data/seed/`
+4. (Optional) Index knowledge base into pgvector
 
-
+```bash
+docker compose exec backend alembic -c /app/database/alembic.ini upgrade head
+docker compose exec backend python scripts/import_seed_data.py
+docker compose exec backend python -m scripts.index_knowledge_base --embedding-model deterministic
 ```
-docker compose up postgres
-
-```
-
-
-执行：
-
-
-```
-migration
-
-↓
-
-seed data
-
-```
-
-
-数据来源：
-
-
-```
-data/seed/
-
-```
-
-
-包含：
-
-
-```
-community.sql
-
-buildings.sql
-
-houses.sql
-
-users.sql
-
-workers.sql
-
-repair_orders.sql
-
-fee_bills.sql
-
-notices.sql
-
-```
-
 
 ---
 
-# 7. Knowledge Base Deployment
-# 知识库部署
+## 8. Backup / 数据备份
 
+A one-shot backup service is defined in `docker-compose.prod.yml` under the
+`backup` profile.
 
-流程：
+Run manually:
 
-
-```
-knowledge documents
-
-
-↓
-
-Document Parser
-
-
-↓
-
-Chunk
-
-
-↓
-
-Embedding
-
-
-↓
-
-pgvector
-
-(PostgreSQL Extension)
-
-
+```bash
+docker compose -f docker-compose.prod.yml --profile backup run --rm backup
 ```
 
+Backups are written to `./backups/` in PostgreSQL custom format (`-Fc`).
+Schedule this command via cron or a scheduler for automated backups.
 
-初始化命令：
+To restore:
 
-
+```bash
+pg_restore -h postgres -U admin -d property_agent -c /backups/property_agent_YYYYMMDD_HHMMSS.dump
 ```
-python ingest.py
-
-```
-
-
-结果：
-
-pgvector 生成知识索引。
-
 
 ---
 
-# 8. Backend Deployment
-# 后端部署
+## 9. Monitoring / 监控
 
+The backend exposes Prometheus metrics at `/api/metrics`.
 
-启动：
+To start the optional monitoring stack:
 
-
-```
-docker compose up backend
-
+```bash
+docker compose -f docker-compose.monitoring.yml up -d
 ```
 
+Access:
 
-启动后：
-
-
-```
-API Server
-
-http://localhost:8000
-
-```
-
-
-检查：
-
-```
-GET /health
-
-```
-
-
-返回：
-
-```json
-{
-"status":"ok"
-}
-
-```
-
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3001 (default login `admin/admin`)
 
 ---
 
-# 9. Frontend Deployment
-# 前端部署
+## 10. CI/CD / 持续集成
 
+GitHub Actions workflow: `.github/workflows/ci.yml`
 
-启动：
+Runs on every push and pull request to `main`:
 
-
-```
-docker compose up frontend
-
-```
-
-
-访问：
-
-```
-http://localhost:3000
-
-```
-
+- Backend tests against PostgreSQL + pgvector and Redis service containers
+- Frontend build
+- npm audit vulnerability check
+- Docker Compose file validation
 
 ---
 
-# 10. Agent Runtime Deployment
-# Agent运行部署
+## 11. Health Checks / 健康检查
 
-
-Agent作为Backend内部模块运行。
-
-
-流程：
-
-
-```
-Chat Request
-
-
-↓
-
-Agent Runtime
-
-
-↓
-
-Graph Execution
-
-
-↓
-
-Tool Calling
-
-
-↓
-
-Business Service
-
-
-```
-
+| Service | Endpoint |
+|---------|----------|
+| Backend liveness | `GET /api/health` |
+| Backend readiness | `GET /api/health/ready` |
+| Backend metrics | `GET /api/metrics` |
+| Frontend | page load on `/` |
+| PostgreSQL | `pg_isready` |
+| Redis | `redis-cli ping` |
 
 ---
 
-# 11. Local Development Workflow
-# 本地开发流程
-
-
-推荐：
-
-
-## Step 1
-
-
-Clone:
-
-
-```
-git clone xxx
-
-```
-
-
----
-
-## Step 2
-
-
-配置：
-
-
-```
-.env
-
-```
-
-
----
-
-## Step 3
-
-
-启动基础服务：
-
-
-```
-docker compose up
-
-```
-
-
----
-
-## Step 4
-
-
-初始化数据：
-
-
-```
-seed database
-
-ingest knowledge
-
-```
-
-
----
-
-## Step 5
-
-
-运行测试：
-
-
-```
-pytest
-
-npm test
-
-```
-
-
----
-
-# 12. Production Deployment
-# 生产部署建议
-
-
-生产环境增加：
-
-
-## Reverse Proxy
-
-
-推荐：
-
-```
-Nginx
-
-```
-
-
----
-
-## HTTPS
-
-
-使用：
-
-```
-SSL Certificate
-
-```
-
-
----
-
-## Monitoring
-
-
-增加：
-
-```
-Prometheus
-
-Grafana
-
-```
-
-
----
-
-## Logging
-
-
-使用：
-
-```
-ELK
-
-or
-
-Cloud Logging
-
-```
-
-
----
-
-# 13. Backup Strategy
-# 数据备份
-
-
-需要备份：
-
-
-## PostgreSQL
-
-
-备份：
-
-```
-User
-
-Community
-
-Building
-
-House
-
-HouseBinding
-
-Worker
-
-RepairOrder
-
-FeeBill
-
-Notice
-
-```
-
-
----
-
-
-## pgvector 向量数据
-
-随 PostgreSQL 一同备份（pgvector 数据存储在 PostgreSQL 中）。
-
-备份：
-
-```
-Knowledge Embeddings
-
-Knowledge Chunks
-
-```
-
-
----
-
-# 14. Health Check
-# 健康检查
-
-
-服务：
-
-|服务|检查|
-|-|-|
-|Frontend|页面访问|
-|Backend|/health|
-|PostgreSQL|Connection|
-|pgvector|Vector Query|
-|Redis|Ping|
-
-
----
-
-# 15. Deployment Acceptance
-# 部署验收
-
-
-部署完成标准：
-
-
-## System
-
-
-```
-All containers running
-
-```
-
-
----
-
-## Database
-
-
-```
-Seed data loaded
-
-```
-
-
----
-
-## AI
-
-
-```
-Agent responds
-
-```
-
-
----
-
-## RAG
-
-
-```
-Knowledge query works
-
-```
-
-
----
-
-# Summary
-# 总结
-
-
-部署流程：
-
-
-```
-Docker Compose
-
-↓
-
-Database
-
-↓
-
-Seed Data
-
-↓
-
-Knowledge Ingestion
-
-↓
-
-Backend
-
-↓
-
-Frontend
-
-↓
-
-Agent
-
-```
-
-
-最终实现：
-
-一键启动的 AI物业社区智能体 Demo 环境。
+## 12. Production Checklist / 生产检查清单
+
+Before going live:
+
+- [ ] Change `SECRET_KEY` to a strong random value
+- [ ] Change `POSTGRES_PASSWORD` and `DATABASE_URL` credentials
+- [ ] Obtain and place SSL certificates under `./ssl/`
+- [ ] Set `BACKEND_CORS_ORIGINS` to the production frontend URL only
+- [ ] Set `VITE_API_BASE_URL` to the production API URL
+- [ ] Run migrations and import seed data
+- [ ] Configure automated backups
+- [ ] (Optional) Configure real LLM / embedding model
+- [ ] (Optional) Start monitoring stack

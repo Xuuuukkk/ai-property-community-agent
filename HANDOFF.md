@@ -24,49 +24,43 @@
 | Phase 4 | Frontend UI（React + Vite + TypeScript，已外包改造） | ✅ |
 | Phase 5 | AI Agent System（LangGraph 路由 + Tool + RAG 接入） | ✅ |
 | Phase 6 | Agent Evaluation（轨迹表、评估数据集、指标、报告） | ✅ |
+| Phase 7 | Deployment（配置管理、生产 Compose、Nginx、CI/CD、日志监控、备份） | ✅ |
 
 **关键验证结果：**
 
-- 后端测试：**42/42 通过**
+- 后端测试：**42/42 通过**（当前 Docker 未运行，需启动后复测）
 - 前端构建通过，`npm audit` 0 漏洞
 - 容器内 4 服务可正常启动
 - RAG 已索引 22 文档 / 99 切片
 - 评估脚本可生成 HTML/JSON 报告
+- Phase 7 已补齐：`.env.example`、生产 Docker Compose、Nginx、GitHub Actions CI、日志/监控/备份
 - 最新代码已 push 到 GitHub `main`
 
 ---
 
 ## 3. 当前卡在哪一步
 
-**没有功能性阻塞。** 系统可以跑起来。
+**没有功能性阻塞。** Phase 7 Deployment 已完成，系统具备生产部署所需的最小闭环。
 
-但有几个已知短板需要在下一步补强：
+但仍有几个功能增强项未做（不影响部署）：
 
 1. **RAG 语义检索效果差**：当前 embedding 用的是 `deterministic` fallback（因为 sentence-transformers 默认模型下载失败），导致 Recall@5 只有 25%。
-2. **意图分类器是规则-based**：对边缘输入（如“电梯故障”“今天有社区活动吗”）会误判为 `unknown`。
-3. **Agent 还没接真实 LLM**：目前所有决策都是硬编码规则，便于测试但没有泛化能力。
+2. **意图分类器是规则-based**：对边缘输入会误判为 `unknown`。
+3. **Agent 还没接真实 LLM**：目前决策是硬编码规则，便于测试但泛化能力有限。
 4. **没有权限/认证系统**：公告发布等操作目前是开放的。
 
 ---
 
 ## 4. 下一步计划是什么
 
-按文档顺序，接下来应该是 **Phase 7 Deployment（部署上线）**。
+文档内 Phase 7 已完成。后续可选方向：
 
-可选工作项（按推荐优先级）：
-
-1. **Phase 7 Deployment**
-   - 生产环境 `.env` 与密钥管理
-   - GitHub Actions CI/CD（测试、构建镜像）
-   - HTTPS / 反向代理
-   - 日志、监控、数据库备份
-2. **接入真实 LLM**（OpenAI / 兼容 API），把 router 和 domain agent 从规则改为模型驱动
-3. **提升 RAG 效果**：解决 embedding 模型下载，或换用云端 embedding API
-4. **完善意图分类器**：补充更多训练样例或换用 LLM 分类
-5. **添加权限认证**：JWT + 角色权限（业主/物业）
-6. **前端测试与 E2E 测试**
-
-如果用户没有特别指定，建议先推进 **Phase 7 Deployment**。
+1. **接入真实 LLM**（OpenAI / 兼容 API），把 router 和 domain agent 从规则改为模型驱动
+2. **提升 RAG 效果**：解决 embedding 模型下载，或换用云端 embedding API
+3. **完善意图分类器**：补充更多训练样例或换用 LLM 分类
+4. **添加权限认证**：JWT + 角色权限（业主/物业）
+5. **前端测试与 E2E 测试**
+6. **Docker 镜像自动推送 / 云部署**（CI/CD 目前只验证配置和构建，不推送镜像）
 
 ---
 
@@ -142,6 +136,15 @@ pytest tests/ -q
 
 # 跑评估并生成报告
 python -m scripts.run_evaluation
+
+# 生产部署（需要 .env 和 ssl/ 证书）
+docker compose -f docker-compose.prod.yml up -d --build
+
+# 手动运行一次性备份
+docker compose -f docker-compose.prod.yml --profile backup run --rm backup
+
+# 启动可选监控栈
+docker compose -f docker-compose.monitoring.yml up -d
 ```
 
 ---
@@ -157,3 +160,9 @@ python -m scripts.run_evaluation
 - 评估数据集：`evaluation/`
 - 评估报告：`backend/reports/evaluation-report.html`
 - 迁移脚本：`database/versions/`
+- 环境模板：`.env.example`
+- 生产部署：`docker-compose.prod.yml`
+- Nginx 生产配置：`nginx/nginx.prod.conf`
+- CI/CD：`.github/workflows/ci.yml`
+- 监控：`docker-compose.monitoring.yml`
+- 部署文档：`docs/07-operation/deployment.md`

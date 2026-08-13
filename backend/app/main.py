@@ -4,6 +4,7 @@ Phase 1: Backend foundation — app factory, health routes, config wiring.
 Business routers (user/repair/fee/notice) are added in Phase 3.
 """
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import (
     agent_router,
@@ -15,8 +16,12 @@ from app.api.routes import (
     users_router,
 )
 from app.core.config import get_settings
+from app.core.logging import RequestLoggingMiddleware, configure_logging
 
 settings = get_settings()
+
+# Configure logging once at import time so it applies to all workers.
+configure_logging()
 
 
 def create_app() -> FastAPI:
@@ -26,6 +31,18 @@ def create_app() -> FastAPI:
         version="0.1.0",
         description="AI Property Community Agent - Backend API",
     )
+
+    # CORS — origins are controlled via the BACKEND_CORS_ORIGINS env variable.
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # Log every request with timing and status code.
+    app.add_middleware(RequestLoggingMiddleware)
 
     # Health & readiness under /api
     app.include_router(health_router, prefix=settings.API_PREFIX)
