@@ -1,5 +1,6 @@
 """Repair order API endpoints."""
 
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
@@ -9,6 +10,14 @@ from app.schemas.repair import RepairCreate, RepairListResponse, RepairResponse
 from app.services.repair import repair_service
 
 router = APIRouter(prefix="/repair", tags=["repair"])
+
+
+class RepairAssignPayload(BaseModel):
+    worker_id: int
+
+
+class RepairStatusPayload(BaseModel):
+    status: str
 
 
 @router.get("/list", response_model=RepairListResponse)
@@ -52,3 +61,32 @@ def create_repair(
 def get_repair(repair_id: int, db: Session = Depends(get_db)) -> RepairResponse:
     """Return a single repair order by ID."""
     return repair_service.get_repair(db, repair_id)
+
+
+@router.post("/{repair_id}/assign", response_model=RepairResponse)
+def assign_repair_worker(
+    repair_id: int,
+    payload: RepairAssignPayload,
+    db: Session = Depends(get_db),
+) -> RepairResponse:
+    """Assign a worker to a repair order."""
+    repair = repair_service.get_repair(db, repair_id)
+    repair.worker_id = payload.worker_id
+    repair.status = "ASSIGNED"
+    db.commit()
+    db.refresh(repair)
+    return repair
+
+
+@router.post("/{repair_id}/status", response_model=RepairResponse)
+def update_repair_status(
+    repair_id: int,
+    payload: RepairStatusPayload,
+    db: Session = Depends(get_db),
+) -> RepairResponse:
+    """Update the status of a repair order."""
+    repair = repair_service.get_repair(db, repair_id)
+    repair.status = payload.status
+    db.commit()
+    db.refresh(repair)
+    return repair
