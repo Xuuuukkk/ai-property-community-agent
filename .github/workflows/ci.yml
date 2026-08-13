@@ -60,7 +60,8 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Apply database migrations
-        run: alembic -c ../database/alembic.ini upgrade head
+        working-directory: .
+        run: alembic -c database/alembic.ini upgrade head
 
       - name: Import seed data
         run: python scripts/import_seed_data.py
