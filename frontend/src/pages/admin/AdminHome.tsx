@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   AiIcon,
   ArrowRightIcon,
   BellIcon,
   FeeIcon,
+  HomeIcon,
   NoticeIcon,
+  ProfileIcon,
   QrIcon,
   RepairIcon,
   TicketIcon,
@@ -13,14 +15,14 @@ import {
 import { api } from '../../api/client'
 import { useAuth } from '../../contexts/AuthContext'
 import type { Notice } from '../../api/types'
-import OwnerShell from './OwnerShell'
+import AdminShell from './AdminShell'
 
-const QUICK_SERVICES = [
-  { key: 'repair', label: '报事服务', icon: RepairIcon },
-  { key: 'fee', label: '费用查询', icon: FeeIcon },
-  { key: 'notice', label: '社区公告', icon: NoticeIcon },
-  { key: 'ticket', label: '我的工单', icon: TicketIcon },
-] as const
+const DATA_SERVICES = [
+  { key: 'repair', label: '物业管家', icon: RepairIcon, path: '/admin/repairs' },
+  { key: 'fee', label: '物业缴费', icon: FeeIcon, path: '/admin/desk?tab=fee' },
+  { key: 'notice', label: '最新工单', icon: NoticeIcon, path: '/admin/repairs' },
+  { key: 'ticket', label: '最新工单', icon: TicketIcon, path: '/admin/repairs' },
+]
 
 const NOTICES_MOCK: Notice[] = [
   {
@@ -55,10 +57,10 @@ const NOTICES_MOCK: Notice[] = [
   },
 ]
 
-export default function OwnerHome() {
+export default function AdminHome() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [unpaidAmount] = useState<number>(1280.0)
+  const [stats] = useState({ todo: 12, doing: 28, done: 45, pending: 8 })
   const [notices, setNotices] = useState<Notice[]>(NOTICES_MOCK)
 
   useEffect(() => {
@@ -68,35 +70,17 @@ export default function OwnerHome() {
         if (res.items.length > 0) setNotices(res.items.slice(0, 3))
       })
       .catch(() => {
-        // keep mock data on error
+        // keep mock data
       })
   }, [])
 
-  const today = useMemo(
-    () =>
-      new Intl.DateTimeFormat('zh-CN', {
-        month: 'long',
-        day: 'numeric',
-        weekday: 'long',
-      }).format(new Date()),
-    [],
-  )
-
-  const handleServiceClick = (key: string) => {
-    if (key === 'fee') navigate('/owner/fees')
-    else if (key === 'ticket') navigate('/owner/tickets')
-    else if (key === 'notice') navigate('/owner/notices')
-    else navigate(`/owner/${key}`)
-  }
-
-  const displayName = user?.real_name || user?.username || '业主'
-  const houseInfo = '2栋1单元1202室'
+  const displayName = user?.real_name || user?.username || '管理员'
 
   return (
-    <OwnerShell activeTab="home">
+    <AdminShell activeTab="home">
       <div className="yx-page">
         <header className="yx-topbar">
-          <div className="yx-topbar-title">云溪花园智慧社区</div>
+          <div className="yx-topbar-title">物业管理系统</div>
           <button type="button" className="yx-bell" aria-label="通知">
             <BellIcon />
             <span className="yx-bell-dot" />
@@ -109,9 +93,9 @@ export default function OwnerHome() {
             <div className="yx-profile-info">
               <div className="yx-profile-name">
                 {displayName}
-                <span className="yx-profile-role">业主</span>
+                <span className="yx-profile-role">管理员</span>
               </div>
-              <div className="yx-profile-meta">{houseInfo}</div>
+              <div className="yx-profile-meta">物业管理人员 欢迎回来</div>
             </div>
             <button type="button" className="yx-profile-extra" aria-label="二维码">
               <QrIcon />
@@ -121,31 +105,53 @@ export default function OwnerHome() {
           <section className="yx-card yx-mb-12">
             <div className="yx-fee-row">
               <div>
-                <div className="yx-fee-label">待缴费用总额（元）</div>
-                <div className="yx-fee-amount">{unpaidAmount.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</div>
+                <div className="yx-fee-label">未缴费用总额（元）</div>
+                <div className="yx-fee-amount">1,280.00</div>
               </div>
               <button
                 type="button"
                 className="yx-btn yx-btn-accent"
                 style={{ width: 'auto', padding: '8px 16px', fontSize: 13 }}
-                onClick={() => navigate('/owner/fees')}
+                onClick={() => navigate('/admin/desk?tab=fee')}
               >
-                去缴费
+                去催缴
               </button>
             </div>
           </section>
 
           <section className="yx-card yx-mb-12">
-            <div className="yx-card-title">报事服务</div>
+            <div className="yx-card-title">数据概览</div>
+            <div className="yx-stat-grid">
+              <div className="yx-stat-item">
+                <div className="yx-stat-value">{stats.todo}</div>
+                <div className="yx-stat-label">新增报修</div>
+              </div>
+              <div className="yx-stat-item">
+                <div className="yx-stat-value">{stats.doing}</div>
+                <div className="yx-stat-label">处理中</div>
+              </div>
+              <div className="yx-stat-item">
+                <div className="yx-stat-value">{stats.done}</div>
+                <div className="yx-stat-label">已完成</div>
+              </div>
+              <div className="yx-stat-item">
+                <div className="yx-stat-value">{stats.pending}</div>
+                <div className="yx-stat-label">待处理</div>
+              </div>
+            </div>
+          </section>
+
+          <section className="yx-card yx-mb-12">
+            <div className="yx-card-title">数据服务</div>
             <div className="yx-services-grid">
-              {QUICK_SERVICES.map((service) => {
+              {DATA_SERVICES.map((service) => {
                 const Icon = service.icon
                 return (
                   <button
                     key={service.key}
                     type="button"
                     className="yx-service-item"
-                    onClick={() => handleServiceClick(service.key)}
+                    onClick={() => navigate(service.path)}
                   >
                     <span className="yx-service-icon">
                       <Icon />
@@ -159,8 +165,8 @@ export default function OwnerHome() {
 
           <section className="yx-card yx-mb-12">
             <div className="yx-card-title">
-              社区公告
-              <button type="button" className="yx-card-link" onClick={() => navigate('/owner/notices')}>
+              快用公告
+              <button type="button" className="yx-card-link" onClick={() => navigate('/admin/desk?tab=notice')}>
                 查看更多 <ArrowRightIcon />
               </button>
             </div>
@@ -177,28 +183,20 @@ export default function OwnerHome() {
             </div>
           </section>
 
-          <button
-            type="button"
-            className="yx-ai-card"
-            onClick={() => navigate('/owner/ai')}
-          >
+          <button type="button" className="yx-ai-card" onClick={() => navigate('/admin/desk?tab=notice')}>
             <span className="yx-ai-icon">
               <AiIcon />
             </span>
             <div className="yx-ai-text">
               <div className="yx-ai-title">AI 社区助手</div>
-              <div className="yx-ai-desc">有问题？问问社区助手</div>
+              <div className="yx-ai-desc">智能帮手，提高社区管理效率</div>
             </div>
             <span style={{ color: '#687280' }}>
               <ArrowRightIcon />
             </span>
           </button>
-
-          <div style={{ color: '#9aa3ad', fontSize: 12, textAlign: 'center', marginTop: 20 }}>
-            {today}
-          </div>
         </main>
       </div>
-    </OwnerShell>
+    </AdminShell>
   )
 }

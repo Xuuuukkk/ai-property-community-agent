@@ -1,53 +1,31 @@
 import { useNavigate } from 'react-router-dom'
-import { HomeIcon, RepairIcon, TicketIcon } from '../components/owner/icons'
-
-const PORTALS = [
-  { title: '业主端', desc: '报修、查费、公告、工单', role: 'OWNER', icon: HomeIcon },
-  { title: '维修人员端', desc: '接单、处理、流转', role: 'WORKER', icon: RepairIcon },
-  { title: '物业管理端', desc: '后台管理与配置', role: 'PROPERTY_STAFF', icon: TicketIcon },
-] as const
+import { BuildingIcon } from '../components/owner/icons'
 
 export default function PortalHome() {
   const navigate = useNavigate()
 
   return (
-    <div className="owner-page" style={{ background: '#f7f8fa' }}>
-      <main className="owner-main">
-        <section className="owner-workspace-head" style={{ paddingTop: 48 }}>
-          <div style={{ textAlign: 'center' }}>
-            <span className="owner-eyebrow">YUNXI GARDEN</span>
-            <h2 style={{ marginTop: 8 }}>云溪花园</h2>
-            <p>智慧社区 · 美好生活</p>
-          </div>
-        </section>
+    <div className="yx-splash">
+      <div className="yx-splash-bg" />
+      <div className="yx-splash-content">
+        <div className="yx-splash-logo">
+          <BuildingIcon />
+        </div>
+        <h1 className="yx-splash-title">云溪花园</h1>
+        <p className="yx-splash-subtitle">智慧社区</p>
+        <p className="yx-splash-tagline">让社区生活更美好</p>
 
-        <section className="owner-panel">
-          <div className="owner-list">
-            {PORTALS.map((item) => {
-              const Icon = item.icon
-              return (
-                <button
-                  key={item.title}
-                  type="button"
-                  className="owner-list-item"
-                  onClick={() => navigate(`/login?role=${item.role}`)}
-                  style={{ textAlign: 'left' }}
-                >
-                  <div className="owner-list-top">
-                    <div>
-                      <h4>{item.title}</h4>
-                      <p>{item.desc}</p>
-                    </div>
-                    <span className="owner-workspace-hero-icon">
-                      <Icon />
-                    </span>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-        </section>
-      </main>
+        <div className="yx-splash-action">
+          <button
+            type="button"
+            className="yx-btn yx-btn-primary"
+            onClick={() => navigate('/role-select')}
+          >
+            进入小程序
+          </button>
+        </div>
+        <p className="yx-splash-footer">智慧服务 · 贴心相伴</p>
+      </div>
     </div>
   )
 }

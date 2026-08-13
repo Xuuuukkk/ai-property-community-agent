@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth, type UserRole } from '../contexts/AuthContext'
-import { HomeIcon, RepairIcon, TicketIcon } from '../components/owner/icons'
+import { ArrowLeftIcon, EyeIcon, EyeOffIcon, LockIcon, UserIcon } from '../components/owner/icons'
 
-const ROLES: { key: UserRole; label: string; icon: typeof HomeIcon }[] = [
-  { key: 'OWNER', label: '业主', icon: HomeIcon },
-  { key: 'WORKER', label: '维修人员', icon: RepairIcon },
-  { key: 'PROPERTY_STAFF', label: '物业管理', icon: TicketIcon },
-]
+const ROLE_LABELS: Record<UserRole, string> = {
+  OWNER: '业主',
+  WORKER: '维修人员',
+  PROPERTY_STAFF: '物业人员',
+  ADMIN: '管理员',
+}
 
 const ROLE_PATHS: Record<UserRole, string> = {
   OWNER: '/owner',
@@ -22,11 +23,14 @@ export default function LoginPage() {
   const { login, isAuthenticated, role } = useAuth()
 
   const initialRole = (searchParams.get('role') as UserRole) || 'OWNER'
-  const [selectedRole, setSelectedRole] = useState<UserRole>(initialRole)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [remember, setRemember] = useState(true)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  const roleLabel = ROLE_LABELS[initialRole] || '用户'
 
   const demoHint = useMemo(() => {
     const hints: Record<UserRole, string> = {
@@ -35,8 +39,8 @@ export default function LoginPage() {
       PROPERTY_STAFF: '演示账号：linzhe917 / 123456',
       ADMIN: '演示账号：mayun420 / 123456',
     }
-    return hints[selectedRole]
-  }, [selectedRole])
+    return hints[initialRole] || ''
+  }, [initialRole])
 
   useEffect(() => {
     if (isAuthenticated && role) {
@@ -58,155 +62,94 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="owner-page" style={{ background: '#f7f8fa', minHeight: '100vh' }}>
-      <main className="owner-main" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div
-          style={{
-            width: '100%',
-            maxWidth: 420,
-            background: '#ffffff',
-            borderRadius: 20,
-            padding: '40px 32px',
-            boxShadow: '0 4px 24px rgba(10, 37, 64, 0.06)',
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '8px 0',
-              marginBottom: 16,
-              background: 'transparent',
-              border: 'none',
-              color: '#6b7280',
-              fontSize: 14,
-              cursor: 'pointer',
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5" />
-              <path d="M12 19l-7-7 7-7" />
-            </svg>
-            返回
-          </button>
+    <div className="yx-login-page">
+      <div className="yx-topbar">
+        <button type="button" className="yx-back" onClick={() => navigate('/role-select')}>
+          <ArrowLeftIcon />
+        </button>
+        <div />
+      </div>
 
-          <div style={{ textAlign: 'center', marginBottom: 32 }}>
-            <div style={{ fontSize: 12, color: '#8b95a5', fontWeight: 500, letterSpacing: 1 }}>YUNXI GARDEN</div>
-            <h1 style={{ fontSize: 24, color: '#0a2540', margin: '8px 0 4px' }}>欢迎回家</h1>
-            <p style={{ fontSize: 14, color: '#6b7280' }}>请选择角色并登录</p>
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: 12,
-              marginBottom: 28,
-            }}
-          >
-            {ROLES.map((roleItem) => {
-              const Icon = roleItem.icon
-              const active = selectedRole === roleItem.key
-              return (
-                <button
-                  key={roleItem.key}
-                  type="button"
-                  onClick={() => setSelectedRole(roleItem.key)}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 8,
-                    padding: '16px 8px',
-                    borderRadius: 12,
-                    border: `1.5px solid ${active ? '#2e4a66' : '#e5e7eb'}`,
-                    background: active ? '#eef2f6' : '#ffffff',
-                    color: active ? '#0a2540' : '#6b7280',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    fontSize: 13,
-                    fontWeight: 500,
-                  }}
-                >
-                  <Icon />
-                  {roleItem.label}
-                </button>
-              )
-            })}
-          </div>
-
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div>
-              <label style={{ display: 'block', fontSize: 13, color: '#374151', marginBottom: 6 }}>用户名</label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="请输入用户名"
-                required
-                style={{
-                  width: '100%',
-                  padding: '12px 14px',
-                  borderRadius: 10,
-                  border: '1px solid #e5e7eb',
-                  fontSize: 14,
-                  outline: 'none',
-                }}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: 13, color: '#374151', marginBottom: 6 }}>密码</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="请输入密码"
-                required
-                style={{
-                  width: '100%',
-                  padding: '12px 14px',
-                  borderRadius: 10,
-                  border: '1px solid #e5e7eb',
-                  fontSize: 14,
-                  outline: 'none',
-                }}
-              />
-            </div>
-
-            {error && (
-              <div style={{ padding: 10, borderRadius: 8, background: '#fef2f2', color: '#991b1b', fontSize: 13 }}>
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '14px',
-                borderRadius: 10,
-                border: 'none',
-                background: '#2e4a66',
-                color: '#ffffff',
-                fontSize: 15,
-                fontWeight: 500,
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.7 : 1,
-              }}
-            >
-              {loading ? '登录中...' : '登录'}
-            </button>
-          </form>
-
-          <div style={{ marginTop: 20, padding: 12, borderRadius: 8, background: '#f8f9fa', fontSize: 12, color: '#6b7280' }}>
-            {demoHint}
-          </div>
+      <div className="yx-container">
+        <div className="yx-login-header">
+          <h1 className="yx-login-title">欢迎登录</h1>
+          <p className="yx-login-subtitle">选择身份 · 账号密码登录</p>
         </div>
-      </main>
+
+        <form className="yx-login-form" onSubmit={handleSubmit}>
+          <div className="yx-input-wrap">
+            <span className="yx-input-icon">
+              <UserIcon />
+            </span>
+            <input
+              type="text"
+              className="yx-input with-icon"
+              placeholder={`请输入${roleLabel}账号`}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="yx-input-wrap">
+            <span className="yx-input-icon">
+              <LockIcon />
+            </span>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              className="yx-input with-icon"
+              placeholder="请输入密码"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              className="yx-input-eye"
+              onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+            </button>
+          </div>
+
+          <div className="yx-login-options">
+            <label className="yx-login-remember">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+              />
+              记住账号
+            </label>
+            <a href="#" className="yx-login-forgot" onClick={(e) => e.preventDefault()}>
+              忘记密码？
+            </a>
+          </div>
+
+          {error && (
+            <div style={{ padding: 10, borderRadius: 8, background: '#ffe2e2', color: '#a83232', fontSize: 13 }}>
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="yx-btn yx-btn-primary"
+            disabled={loading}
+            style={{ marginTop: 8 }}
+          >
+            {loading ? '登录中...' : '登录'}
+          </button>
+        </form>
+
+        <div className="yx-login-footer">
+          <p>还没有账号？<a href="#" onClick={(e) => e.preventDefault()}>联系物业管理处</a></p>
+          {demoHint && (
+            <p style={{ marginTop: 8, color: '#687280', fontSize: 12 }}>{demoHint}</p>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
