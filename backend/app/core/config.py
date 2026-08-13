@@ -66,6 +66,8 @@ class Settings(BaseSettings):
     # Provider base URL; defaults to OpenAI. Use a compatible endpoint if needed.
     OPENAI_API_BASE: str = "https://api.openai.com/v1"
     LLM_API_KEY: str = ""
+    # Chat completion model. Must be supported by the provider above.
+    LLM_MODEL: str = "gpt-4o-mini"
     # Embedding model name. Empty string uses the default sentence-transformers
     # model; "deterministic" is a test-only fallback with no semantic meaning.
     EMBEDDING_MODEL: str = ""

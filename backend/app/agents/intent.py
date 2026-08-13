@@ -1,0 +1,108 @@
+"""Intent classification for the agent router.
+
+Provides a deterministic rule-based classifier that is always available, plus
+an optional LLM-based classifier used when ``LLM_API_KEY`` is configured.
+"""
+
+from __future__ import annotations
+
+import json
+import logging
+import re
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from langchain_openai import ChatOpenAI
+
+logger = logging.getLogger(__name__)
+
+INTENTS = {"repair", "fee", "notice", "knowledge", "unknown"}
+
+
+def classify_intent_rule(text: str) -> str:
+    """Deterministic rule-based intent classifier.
+
+    The rules are intentionally simple so tests are stable and the system
+    works without an external API key.
+    """
+    lowered = text.lower()
+
+    # Notice: community announcements / outage notifications (checked before
+    # repair because phrases like "停水维修" are announcements).
+    if any(k in lowered for k in ("公告", "通知", "停水", "停电", "notice", "announcement")):
+        return "notice"
+
+    # Fee: billing and payment queries.
+    if any(k in lowered for k in ("物业费", "费用", "账单", "缴费", "欠费", "fee", "bill", "payment")):
+        return "fee"
+
+    # Knowledge: regulations, hours, FAQ.
+    if any(k in lowered for k in ("装修", "几点", "规定", "制度", "faq", "知识", "knowledge")):
+        return "knowledge"
+
+    # Repair: breakdown reports (avoid matching the single character "修" alone).
+    if any(k in lowered for k in ("报修", "维修", "漏水", "跳闸", "坏了", "repair", "leak", "broken")):
+        return "repair"
+
+    return "unknown"
+
+
+def _parse_intent_from_llm_output(content: str) -> str | None:
+    """Extract a valid intent label from LLM output."""
+    if not content:
+        return None
+
+    # Try JSON first.
+    try:
+        data = json.loads(content.strip())
+        if isinstance(data, dict) and "intent" in data:
+            intent = str(data["intent"]).strip().lower()
+            if intent in INTENTS:
+                return intent
+    except json.JSONDecodeError:
+        pass
+
+    # Fall back to looking for one of the known labels in the text.
+    lowered = content.lower()
+    for intent in INTENTS:
+        if re.search(rf"\b{intent}\b", lowered):
+            return intent
+
+    return None
+
+
+def classify_intent(text: str, llm: "ChatOpenAI | None" = None) -> str:
+    """Classify user text into one of the supported intents.
+
+    If ``llm`` is provided, the LLM is asked to classify the message and the
+    result is validated. If the LLM fails or returns an unrecognized label,
+    the rule-based classifier is used as a fallback.
+    """
+    if llm is None:
+        return classify_intent_rule(text)
+
+    system_prompt = (
+        "You are an intent classifier for a property community AI assistant. "
+        "Classify the user's message into exactly one of: repair, fee, notice, knowledge, unknown.\n"
+        "Respond with a JSON object: {\"intent\": \"...\"}. No other text."
+    )
+
+    try:
+        from langchain_core.messages import HumanMessage, SystemMessage
+
+        response = llm.invoke(
+            [
+                SystemMessage(content=system_prompt),
+                HumanMessage(content=text),
+            ]
+        )
+        content = response.content if response else ""
+        intent = _parse_intent_from_llm_output(content)
+        if intent is not None:
+            logger.debug("llm_intent_classified", extra={"input": text, "intent": intent})
+            return intent
+        logger.warning("llm_intent_unrecognized", extra={"input": text, "raw": content})
+    except Exception as exc:  # pragma: no cover - network failures fall back gracefully
+        logger.warning("llm_intent_failed", extra={"input": text, "error": str(exc)})
+
+    return classify_intent_rule(text)

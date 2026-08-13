@@ -15,7 +15,8 @@ from app.agents.evaluation.metrics import (
     ToolMetrics,
     WorkflowMetrics,
 )
-from app.agents.graph import _classify_intent, run_agent
+from app.agents.graph import run_agent
+from app.agents.intent import classify_intent_rule
 
 
 def _nested_get(data: dict[str, Any], path: str) -> Any:
@@ -34,7 +35,7 @@ def evaluate_intents(cases: list[dict[str, Any]]) -> IntentMetrics:
     for case in cases:
         text = case["text"]
         expected = case["expected_intent"]
-        predicted = _classify_intent(text)
+        predicted = classify_intent_rule(text)
         correct = predicted == expected
         metrics.total += 1
         if correct:

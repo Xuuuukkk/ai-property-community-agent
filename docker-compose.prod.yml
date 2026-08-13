@@ -65,6 +65,7 @@ services:
       REDIS_URL: ${REDIS_URL}
       OPENAI_API_BASE: ${OPENAI_API_BASE:-https://api.openai.com/v1}
       LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4o-mini}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-deterministic}
       HF_TOKEN: ${HF_TOKEN:-}
     # Backend is not exposed directly; traffic goes through the frontend/nginx gateway.

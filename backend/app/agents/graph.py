@@ -28,6 +28,8 @@ from app.agents.domain_agents import (
     run_notice_agent,
     run_repair_agent,
 )
+from app.agents.intent import INTENTS, classify_intent
+from app.agents.response import generate_response
 from app.agents.state import (
     AgentState,
     get_final_response,
@@ -35,8 +37,7 @@ from app.agents.state import (
     get_messages,
 )
 from app.core.database import SessionLocal
-
-INTENTS = {"repair", "fee", "notice", "knowledge", "unknown"}
+from app.core.llm import get_llm
 
 
 @dataclass
@@ -50,34 +51,6 @@ class AgentResult:
     requires_human: bool = False
 
 
-def _classify_intent(text: str) -> str:
-    """Rule-based intent classifier.
-
-    The rules are intentionally simple and deterministic so tests are stable.
-    Order matters: more specific intents are checked first.
-    """
-    lowered = text.lower()
-
-    # Notice: community announcements / outage notifications (checked before
-    # repair because phrases like "停水维修" are announcements).
-    if any(k in lowered for k in ("公告", "通知", "停水", "停电", "notice", "announcement")):
-        return "notice"
-
-    # Fee: billing and payment queries.
-    if any(k in lowered for k in ("物业费", "费用", "账单", "缴费", "欠费", "fee", "bill", "payment")):
-        return "fee"
-
-    # Knowledge: regulations, hours, FAQ.
-    if any(k in lowered for k in ("装修", "几点", "规定", "制度", "faq", "知识", "knowledge", "?", "？")):
-        return "knowledge"
-
-    # Repair: breakdown reports (avoid matching the single character "修" alone).
-    if any(k in lowered for k in ("报修", "维修", "漏水", "跳闸", "坏了", "repair", "leak", "broken")):
-        return "repair"
-
-    return "unknown"
-
-
 def router_node(state: AgentState) -> AgentState:
     """Classify intent and initialize the conversation context."""
     user_text = ""
@@ -86,7 +59,8 @@ def router_node(state: AgentState) -> AgentState:
             user_text = msg.content
             break
 
-    intent = _classify_intent(user_text)
+    llm = get_llm()
+    intent = classify_intent(user_text, llm=llm)
     state["intent"] = intent
     state["tool_results"] = []
     state["requires_human"] = False
@@ -121,14 +95,35 @@ def agent_node(state: AgentState) -> AgentState:
 
 
 def response_node(state: AgentState) -> AgentState:
-    """No-op response formatter.
+    """Format the final answer.
 
-    The domain agents already produce user-facing text. This node exists so
-    future enhancements (e.g. LLM rephrasing, guardrails) can be inserted here
-    without changing the graph topology.
+    When an LLM is configured, the domain agent's deterministic response is
+    passed to the model for natural-language rephrasing. Otherwise the
+    deterministic text is returned directly.
     """
-    if not get_final_response(state):
+    final_response = get_final_response(state)
+    if not final_response:
         state["final_response"] = "抱歉，我暂时无法处理您的请求。"
+        return state
+
+    llm = get_llm()
+    if llm is None:
+        return state
+
+    user_text = ""
+    for msg in reversed(get_messages(state)):
+        if isinstance(msg, HumanMessage):
+            user_text = msg.content
+            break
+
+    rephrased = generate_response(
+        user_text,
+        state.get("tool_results", []),
+        llm=llm,
+    )
+    if rephrased:
+        state["final_response"] = rephrased
+
     return state
 
 
