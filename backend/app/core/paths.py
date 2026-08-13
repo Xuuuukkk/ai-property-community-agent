@@ -12,10 +12,26 @@ import os
 from pathlib import Path
 
 
+def _is_valid_repo_root(candidate: Path) -> bool:
+    """Return True if ``candidate`` looks like the project repository root.
+
+    We require both ``knowledge-base/`` and ``evaluation/`` directories to be
+    present **and** non-empty (contain at least one Markdown/JSON file). This
+    avoids matching empty shadow directories that Docker bind mounts can create
+    inside the backend folder.
+    """
+    kb = candidate.joinpath("knowledge-base")
+    ev = candidate.joinpath("evaluation")
+    if not kb.is_dir() or not ev.is_dir():
+        return False
+    # Ensure the directories are not empty shadows.
+    return any(kb.rglob("*.md")) and any(ev.rglob("*.json"))
+
+
 def _find_repo_root() -> Path:
     """Return the repository root directory.
 
-    The root is identified by the presence of ``knowledge-base/`` and
+    The root is identified by the presence of non-empty ``knowledge-base/`` and
     ``evaluation/`` directories. If the ``REPO_ROOT`` environment variable is
     set, it takes precedence.
     """
@@ -35,15 +51,12 @@ def _find_repo_root() -> Path:
         candidates.append(parent)
 
     for candidate in candidates:
-        if (
-            candidate.joinpath("knowledge-base").is_dir()
-            and candidate.joinpath("evaluation").is_dir()
-        ):
+        if _is_valid_repo_root(candidate):
             return candidate
 
     raise RuntimeError(
         "Cannot locate repository root. Ensure knowledge-base/ and evaluation/ "
-        "directories exist, or set the REPO_ROOT environment variable."
+        "directories exist and are non-empty, or set the REPO_ROOT environment variable."
     )
 
 
