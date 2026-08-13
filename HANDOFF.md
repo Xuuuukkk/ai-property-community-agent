@@ -29,10 +29,13 @@
 | 增强 | Agent 公告意图拆分为查询/发布 | ✅ |
 | 增强 | ToC 业主端首页前端 | ✅ |
 | 增强 | ToC 业主端 AI 助手聊天页 | ✅ |
+| 增强 | 统一门户 + JWT 登录 + 角色分流（业主/维修/物业） | ✅ |
+| 增强 | 业主端子页面（报修、查费、公告、工单） | ✅ |
+| 增强 | 维修人员端前端（工单处理台） | ✅ |
 
 **关键验证结果：**
 
-- 后端测试：**56/56 通过**（已在 Docker 容器内验证）
+- 后端测试：**61/61 通过**（已在 Docker 容器内验证）
 - 前端构建通过，`npm audit` 0 漏洞
 - 容器内 4 服务可正常启动
 - RAG 已索引 22 文档 / 99 切片
@@ -49,20 +52,19 @@
 但仍有几个功能增强项未做（不影响部署）：
 
 1. **RAG 语义检索效果差**：当前 embedding 用的是 `deterministic` fallback（因为 sentence-transformers 默认模型下载失败），导致 Recall@5 只有 25%。
-2. **没有权限/认证系统**：公告发布等操作目前是开放的。
-3. **前端测试与 E2E 测试**尚未补充。
-4. **业主端子页面**尚未完全实现：已完成首页和 AI 助手聊天页，报修、查费、公告、工单列表页待做。
-5. **维修人员端前端**尚未实现。
+2. **前端测试与 E2E 测试**尚未补充。
+3. **权限颗粒度待细化**：目前只做了登录 + 角色路由守卫，业务 API 本身仍开放（未对接口做权限校验）。
+4. **Docker 镜像自动推送 / 云部署**：CI 目前只验证构建，不推送镜像。
 
 ---
 
 ## 4. 下一步计划是什么
 
-文档内 Phase 7 已完成，真实 LLM 也已接入。后续可选方向：
+文档内 Phase 7 已完成，真实 LLM、统一登录与角色分流也已接入。后续可选方向：
 
-1. **业主端子页面**：AI 助手聊天页、报修页、查费页、公告页、工单列表页
-2. **维修人员端前端**：今日任务列表、工单详情、状态更新
-3. **添加权限认证**：JWT + 角色权限（业主/物业/维修工）
+1. **业务 API 权限校验**：把 `get_current_user` 接到公告发布、工单分配、费用查询等敏感接口上
+2. **业主端数据接入**：当前首页/子页面多为静态数据，需接入真实 API（费用、公告、工单、报修创建）
+3. **维修人员端状态流转**：WorkerDashboard 目前可接单和切状态，但缺少“我的”页面和个人信息
 4. **提升 RAG 效果**：解决 embedding 模型下载，或换用云端 embedding API
 5. **前端测试与 E2E 测试**
 6. **Docker 镜像自动推送 / 云部署**
@@ -182,31 +184,32 @@ docker compose -f docker-compose.monitoring.yml up -d
 
 ### 8.1 本次会话完成的核心内容
 
-1. **业主端首页上线**
-   - 文件：`frontend/src/pages/owner/OwnerHome.tsx` + `OwnerHome.css`
-   - 路由：`/owner`
-   - 设计稿：`docs/08-ui-design/owner-home-v3.html`
-   - 已按 UI 规范收敛色彩体系，支持移动端底部 Tab + 桌面端左侧边栏响应式布局。
+1. **统一门户 + 角色分流 + JWT 登录**
+   - 入口：`/` 三端选择（业主 / 维修 / 物业）
+   - 登录页：`/login`，支持角色 Tab 切换
+   - 后端：`POST /api/auth/login`、`GET /api/auth/me`，JWT 7 天
+   - 前端：`AuthContext` + `ProtectedRoute` 按角色守卫路由
+   - 演示账号密码已统一设为 `123456`
 
-2. **路由拆分**
-   - 物业端：`/admin/*`（原 `App.tsx` 内容迁至 `frontend/src/pages/admin/AdminApp.tsx`）
-   - 业主端：`/owner`
-   - 根路径 `/` 默认跳转到 `/admin`
+2. **角色与路由对应**
+   - 业主 `OWNER` → `/owner/*`
+   - 维修人员 `WORKER` → `/worker/*`
+   - 物业人员 `PROPERTY_STAFF` / 管理员 `ADMIN` → `/admin/*`
 
-3. **Agent 公告意图拆分**
-   - `notice` 拆为 `notice_query`（查询）和 `notice_publish`（发布）
-   - 新增 `list_notices` 工具，避免误发公告
+3. **业主端完整子页面**
+   - 首页 `/owner`、AI 助手 `/owner/ai`、报修 `/owner/repair`、查费 `/owner/fees`、公告 `/owner/notices`、工单 `/owner/tickets`
+   - 统一使用 `OwnerShell`，显示真实用户名，支持退出登录
 
-4. **CI 已全绿**
-   - 修复了 alembic 工作目录、REPO_ROOT 导入等导致 Actions 失败的问题
+4. **维修人员端工单处理台**
+   - 路由 `/worker`，支持接单、切换状态（ASSIGNED/PROCESSING/COMPLETED/CLOSED）
 
 ### 8.2 当前代码状态
 
 - 工作区：**干净**（`git status --short` 无输出）
-- 最新 commit：`8339ecb docs(handoff): mark owner home page as completed and update next steps`
+- 最新 commit：`c5d5f09 chore(config): update CORS, SECRET_KEY defaults and add repair assign/status APIs`
 - 远端 `main` 已同步，可直接 `git pull`
-- 后端测试：**56/56 通过**
-- 前端构建：**通过**，`npm audit` 0 漏洞
+- 后端测试：**61/61 通过**
+- 前端构建：**通过**
 
 ### 8.3 队员接手后如何验证
 
@@ -214,14 +217,16 @@ docker compose -f docker-compose.monitoring.yml up -d
 # 1. 启动全栈
 docker compose up -d --build
 
-# 2. 业主端首页
-open http://localhost:3000/owner
+# 2. 设置演示密码（首次或重新导入种子数据后执行一次）
+docker compose exec backend python scripts/set_demo_passwords.py
 
-# 3. 物业端后台
-open http://localhost:3000/admin
+# 3. 打开统一门户
+open http://localhost:3000/
 
-# 4. 后端健康检查
-curl http://localhost:8000/api/health
+# 4. 用演示账号登录
+curl -s http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"guoyi378","password":"123456"}' | python -m json.tool
 
 # 5. 后端测试
 cd backend
@@ -234,18 +239,16 @@ npm run build
 
 ### 8.4 建议下一步优先级
 
-按业务闭环和依赖顺序，建议先做：
-
-1. **业主端 AI 助手聊天页**（`/owner/ai`）—— 复用 `/api/agent/chat` 即可快速闭环
-2. **业主端报修页**（`/owner/repair`）—— 调用现有报修 API
-3. **业主端查费页**（`/owner/fees`）—— 调用费用 API
-4. **权限认证**（JWT + 角色）—— 在子页面多起来之前引入，避免返工
-5. **维修人员端**（`/worker`）—— 独立角色，依赖认证
+1. **业务 API 权限校验**：把 `get_current_user` 接到公告发布、工单分配、费用查询等接口
+2. **业主端数据接入**：首页/子页面接入真实 API（费用、公告、工单、创建报修）
+3. **维修人员端完善**：增加“我的”页面、工单详情、扫码/拍照上报
+4. **提升 RAG 效果**：解决 embedding 模型下载，或换用云端 embedding API
+5. **前端测试与 E2E 测试**
+6. **Docker 镜像自动推送 / 云部署**
 
 ### 8.5 需要队员注意的风险点
 
 - **前端路由**：使用了 `BrowserRouter`，Nginx 已配置 `try_files`，直接访问 `/owner` 不会 404。
-- **图标统一**：业主端所有图标来自 `frontend/src/components/owner/icons.tsx`，新增页面请复用。
-- **业主端样式隔离**：业主端样式写在 `OwnerHome.css` 中，变量以 `--owner-` 为前缀，避免和 `index.css` 的物业端样式冲突。
-- **API 暂未接入**：当前业主端首页数据是静态的（费用、公告），后续需连接真实 API。
-- **真实 LLM 未配置**：`.env` 里 `LLM_API_KEY` 为空时自动走规则 fallback，不影响测试。
+- **演示密码**：`scripts/set_demo_passwords.py` 会把所有用户密码改成 `123456`，**生产环境绝对不能运行**。
+- **SECRET_KEY**：生产部署必须替换 `docker-compose.prod.yml` 里的 `SECRET_KEY`。
+- **API 权限待细化**：目前只做了登录 + 路由角色守卫，业务接口本身仍开放。
