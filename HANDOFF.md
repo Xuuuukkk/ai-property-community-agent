@@ -25,6 +25,7 @@
 | Phase 5 | AI Agent System（LangGraph 路由 + Tool + RAG 接入） | ✅ |
 | Phase 6 | Agent Evaluation（轨迹表、评估数据集、指标、报告） | ✅ |
 | Phase 7 | Deployment（配置管理、生产 Compose、Nginx、CI/CD、日志监控、备份） | ✅ |
+| 增强 | 接入真实 LLM（意图分类 + 回答生成，无 key 时自动 fallback） | ✅ |
 
 **关键验证结果：**
 
@@ -45,22 +46,19 @@
 但仍有几个功能增强项未做（不影响部署）：
 
 1. **RAG 语义检索效果差**：当前 embedding 用的是 `deterministic` fallback（因为 sentence-transformers 默认模型下载失败），导致 Recall@5 只有 25%。
-2. **意图分类器是规则-based**：对边缘输入会误判为 `unknown`。
-3. **Agent 还没接真实 LLM**：目前决策是硬编码规则，便于测试但泛化能力有限。
-4. **没有权限/认证系统**：公告发布等操作目前是开放的。
+2. **没有权限/认证系统**：公告发布等操作目前是开放的。
+3. **前端测试与 E2E 测试**尚未补充。
 
 ---
 
 ## 4. 下一步计划是什么
 
-文档内 Phase 7 已完成。后续可选方向：
+文档内 Phase 7 已完成，真实 LLM 也已接入。后续可选方向：
 
-1. **接入真实 LLM**（OpenAI / 兼容 API），把 router 和 domain agent 从规则改为模型驱动
-2. **提升 RAG 效果**：解决 embedding 模型下载，或换用云端 embedding API
-3. **完善意图分类器**：补充更多训练样例或换用 LLM 分类
-4. **添加权限认证**：JWT + 角色权限（业主/物业）
-5. **前端测试与 E2E 测试**
-6. **Docker 镜像自动推送 / 云部署**（CI/CD 目前只验证配置和构建，不推送镜像）
+1. **提升 RAG 效果**：解决 embedding 模型下载，或换用云端 embedding API
+2. **添加权限认证**：JWT + 角色权限（业主/物业）
+3. **前端测试与 E2E 测试**
+4. **Docker 镜像自动推送 / 云部署**（CI/CD 目前只验证配置和构建，不推送镜像）
 
 ---
 
