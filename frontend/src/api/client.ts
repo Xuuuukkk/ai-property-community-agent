@@ -75,11 +75,12 @@ export const api = {
   getUser: (id: number) => fetchJson<User>(`/api/users/${id}`),
   getWorkerUser: (id: number) => fetchJson<UserProfile>(`/api/users/${id}`),
 
-  listRepairs: (params: { page?: number; page_size?: number; user_id?: number; status?: string } = {}) => {
+  listRepairs: (params: { page?: number; page_size?: number; user_id?: number; worker_id?: number; status?: string } = {}) => {
     const search = new URLSearchParams()
     if (params.page) search.append('page', String(params.page))
     if (params.page_size) search.append('page_size', String(params.page_size))
     if (params.user_id) search.append('user_id', String(params.user_id))
+    if (params.worker_id) search.append('worker_id', String(params.worker_id))
     if (params.status) search.append('status', params.status)
     return fetchJson<RepairListResponse>(`/api/repair/list?${search.toString()}`)
   },

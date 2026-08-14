@@ -1,12 +1,20 @@
 import { ChevronRight, Sparkles, Wrench } from 'lucide-react'
 import type { Notice } from '../api/types'
 
-export function SectionTitle({ title, link }: { title: string; link?: string }) {
+export function SectionTitle({
+  title,
+  link,
+  onLinkClick,
+}: {
+  title: string
+  link?: string
+  onLinkClick?: () => void
+}) {
   return (
     <div className="section-title">
       <h3>{title}</h3>
       {link && (
-        <button>
+        <button onClick={onLinkClick}>
           {link}
           <ChevronRight size={13} />
         </button>
@@ -67,14 +75,16 @@ export function Ticket({
   code,
   status,
   time,
+  onClick,
 }: {
   title: string
   code: string
   status: string
   time: string
+  onClick?: () => void
 }) {
   return (
-    <div className="ticket">
+    <div className="ticket" onClick={onClick} style={onClick ? { cursor: 'pointer' } : undefined}>
       <div className="ticket-icon">
         <Wrench size={17} />
       </div>

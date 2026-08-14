@@ -50,11 +50,19 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse
     return TokenResponse(
         access_token=access_token,
         expires_in=int(expires_delta.total_seconds()),
-        user=UserResponse.model_validate(user),
+        user=_user_response_with_worker_id(user),
     )
 
 
 @router.get("/me", response_model=UserResponse)
 def me(current_user=Depends(get_current_user)) -> UserResponse:
     """Return the currently authenticated user."""
-    return UserResponse.model_validate(current_user)
+    return _user_response_with_worker_id(current_user)
+
+
+def _user_response_with_worker_id(user) -> UserResponse:
+    """Build a UserResponse and include the linked worker id if present."""
+    data = UserResponse.model_validate(user).model_dump()
+    if user.worker_profile:
+        data["worker_id"] = user.worker_profile.id
+    return UserResponse(**data)

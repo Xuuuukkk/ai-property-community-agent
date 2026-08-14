@@ -15,4 +15,5 @@ class UserResponse(BaseModel):
     real_name: str | None = None
     phone: str | None = None
     role: str
+    worker_id: int | None = None
     created_at: datetime

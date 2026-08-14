@@ -12,7 +12,15 @@ import OwnerServices from './pages/owner/OwnerServices'
 import OwnerAiChat from './pages/owner/OwnerAiChat'
 import OwnerProfile from './pages/owner/OwnerProfile'
 import ManagementHome from './pages/management/ManagementHome'
+import ManagementRepairs from './pages/management/ManagementRepairs'
+import ManagementNotices from './pages/management/ManagementNotices'
+import ManagementFees from './pages/management/ManagementFees'
+import ManagementUsers from './pages/management/ManagementUsers'
+import ManagementProfile from './pages/management/ManagementProfile'
 import RepairHome from './pages/repair/RepairHome'
+import RepairOrders from './pages/repair/RepairOrders'
+import RepairMessages from './pages/repair/RepairMessages'
+import RepairProfile from './pages/repair/RepairProfile'
 import StatusBar from './components/StatusBar'
 
 function roleHome(role: UserRole) {
@@ -74,8 +82,17 @@ function AppShell({ children }: { children: React.ReactNode }) {
             <button className="nav-item" onClick={() => window.location.href = '/management'}>
               <span>物业首页</span>
             </button>
+            <button className="nav-item" onClick={() => window.location.href = '/management/repairs'}>
+              <span>物业·工单</span>
+            </button>
+            <button className="nav-item" onClick={() => window.location.href = '/management/notices'}>
+              <span>物业·公告</span>
+            </button>
             <button className="nav-item" onClick={() => window.location.href = '/repair'}>
               <span>维修首页</span>
+            </button>
+            <button className="nav-item" onClick={() => window.location.href = '/repair/orders'}>
+              <span>维修·工单</span>
             </button>
           </div>
           <div className="nav-footer">
@@ -120,10 +137,18 @@ function AppRoutes() {
 
       <Route element={<ProtectedLayout allowedRoles={['WORKER']} />}>
         <Route path="/repair" element={<RepairHome />} />
+        <Route path="/repair/orders" element={<RepairOrders />} />
+        <Route path="/repair/messages" element={<RepairMessages />} />
+        <Route path="/repair/profile" element={<RepairProfile />} />
       </Route>
 
       <Route element={<ProtectedLayout allowedRoles={['PROPERTY_STAFF', 'ADMIN']} />}>
         <Route path="/management" element={<ManagementHome />} />
+        <Route path="/management/repairs" element={<ManagementRepairs />} />
+        <Route path="/management/notices" element={<ManagementNotices />} />
+        <Route path="/management/fees" element={<ManagementFees />} />
+        <Route path="/management/users" element={<ManagementUsers />} />
+        <Route path="/management/profile" element={<ManagementProfile />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

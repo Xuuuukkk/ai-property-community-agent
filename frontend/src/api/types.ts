@@ -11,6 +11,7 @@ export interface User {
   real_name: string | null
   phone: string | null
   role: string
+  worker_id: number | null
   created_at: string
 }
 

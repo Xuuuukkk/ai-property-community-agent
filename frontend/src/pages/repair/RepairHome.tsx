@@ -1,11 +1,72 @@
 import { Bell, Wrench } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { api } from '../../api/client'
+import type { RepairOrder } from '../../api/types'
 import { useAuth } from '../../contexts/AuthContext'
 import AppHeader from '../../components/AppHeader'
 import BottomNav from '../../components/BottomNav'
 import { SectionTitle, Stat, Ticket } from '../../components/common'
 
+const TYPE_LABELS: Record<string, string> = {
+  water_leak: '漏水',
+  elevator_fault: '电梯故障',
+  access_control: '门禁故障',
+  power_trip: '跳闸',
+  wall_seepage: '墙面渗水',
+  public_facility: '公共设施',
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  CREATED: '待处理',
+  ASSIGNED: '待接单',
+  PROCESSING: '处理中',
+  COMPLETED: '已完成',
+  CLOSED: '已关闭',
+}
+
 export default function RepairHome() {
   const { user } = useAuth()
+  const navigate = useNavigate()
+  const [orders, setOrders] = useState<RepairOrder[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!user?.worker_id) return
+    api
+      .listRepairs({ worker_id: user.worker_id, page_size: 100 })
+      .then((res) => setOrders(res.items))
+      .finally(() => setLoading(false))
+  }, [user?.worker_id])
+
+  const assigned = useMemo(
+    () => orders.filter((o) => o.status === 'ASSIGNED'),
+    [orders]
+  )
+  const processing = useMemo(
+    () => orders.filter((o) => o.status === 'PROCESSING'),
+    [orders]
+  )
+  const completed = useMemo(
+    () => orders.filter((o) => o.status === 'COMPLETED' || o.status === 'CLOSED'),
+    [orders]
+  )
+
+  const pendingOrders = useMemo(
+    () => [...assigned, ...processing].sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at)).slice(0, 5),
+    [assigned, processing]
+  )
+
+  const completionRate = useMemo(() => {
+    const total = orders.length
+    if (total === 0) return 0
+    return Math.round((completed.length / total) * 100)
+  }, [orders, completed])
+
+  const formatTime = (iso: string) => {
+    const d = new Date(iso)
+    return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  }
 
   return (
     <div className="page dashboard-page">
@@ -28,29 +89,47 @@ export default function RepairHome() {
           <div>
             <span>今日待办</span>
             <strong>
-              8 <small>项维修任务</small>
+              {loading ? '-' : String(assigned.length + processing.length)} <small>项维修任务</small>
             </strong>
           </div>
           <div className="progress-ring">
-            68<small>%</small>
+            {loading ? '-' : completionRate}
+            <small>%</small>
           </div>
         </div>
 
-        <SectionTitle title="任务状态" link="全部任务" />
+        <SectionTitle title="任务状态" link="全部任务" onLinkClick={() => navigate('/repair/orders')} />
         <div className="stat-grid repair-stats">
-          <Stat value="3" label="待接单" />
-          <Stat value="2" label="处理中" />
-          <Stat value="3" label="已完成" />
+          <Stat value={loading ? '-' : String(assigned.length)} label="待接单" />
+          <Stat value={loading ? '-' : String(processing.length)} label="处理中" />
+          <Stat value={loading ? '-' : String(completed.length)} label="已完成" />
         </div>
 
-        <SectionTitle title="待处理工单" link="查看更多" />
+        <SectionTitle title="待处理工单" link="查看更多" onLinkClick={() => navigate('/repair/orders')} />
         <div className="ticket-list">
-          <Ticket title="厨房水龙头漏水" code="RW20250811001" status="待接单" time="08-11 09:30" />
-          <Ticket title="电梯按钮故障" code="RW20250811002" status="处理中" time="08-11 09:15" />
-          <Ticket title="楼道灯维修" code="RW20250811003" status="待接单" time="08-11 08:42" />
+          {loading ? (
+            <div style={{ padding: '20px', textAlign: 'center', color: '#7e8587', fontSize: 12 }}>加载中...</div>
+          ) : pendingOrders.length === 0 ? (
+            <div style={{ padding: '20px', textAlign: 'center', color: '#7e8587', fontSize: 12 }}>暂无待处理工单</div>
+          ) : (
+            pendingOrders.map((o) => (
+              <Ticket
+                key={o.id}
+                title={TYPE_LABELS[o.type] ?? o.type}
+                code={o.order_no}
+                status={STATUS_LABELS[o.status] ?? o.status}
+                time={formatTime(o.created_at)}
+                onClick={() => navigate(`/repair/orders/${o.id}`)}
+              />
+            ))
+          )}
         </div>
       </div>
-      <BottomNav active="work" labels={['首页', '工单', '消息', '我的']} />
+      <BottomNav
+        active="home"
+        labels={['首页', '工单', '消息', '我的']}
+        paths={['/repair', '/repair/orders', '/repair/messages', '/repair/profile']}
+      />
     </div>
   )
 }

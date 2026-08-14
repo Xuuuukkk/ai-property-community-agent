@@ -25,6 +25,7 @@ def list_repairs(
     page: int = Query(1, ge=1, description="Page number"),
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
     user_id: int | None = Query(None, description="Filter by reporter user ID"),
+    worker_id: int | None = Query(None, description="Filter by assigned worker ID"),
     status: str | None = Query(None, description="Filter by repair status"),
     db: Session = Depends(get_db),
 ) -> RepairListResponse:
@@ -34,6 +35,7 @@ def list_repairs(
         page=page,
         page_size=page_size,
         user_id=user_id,
+        worker_id=worker_id,
         status=status,
     )
     pages = (total + page_size - 1) // page_size

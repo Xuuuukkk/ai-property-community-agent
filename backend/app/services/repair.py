@@ -51,12 +51,15 @@ class RepairService:
         page: int = 1,
         page_size: int = 20,
         user_id: int | None = None,
+        worker_id: int | None = None,
         status: str | None = None,
     ) -> tuple[list[RepairOrder], int]:
         """Return a paginated list of repair orders with optional filters."""
         filters: dict[str, object] = {}
         if user_id is not None:
             filters["user_id"] = user_id
+        if worker_id is not None:
+            filters["worker_id"] = worker_id
         if status is not None:
             filters["status"] = status
         return repair_repository.list_paginated(
