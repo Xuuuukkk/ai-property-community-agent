@@ -5,16 +5,17 @@ interface BottomNavProps {
   active: 'home' | 'work' | 'manage' | 'mine'
   labels: string[]
   paths?: string[]
+  fixed?: boolean
 }
 
 const icons = [<House />, <ClipboardList />, <MessageCircle />, <UserRound />]
 const keys: BottomNavProps['active'][] = ['home', 'work', 'manage', 'mine']
 
-export default function BottomNav({ active, labels, paths }: BottomNavProps) {
+export default function BottomNav({ active, labels, paths, fixed = true }: BottomNavProps) {
   const navigate = useNavigate()
 
   return (
-    <nav className="bottom-nav">
+    <nav className="bottom-nav" style={fixed ? undefined : { position: 'relative' }}>
       {labels.map((label, index) => (
         <button
           key={label}

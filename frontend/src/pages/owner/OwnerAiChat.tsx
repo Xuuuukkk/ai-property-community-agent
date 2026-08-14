@@ -128,6 +128,7 @@ export default function OwnerAiChat() {
         active="manage"
         labels={['首页', '服务', 'AI助手', '我的']}
         paths={['/owner', '/owner/services', '/owner/ai', '/owner/profile']}
+        fixed={false}
       />
     </div>
   )
