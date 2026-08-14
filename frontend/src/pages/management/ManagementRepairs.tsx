@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../api/client'
-import type { RepairOrder } from '../../api/types'
+import type { RepairOrder, Worker } from '../../api/types'
 import AppHeader from '../../components/AppHeader'
 import BottomNav from '../../components/BottomNav'
 import { SectionTitle } from '../../components/common'
@@ -73,17 +73,33 @@ const btnDefault: React.CSSProperties = {
   color: '#20324b',
 }
 
+const selectStyle: React.CSSProperties = {
+  padding: '7px 10px',
+  borderRadius: 8,
+  fontSize: 11,
+  border: '1px solid #d5d8d6',
+  background: '#fff',
+  color: '#20324b',
+  minWidth: 120,
+}
+
 export default function ManagementRepairs() {
   const navigate = useNavigate()
   const [orders, setOrders] = useState<RepairOrder[]>([])
+  const [workers, setWorkers] = useState<Worker[]>([])
   const [filter, setFilter] = useState<string>('ALL')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setLoading(true)
-    api
-      .listRepairs({ page_size: 100 })
-      .then((res) => setOrders(res.items))
+    Promise.all([
+      api.listRepairs({ page_size: 100 }),
+      api.listWorkers({ status: 'ON_DUTY', department: 'engineering' }),
+    ])
+      .then(([repairsRes, workersRes]) => {
+        setOrders(repairsRes.items)
+        setWorkers(workersRes)
+      })
       .finally(() => setLoading(false))
   }, [])
 
@@ -95,14 +111,26 @@ export default function ManagementRepairs() {
   }
 
   const assignWorker = async (id: number, workerId: number) => {
-    await api.assignRepair(id, { worker_id: workerId })
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, worker_id: workerId, status: 'ASSIGNED' } : o)))
+    if (!workerId) return
+    const updated = await api.assignRepair(id, { worker_id: workerId })
+    setOrders((prev) => prev.map((o) => (o.id === id ? updated : o)))
   }
 
   const formatTime = (iso: string) => {
     const d = new Date(iso)
     return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
   }
+
+  const assignedWorkerName = (order: RepairOrder) => {
+    if (order.worker?.real_name) return order.worker.real_name
+    if (order.worker_id) {
+      const w = workers.find((x) => x.id === order.worker_id)
+      return w?.real_name ?? `师傅#${order.worker_id}`
+    }
+    return '未分配'
+  }
+
+  const canDispatch = (status: string) => status === 'CREATED' || status === 'ASSIGNED'
 
   return (
     <div className="page dashboard-page">
@@ -145,21 +173,34 @@ export default function ManagementRepairs() {
                 </p>
                 <p style={{ margin: 0, color: '#8d9497', fontSize: 10 }}>创建时间：{formatTime(o.created_at)}</p>
 
-                <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
-                  {o.status === 'CREATED' && (
+                {o.worker_id !== null && o.worker_id !== undefined && (
+                  <p style={{ margin: '8px 0 0', color: '#20324b', fontSize: 12 }}>
+                    当前师傅：<strong>{assignedWorkerName(o)}</strong>
+                    {o.worker?.phone ? ` · ${o.worker.phone}` : ''}
+                  </p>
+                )}
+
+                <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+                  {canDispatch(o.status) && (
                     <>
-                      <button style={btnPrimary} onClick={() => updateStatus(o.id, 'ASSIGNED')}>
-                        派单
-                      </button>
-                      <button style={btnDefault} onClick={() => assignWorker(o.id, 11)}>
-                        分配给杨飞
-                      </button>
+                      <select
+                        style={selectStyle}
+                        value={o.worker_id ?? ''}
+                        onChange={(e) => assignWorker(o.id, Number(e.target.value))}
+                      >
+                        <option value="">{o.worker_id ? '改派师傅' : '选择师傅'}</option>
+                        {workers.map((w) => (
+                          <option key={w.id} value={w.id}>
+                            {w.real_name ?? `师傅#${w.id}`} · {w.skill_type ?? w.position ?? '维修'}
+                          </option>
+                        ))}
+                      </select>
+                      {!o.worker_id && (
+                        <button style={btnPrimary} onClick={() => updateStatus(o.id, 'ASSIGNED')}>
+                          派单
+                        </button>
+                      )}
                     </>
-                  )}
-                  {o.status === 'ASSIGNED' && (
-                    <button style={btnPrimary} onClick={() => updateStatus(o.id, 'PROCESSING')}>
-                      开始处理
-                    </button>
                   )}
                   {o.status === 'PROCESSING' && (
                     <button style={btnPrimary} onClick={() => updateStatus(o.id, 'COMPLETED')}>

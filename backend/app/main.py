@@ -15,6 +15,7 @@ from app.api.routes import (
     notices_router,
     repair_router,
     users_router,
+    workers_router,
 )
 from app.core.config import get_settings
 from app.core.logging import RequestLoggingMiddleware, configure_logging
@@ -53,6 +54,7 @@ def create_app() -> FastAPI:
 
     # Phase 3 business routers
     app.include_router(users_router, prefix=settings.API_PREFIX)
+    app.include_router(workers_router, prefix=settings.API_PREFIX)
     app.include_router(repair_router, prefix=settings.API_PREFIX)
     app.include_router(fee_router, prefix=settings.API_PREFIX)
     app.include_router(notices_router, prefix=settings.API_PREFIX)

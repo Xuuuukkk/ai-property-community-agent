@@ -68,6 +68,19 @@ export interface UserProfile {
   created_at: string
 }
 
+export interface Worker {
+  id: number
+  user_id: number
+  real_name: string | null
+  phone: string | null
+  department: string
+  position: string | null
+  skill_type: string | null
+  status: string
+  hire_date: string | null
+  created_at: string
+}
+
 export interface RepairListResponse {
   items: RepairOrder[]
   pagination: PageInfo

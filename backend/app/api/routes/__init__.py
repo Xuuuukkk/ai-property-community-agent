@@ -8,6 +8,7 @@ from app.api.routes.knowledge import router as knowledge_router
 from app.api.routes.notices import router as notices_router
 from app.api.routes.repair import router as repair_router
 from app.api.routes.users import router as users_router
+from app.api.routes.workers import router as workers_router
 
 __all__ = [
     "agent_router",
@@ -18,4 +19,5 @@ __all__ = [
     "notices_router",
     "repair_router",
     "users_router",
+    "workers_router",
 ]

@@ -9,6 +9,7 @@ import type {
   RepairListResponse,
   User,
   UserProfile,
+  Worker,
   AgentChatRequest,
   AgentChatResponse,
 } from './types'
@@ -74,6 +75,13 @@ export const api = {
 
   getUser: (id: number) => fetchJson<User>(`/api/users/${id}`),
   getWorkerUser: (id: number) => fetchJson<UserProfile>(`/api/users/${id}`),
+
+  listWorkers: (params: { status?: string; department?: string } = {}) => {
+    const search = new URLSearchParams()
+    if (params.status) search.append('status', params.status)
+    if (params.department) search.append('department', params.department)
+    return fetchJson<Worker[]>(`/api/workers?${search.toString()}`)
+  },
 
   listRepairs: (params: { page?: number; page_size?: number; user_id?: number; worker_id?: number; status?: string } = {}) => {
     const search = new URLSearchParams()
@@ -148,4 +156,5 @@ export type {
   Notice,
   NoticeListResponse,
   UserProfile,
+  Worker,
 } from './types'
