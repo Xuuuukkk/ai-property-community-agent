@@ -153,11 +153,18 @@ export default function RepairOrders() {
   const formatAddress = (house: RepairOrder['house']) => {
     if (!house) return '暂无地址'
     const building = house.building_no || ''
-    const room = house.room_no || ''
-    if (room && building && room.startsWith(building)) {
-      return room
-    }
-    return [building, room].filter(Boolean).join('-')
+    const unit = house.unit_no
+    const floor = house.floor_no
+    // room_no is stored as "B3-2U-15F-01"; derive the room suffix when possible.
+    const roomSuffix = (house.room_no || '').split('-').pop() || ''
+
+    const parts: string[] = []
+    if (building) parts.push(`${building}栋`)
+    if (unit) parts.push(`${unit}单元`)
+    if (floor) parts.push(`${floor}楼`)
+    if (roomSuffix) parts.push(`${roomSuffix}室`)
+
+    return parts.length > 0 ? parts.join('') : house.room_no || '暂无地址'
   }
 
   return (
