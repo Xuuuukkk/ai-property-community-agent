@@ -31,16 +31,16 @@ class RepairService:
         3. Least recently assigned (lowest worker id as a simple heuristic).
         """
         skill_map = {
-            "water_leak": "plumbing",
-            "elevator_fault": "elevator",
-            "access_control": "security",
-            "power_trip": "electrical",
-            "wall_seepage": "plumbing",
-            "public_facility": "general",
+            "water_leak": "水电",
+            "elevator_fault": "电梯",
+            "access_control": "安保",
+            "power_trip": "水电",
+            "wall_seepage": "水电",
+            "public_facility": "维修",
         }
-        desired_skill = skill_map.get(repair.type, "general")
+        desired_skill = skill_map.get(repair.type, "维修")
 
-        query = db.query(Worker).filter(Worker.status == "ON_DUTY")
+        query = db.query(Worker).filter(Worker.status == "在岗")
         skilled = (
             query.filter(Worker.skill_type.ilike(f"%{desired_skill}%"))
             .order_by(Worker.id)

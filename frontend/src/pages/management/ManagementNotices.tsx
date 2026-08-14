@@ -14,6 +14,7 @@ export default function ManagementNotices() {
   const [loading, setLoading] = useState(true)
   const [form, setForm] = useState({ title: '', content: '' })
   const [saving, setSaving] = useState(false)
+  const [expandedId, setExpandedId] = useState<number | null>(null)
 
   const load = () => {
     setLoading(true)
@@ -111,26 +112,45 @@ export default function ManagementNotices() {
             {notices.map((n) => (
               <div
                 key={n.id}
+                onClick={() => setExpandedId(expandedId === n.id ? null : n.id)}
                 style={{
                   display: 'flex',
-                  alignItems: 'center',
+                  flexDirection: 'column',
                   minHeight: 42,
                   borderBottom: '1px solid #f0f1ef',
-                  gap: 8,
+                  gap: 6,
                   fontSize: 11,
+                  padding: '10px 0',
+                  cursor: 'pointer',
                 }}
               >
-                <span
-                  style={{
-                    color: n.is_pinned ? '#ad8a45' : '#a3a5a4',
-                    background: n.is_pinned ? '#f5ecd7' : 'transparent',
-                    padding: n.is_pinned ? '2px 4px' : 0,
-                  }}
-                >
-                  {n.is_pinned ? '置顶' : '通知'}
-                </span>
-                <b style={{ flex: 1, fontWeight: 500 }}>{n.title}</b>
-                <time style={{ color: '#8b9194' }}>{formatDate(n.created_at)}</time>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span
+                    style={{
+                      color: n.is_pinned ? '#ad8a45' : '#a3a5a4',
+                      background: n.is_pinned ? '#f5ecd7' : 'transparent',
+                      padding: n.is_pinned ? '2px 4px' : 0,
+                      borderRadius: 3,
+                    }}
+                  >
+                    {n.is_pinned ? '置顶' : '通知'}
+                  </span>
+                  <b style={{ flex: 1, fontWeight: 500 }}>{n.title}</b>
+                  <time style={{ color: '#8b9194', whiteSpace: 'nowrap' }}>{formatDate(n.created_at)}</time>
+                </div>
+                {expandedId === n.id && n.content && (
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: '#4a5568',
+                      lineHeight: 1.7,
+                      whiteSpace: 'pre-line',
+                      padding: '6px 0',
+                    }}
+                  >
+                    {n.content}
+                  </div>
+                )}
               </div>
             ))}
           </div>
