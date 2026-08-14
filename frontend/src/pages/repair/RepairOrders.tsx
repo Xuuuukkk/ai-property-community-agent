@@ -86,9 +86,9 @@ export default function RepairOrders() {
   const load = () => {
     if (!user?.worker_id) return
     setLoading(true)
-    api
-      .listRepairs({ worker_id: user.worker_id, page_size: 200 })
-      .then((res) => setOrders(res.items))
+      api
+        .listRepairs({ worker_id: user.worker_id, page_size: 100 })
+        .then((res) => setOrders(res.items))
       .finally(() => setLoading(false))
   }
 

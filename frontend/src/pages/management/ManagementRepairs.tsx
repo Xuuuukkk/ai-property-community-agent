@@ -82,7 +82,7 @@ export default function ManagementRepairs() {
   useEffect(() => {
     setLoading(true)
     api
-      .listRepairs({ page_size: 200 })
+      .listRepairs({ page_size: 100 })
       .then((res) => setOrders(res.items))
       .finally(() => setLoading(false))
   }, [])
