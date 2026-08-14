@@ -57,11 +57,31 @@ export default function RepairHome() {
     [assigned, processing]
   )
 
-  const completionRate = useMemo(() => {
-    const total = orders.length
+  const isToday = (iso: string) => {
+    const d = new Date(iso)
+    const now = new Date()
+    return (
+      d.getFullYear() === now.getFullYear() &&
+      d.getMonth() === now.getMonth() &&
+      d.getDate() === now.getDate()
+    )
+  }
+
+  const todayOrders = useMemo(() => orders.filter((o) => isToday(o.created_at)), [orders])
+  const todayPending = useMemo(
+    () => todayOrders.filter((o) => o.status === 'ASSIGNED' || o.status === 'PROCESSING'),
+    [todayOrders]
+  )
+  const todayCompleted = useMemo(
+    () => todayOrders.filter((o) => o.status === 'COMPLETED' || o.status === 'CLOSED'),
+    [todayOrders]
+  )
+
+  const todayCompletionRate = useMemo(() => {
+    const total = todayOrders.length
     if (total === 0) return 0
-    return Math.round((completed.length / total) * 100)
-  }, [orders, completed])
+    return Math.round((todayCompleted.length / total) * 100)
+  }, [todayOrders, todayCompleted])
 
   const formatTime = (iso: string) => {
     const d = new Date(iso)
@@ -89,11 +109,11 @@ export default function RepairHome() {
           <div>
             <span>今日待办</span>
             <strong>
-              {loading ? '-' : String(assigned.length + processing.length)} <small>项维修任务</small>
+              {loading ? '-' : String(todayPending.length)} <small>项维修任务</small>
             </strong>
           </div>
           <div className="progress-ring">
-            {loading ? '-' : completionRate}
+            {loading ? '-' : todayCompletionRate}
             <small>%</small>
           </div>
         </div>
