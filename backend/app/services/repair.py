@@ -6,6 +6,7 @@ from uuid import uuid4
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session, selectinload
 
+from app.models.building import Building
 from app.models.house import House
 from app.models.repair_order import RepairOrder
 from app.models.worker import Worker
@@ -79,8 +80,10 @@ class RepairService:
             db.query(RepairOrder)
             .options(
                 selectinload(RepairOrder.user),
-                selectinload(RepairOrder.house).selectinload(House.building),
-                selectinload(RepairOrder.worker),
+                selectinload(RepairOrder.house)
+                .selectinload(House.building)
+                .selectinload(Building.community),
+                selectinload(RepairOrder.worker).selectinload(Worker.user),
             )
             .filter(RepairOrder.id == repair_id)
             .first()
@@ -107,8 +110,10 @@ class RepairService:
             db.query(RepairOrder)
             .options(
                 selectinload(RepairOrder.user),
-                selectinload(RepairOrder.house),
-                selectinload(RepairOrder.worker),
+                selectinload(RepairOrder.house)
+                .selectinload(House.building)
+                .selectinload(Building.community),
+                selectinload(RepairOrder.worker).selectinload(Worker.user),
             )
         )
         if user_id is not None:
