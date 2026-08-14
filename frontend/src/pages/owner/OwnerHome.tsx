@@ -1,204 +1,66 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {
-  AiIcon,
-  ArrowRightIcon,
-  BellIcon,
-  FeeIcon,
-  NoticeIcon,
-  QrIcon,
-  RepairIcon,
-  TicketIcon,
-} from '../../components/owner/icons'
-import { api } from '../../api/client'
+  CircleUserRound,
+  FileText,
+  Megaphone,
+  MessageCircle,
+  Receipt,
+  ScanLine,
+  Wrench,
+} from 'lucide-react'
+import AppHeader from '../../components/AppHeader'
+import BottomNav from '../../components/BottomNav'
+import { NoticeList, SectionTitle, ServiceItem } from '../../components/common'
 import { useAuth } from '../../contexts/AuthContext'
-import type { Notice } from '../../api/types'
-import OwnerShell from './OwnerShell'
-
-const QUICK_SERVICES = [
-  { key: 'repair', label: '报事服务', icon: RepairIcon },
-  { key: 'fee', label: '费用查询', icon: FeeIcon },
-  { key: 'notice', label: '社区公告', icon: NoticeIcon },
-  { key: 'ticket', label: '我的工单', icon: TicketIcon },
-] as const
-
-const NOTICES_MOCK: Notice[] = [
-  {
-    id: 1,
-    title: '关于小区公共区域消杀的通知',
-    content: '',
-    publisher_id: 1,
-    notice_type: '安全通知',
-    is_pinned: true,
-    status: 'PUBLISHED',
-    created_at: '2026-08-10',
-  },
-  {
-    id: 2,
-    title: '6月电梯维护保养安排公告',
-    content: '',
-    publisher_id: 1,
-    notice_type: '设施通知',
-    is_pinned: false,
-    status: 'PUBLISHED',
-    created_at: '2026-08-09',
-  },
-  {
-    id: 3,
-    title: '端午节放假及温馨提示',
-    content: '',
-    publisher_id: 1,
-    notice_type: '社区活动',
-    is_pinned: false,
-    status: 'PUBLISHED',
-    created_at: '2026-08-08',
-  },
-]
 
 export default function OwnerHome() {
-  const navigate = useNavigate()
   const { user } = useAuth()
-  const [unpaidAmount] = useState<number>(1280.0)
-  const [notices, setNotices] = useState<Notice[]>(NOTICES_MOCK)
-
-  useEffect(() => {
-    api
-      .listNotices({ page_size: 3 })
-      .then((res) => {
-        if (res.items.length > 0) setNotices(res.items.slice(0, 3))
-      })
-      .catch(() => {
-        // keep mock data on error
-      })
-  }, [])
-
-  const today = useMemo(
-    () =>
-      new Intl.DateTimeFormat('zh-CN', {
-        month: 'long',
-        day: 'numeric',
-        weekday: 'long',
-      }).format(new Date()),
-    [],
-  )
-
-  const handleServiceClick = (key: string) => {
-    if (key === 'fee') navigate('/owner/fees')
-    else if (key === 'ticket') navigate('/owner/tickets')
-    else if (key === 'notice') navigate('/owner/notices')
-    else navigate(`/owner/${key}`)
-  }
-
-  const displayName = user?.real_name || user?.username || '业主'
-  const houseInfo = '2栋1单元1202室'
 
   return (
-    <OwnerShell activeTab="home">
-      <div className="yx-page">
-        <header className="yx-topbar">
-          <div className="yx-topbar-title">云溪花园智慧社区</div>
-          <button type="button" className="yx-bell" aria-label="通知">
-            <BellIcon />
-            <span className="yx-bell-dot" />
-          </button>
-        </header>
-
-        <main className="yx-main yx-container">
-          <div className="yx-profile-card yx-mb-12">
-            <div className="yx-avatar">{displayName.charAt(0)}</div>
-            <div className="yx-profile-info">
-              <div className="yx-profile-name">
-                {displayName}
-                <span className="yx-profile-role">业主</span>
-              </div>
-              <div className="yx-profile-meta">{houseInfo}</div>
-            </div>
-            <button type="button" className="yx-profile-extra" aria-label="二维码">
-              <QrIcon />
-            </button>
+    <div className="page dashboard-page">
+      <AppHeader title="云溪花园智慧社区" />
+      <div className="dashboard-scroll">
+        <div className="profile-card">
+          <div className="avatar">
+            <CircleUserRound size={40} />
           </div>
-
-          <section className="yx-card yx-mb-12">
-            <div className="yx-fee-row">
-              <div>
-                <div className="yx-fee-label">待缴费用总额（元）</div>
-                <div className="yx-fee-amount">{unpaidAmount.toLocaleString('zh-CN', { minimumFractionDigits: 2 })}</div>
-              </div>
-              <button
-                type="button"
-                className="yx-btn yx-btn-accent"
-                style={{ width: 'auto', padding: '8px 16px', fontSize: 13 }}
-                onClick={() => navigate('/owner/fees')}
-              >
-                去缴费
-              </button>
-            </div>
-          </section>
-
-          <section className="yx-card yx-mb-12">
-            <div className="yx-card-title">报事服务</div>
-            <div className="yx-services-grid">
-              {QUICK_SERVICES.map((service) => {
-                const Icon = service.icon
-                return (
-                  <button
-                    key={service.key}
-                    type="button"
-                    className="yx-service-item"
-                    onClick={() => handleServiceClick(service.key)}
-                  >
-                    <span className="yx-service-icon">
-                      <Icon />
-                    </span>
-                    <span>{service.label}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </section>
-
-          <section className="yx-card yx-mb-12">
-            <div className="yx-card-title">
-              社区公告
-              <button type="button" className="yx-card-link" onClick={() => navigate('/owner/notices')}>
-                查看更多 <ArrowRightIcon />
-              </button>
-            </div>
-            <div className="yx-notice-list">
-              {notices.map((notice) => (
-                <div key={notice.id} className="yx-notice-item">
-                  <span className="yx-notice-tag">{notice.notice_type}</span>
-                  <div className="yx-notice-content">
-                    <div className="yx-notice-title">{notice.title}</div>
-                  </div>
-                  <div className="yx-notice-date">{notice.created_at.slice(5, 10)}</div>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <button
-            type="button"
-            className="yx-ai-card"
-            onClick={() => navigate('/owner/ai')}
-          >
-            <span className="yx-ai-icon">
-              <AiIcon />
-            </span>
-            <div className="yx-ai-text">
-              <div className="yx-ai-title">AI 社区助手</div>
-              <div className="yx-ai-desc">有问题？问问社区助手</div>
-            </div>
-            <span style={{ color: '#687280' }}>
-              <ArrowRightIcon />
-            </span>
-          </button>
-
-          <div style={{ color: '#9aa3ad', fontSize: 12, textAlign: 'center', marginTop: 20 }}>
-            {today}
+          <div>
+            <strong>
+              {user?.real_name ?? user?.username ?? '业主'} <small>业主</small>
+            </strong>
+            <p>欢迎回到云溪花园</p>
           </div>
-        </main>
+          <ScanLine size={21} />
+        </div>
+
+        <div className="amount-card">
+          <div>
+            <span>未缴费用总额（元）</span>
+            <strong>1,280.00</strong>
+          </div>
+          <button>去缴费</button>
+        </div>
+
+        <SectionTitle title="快捷服务" />
+        <div className="service-grid four">
+          <ServiceItem icon={<Wrench />} label="报修服务" />
+          <ServiceItem icon={<Receipt />} label="费用查询" />
+          <ServiceItem icon={<Megaphone />} label="社区公告" />
+          <ServiceItem icon={<FileText />} label="我的工单" />
+        </div>
+
+        <NoticeList title="社区公告" />
+
+        <div className="ai-card">
+          <div>
+            <strong>AI 社区助手</strong>
+            <p>有问题？问问社区助手</p>
+          </div>
+          <div className="bot-bubble">
+            <MessageCircle size={27} />
+          </div>
+        </div>
       </div>
-    </OwnerShell>
+      <BottomNav active="home" labels={['首页', '服务', 'AI助手', '我的']} />
+    </div>
   )
 }

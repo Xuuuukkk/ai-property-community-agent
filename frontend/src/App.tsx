@@ -1,24 +1,27 @@
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext'
+import { AuthProvider, useAuth, type UserRole } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
-import AdminApp from './pages/admin/AdminApp'
-import AdminHome from './pages/admin/AdminHome'
-import AdminNotices from './pages/admin/AdminNotices'
-import AdminProfile from './pages/admin/AdminProfile'
-import AdminRepairs from './pages/admin/AdminRepairs'
+import WelcomePage from './pages/WelcomePage'
+import RoleSelectPage from './pages/RoleSelectPage'
 import LoginPage from './pages/LoginPage'
-import PortalHome from './pages/PortalHome'
-import OwnerAiChat from './pages/owner/OwnerAiChat'
-import OwnerFeePage from './pages/owner/OwnerFeePage'
 import OwnerHome from './pages/owner/OwnerHome'
-import OwnerNoticePage from './pages/owner/OwnerNoticePage'
-import OwnerProfile from './pages/owner/OwnerProfile'
-import OwnerRepairPage from './pages/owner/OwnerRepairPage'
-import OwnerServices from './pages/owner/OwnerServices'
-import OwnerTicketPage from './pages/owner/OwnerTicketPage'
-import RoleSelect from './pages/RoleSelect'
-import WorkerDashboard from './pages/worker/WorkerDashboard'
-import type { UserRole } from './contexts/AuthContext'
+import ManagementHome from './pages/management/ManagementHome'
+import RepairHome from './pages/repair/RepairHome'
+import StatusBar from './components/StatusBar'
+
+function roleHome(role: UserRole) {
+  if (role === 'OWNER') return '/owner'
+  if (role === 'WORKER') return '/repair'
+  if (role === 'PROPERTY_STAFF' || role === 'ADMIN') return '/management'
+  return '/'
+}
+
+function HomeRedirect() {
+  const { user, isLoading } = useAuth()
+  if (isLoading) return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>加载中...</div>
+  if (!user) return <WelcomePage />
+  return <Navigate to={roleHome(user.role as UserRole)} replace />
+}
 
 function ProtectedLayout({ allowedRoles }: { allowedRoles: UserRole[] }) {
   return (
@@ -28,36 +31,78 @@ function ProtectedLayout({ allowedRoles }: { allowedRoles: UserRole[] }) {
   )
 }
 
+function AppShell({ children }: { children: React.ReactNode }) {
+  return (
+    <main className="app-shell">
+      <div className="ambient ambient-one" />
+      <div className="ambient ambient-two" />
+      <div className="prototype-layout">
+        <aside className="prototype-nav">
+          <div className="nav-brand">
+            <span className="brand-mark">✦</span>
+            <span>云溪花园</span>
+          </div>
+          <p className="nav-caption">智慧社区 · UI 原型</p>
+          <div className="nav-list">
+            <button className="nav-item active" onClick={() => window.location.href = '/'}>
+              <span>启动页</span>
+            </button>
+            <button className="nav-item" onClick={() => window.location.href = '/roles'}>
+              <span>身份选择</span>
+            </button>
+            <button className="nav-item" onClick={() => window.location.href = '/login'}>
+              <span>账号登录</span>
+            </button>
+            <button className="nav-item" onClick={() => window.location.href = '/owner'}>
+              <span>业主首页</span>
+            </button>
+            <button className="nav-item" onClick={() => window.location.href = '/management'}>
+              <span>物业首页</span>
+            </button>
+            <button className="nav-item" onClick={() => window.location.href = '/repair'}>
+              <span>维修首页</span>
+            </button>
+          </div>
+          <div className="nav-footer">
+            <span className="status-dot" />
+            开发中<br />
+            <small>路由已打通</small>
+          </div>
+        </aside>
+        <section className="phone-stage">
+          <div className="phone-screen">
+            <StatusBar />
+            {children}
+          </div>
+        </section>
+        <div className="stage-label">
+          <span>移动端预览</span>
+          <span className="label-line" />
+          <span>云溪花园</span>
+        </div>
+      </div>
+    </main>
+  )
+}
+
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<PortalHome />} />
-      <Route path="/role-select" element={<RoleSelect />} />
+      <Route path="/" element={<HomeRedirect />} />
+      <Route path="/welcome" element={<WelcomePage />} />
+      <Route path="/roles" element={<RoleSelectPage />} />
       <Route path="/login" element={<LoginPage />} />
 
       <Route element={<ProtectedLayout allowedRoles={['OWNER']} />}>
         <Route path="/owner" element={<OwnerHome />} />
-        <Route path="/owner/services" element={<OwnerServices />} />
-        <Route path="/owner/ai" element={<OwnerAiChat />} />
-        <Route path="/owner/repair" element={<OwnerRepairPage />} />
-        <Route path="/owner/fees" element={<OwnerFeePage />} />
-        <Route path="/owner/notices" element={<OwnerNoticePage />} />
-        <Route path="/owner/tickets" element={<OwnerTicketPage />} />
-        <Route path="/owner/profile" element={<OwnerProfile />} />
       </Route>
 
       <Route element={<ProtectedLayout allowedRoles={['WORKER']} />}>
-        <Route path="/worker" element={<WorkerDashboard />} />
-        <Route path="/worker/repairs" element={<WorkerDashboard />} />
-        <Route path="/worker/profile" element={<WorkerDashboard />} />
+        <Route path="/repair" element={<RepairHome />} />
       </Route>
 
       <Route element={<ProtectedLayout allowedRoles={['PROPERTY_STAFF', 'ADMIN']} />}>
-        <Route path="/admin" element={<AdminHome />} />
-        <Route path="/admin/repairs" element={<AdminRepairs />} />
-        <Route path="/admin/notices" element={<AdminNotices />} />
-        <Route path="/admin/profile" element={<AdminProfile />} />
-        <Route path="/admin/desk/*" element={<AdminApp />} />
+        <Route path="/management" element={<ManagementHome />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -69,7 +114,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <AppShell>
+          <AppRoutes />
+        </AppShell>
       </AuthProvider>
     </BrowserRouter>
   )
