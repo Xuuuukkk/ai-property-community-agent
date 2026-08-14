@@ -59,7 +59,7 @@ def test_get_repair_not_found(client: TestClient) -> None:
 
 
 def test_create_repair(client: TestClient) -> None:
-    """POST /api/repair creates a new repair order."""
+    """POST /api/repair creates a new repair order and auto-dispatches a worker."""
     payload = {
         "user_id": 1,
         "house_id": 1,
@@ -71,8 +71,9 @@ def test_create_repair(client: TestClient) -> None:
     assert response.status_code == 201
     data = response.json()
     assert data["user_id"] == 1
-    assert data["status"] == "CREATED"
+    assert data["status"] == "ASSIGNED"
     assert data["order_no"].startswith("RO")
+    assert "worker" in data
 
 
 def test_list_fees_by_user(client: TestClient) -> None:

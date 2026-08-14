@@ -50,6 +50,7 @@ class AgentResult:
     response: str
     tool_results: list[dict[str, Any]]
     requires_human: bool = False
+    pending_repair: dict[str, Any] | None = None
 
 
 def router_node(state: AgentState) -> AgentState:
@@ -60,9 +61,14 @@ def router_node(state: AgentState) -> AgentState:
             user_text = msg.content
             break
 
-    llm = get_llm()
-    intent = classify_intent(user_text, llm=llm)
-    state["intent"] = intent
+    # If a multi-turn repair collection is in progress, stay in the repair flow
+    # even if the current message is ambiguous.
+    if state.get("pending_repair"):
+        state["intent"] = "repair"
+    else:
+        llm = get_llm()
+        state["intent"] = classify_intent(user_text, llm=llm)
+
     state["tool_results"] = []
     state["requires_human"] = False
     return state
@@ -92,6 +98,7 @@ def agent_node(state: AgentState) -> AgentState:
         state["final_response"] = result.get("response", "")
         state["tool_results"] = result.get("tool_results", [])
         state["requires_human"] = result.get("requires_human", False)
+        state["pending_repair"] = result.get("pending_repair")
     finally:
         db.close()
     return state
@@ -168,6 +175,7 @@ def run_agent(
     *,
     user_id: int | None = None,
     conversation_id: str | None = None,
+    pending_repair: dict[str, Any] | None = None,
     system_message: str | None = None,
     db: Session | None = None,
 ) -> AgentResult:
@@ -187,6 +195,7 @@ def run_agent(
         "user_id": user_id,
         "conversation_id": session_id,
         "messages": messages,
+        "pending_repair": pending_repair,
     }
 
     final_state = agent_graph.invoke(initial_state)
@@ -196,6 +205,7 @@ def run_agent(
         response=final_state.get("final_response") or "",
         tool_results=final_state.get("tool_results", []),
         requires_human=final_state.get("requires_human", False),
+        pending_repair=final_state.get("pending_repair"),
     )
 
     if db is not None:

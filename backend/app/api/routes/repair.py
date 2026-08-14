@@ -77,7 +77,7 @@ def assign_repair_worker(
     repair.status = "ASSIGNED"
     db.commit()
     db.refresh(repair)
-    return repair
+    return repair_service.get_repair(db, repair_id)
 
 
 @router.post("/{repair_id}/status", response_model=RepairResponse)
@@ -89,6 +89,33 @@ def update_repair_status(
     """Update the status of a repair order."""
     repair = repair_service.get_repair(db, repair_id)
     repair.status = payload.status
+    if payload.status == "COMPLETED":
+        from datetime import datetime
+        repair.completed_at = datetime.now()
     db.commit()
     db.refresh(repair)
-    return repair
+    return repair_service.get_repair(db, repair_id)
+
+
+@router.post("/{repair_id}/owner-confirm", response_model=RepairResponse)
+def owner_confirm_repair(
+    repair_id: int,
+    db: Session = Depends(get_db),
+) -> RepairResponse:
+    """Owner confirms the repair is finished.
+
+    The order is only marked COMPLETED when both owner and worker confirm.
+    """
+    return repair_service.confirm_by_owner(db, repair_id)
+
+
+@router.post("/{repair_id}/worker-confirm", response_model=RepairResponse)
+def worker_confirm_repair(
+    repair_id: int,
+    db: Session = Depends(get_db),
+) -> RepairResponse:
+    """Worker confirms the repair is finished.
+
+    The order is only marked COMPLETED when both owner and worker confirm.
+    """
+    return repair_service.confirm_by_worker(db, repair_id)

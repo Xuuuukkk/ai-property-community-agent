@@ -18,10 +18,12 @@ def create_repair_order(
     type: str,
     description: str,
     urgency: str = "MEDIUM",
+    image_urls: list[str] | None = None,
 ) -> dict:
     """Create a new repair order.
 
-    Returns a summary dict with order_id, status and a human-readable message.
+    Returns a summary dict with order_id, status, assigned worker and a
+    human-readable message.
     """
     payload = RepairCreate(
         user_id=user_id,
@@ -29,8 +31,22 @@ def create_repair_order(
         type=type,
         description=description,
         urgency=urgency,
+        image_urls=image_urls or [],
     )
     order = repair_service.create_repair(db, payload=payload)
+
+    worker = getattr(order, "worker", None)
+    worker_info = None
+    if worker is not None:
+        worker_user = getattr(worker, "user", None)
+        worker_info = {
+            "id": worker.id,
+            "real_name": getattr(worker_user, "real_name", None) if worker_user else None,
+            "phone": getattr(worker_user, "phone", None) if worker_user else None,
+            "department": getattr(worker, "department", None),
+            "position": getattr(worker, "position", None),
+        }
+
     return {
         "tool": "create_repair_order",
         "input": {
@@ -39,11 +55,14 @@ def create_repair_order(
             "type": type,
             "description": description,
             "urgency": urgency,
+            "image_urls": image_urls,
         },
         "output": {
             "order_id": order.id,
             "order_no": order.order_no,
             "status": order.status,
+            "worker_id": order.worker_id,
+            "worker": worker_info,
             "message": f"维修工单已创建，编号：{order.order_no}，当前状态：{order.status}",
         },
     }

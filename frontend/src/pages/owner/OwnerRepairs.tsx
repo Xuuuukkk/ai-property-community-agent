@@ -29,26 +29,28 @@ export default function OwnerRepairs() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  useEffect(() => {
+  const load = () => {
     if (!user) return
-    let cancelled = false
+    setLoading(true)
     api
       .listRepairs({ user_id: user.id, page_size: 50 })
-      .then((res) => {
-        if (cancelled) return
-        setRepairs(res.items)
-      })
-      .catch((err) => {
-        if (cancelled) return
-        setError(err instanceof Error ? err.message : '加载失败')
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
+      .then((res) => setRepairs(res.items))
+      .catch((err) => setError(err instanceof Error ? err.message : '加载失败'))
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    load()
   }, [user])
+
+  const handleOwnerConfirm = async (id: number) => {
+    try {
+      await api.ownerConfirmRepair(id)
+      load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '确认失败')
+    }
+  }
 
   const formatDate = (iso: string) => {
     const d = new Date(iso)
@@ -102,9 +104,9 @@ export default function OwnerRepairs() {
                 <div
                   style={{
                     fontSize: 10,
-                    color: repair.status === 'CREATED' ? '#c49b5a' : repair.status === 'CLOSED' ? '#7e8587' : '#5a8a6e',
+                    color: repair.status === 'CREATED' ? '#c49b5a' : repair.status === 'CLOSED' || repair.status === 'COMPLETED' ? '#7e8587' : '#5a8a6e',
                     background:
-                      repair.status === 'CREATED' ? '#f8f1e4' : repair.status === 'CLOSED' ? '#f0f0f0' : '#eef6f1',
+                      repair.status === 'CREATED' ? '#f8f1e4' : repair.status === 'CLOSED' || repair.status === 'COMPLETED' ? '#f0f0f0' : '#eef6f1',
                     padding: '2px 8px',
                     borderRadius: 4,
                   }}
@@ -115,19 +117,57 @@ export default function OwnerRepairs() {
               <div style={{ fontSize: 12, color: '#4a5568', marginTop: 10, lineHeight: 1.5 }}>
                 {repair.description ?? '暂无描述'}
               </div>
+              {repair.worker && (
+                <div style={{ fontSize: 12, color: '#22395e', marginTop: 8, background: '#f5f7fa', padding: 8, borderRadius: 6 }}>
+                  <div>维修师傅：{repair.worker.real_name ?? '未命名'}</div>
+                  <div>电话：{repair.worker.phone ?? '暂无'}</div>
+                </div>
+              )}
+              {repair.image_urls && repair.image_urls.length > 0 && (
+                <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                  {repair.image_urls.map((url, idx) => (
+                    <img
+                      key={idx}
+                      src={url}
+                      alt="报修图片"
+                      style={{ width: 70, height: 70, objectFit: 'cover', borderRadius: 6 }}
+                    />
+                  ))}
+                </div>
+              )}
               <div style={{ fontSize: 10, color: '#9ca3af', marginTop: 10 }}>
                 提交时间：{formatDate(repair.created_at)}
                 {repair.urgency && (
                   <span
                     style={{
                       marginLeft: 10,
-                      color: repair.urgency === 'HIGH' ? '#a94442' : repair.urgency === 'MEDIUM' ? '#c49b5a' : '#5a8a6e',
+                      color: repair.urgency === 'HIGH' || repair.urgency === 'URGENT' ? '#a94442' : repair.urgency === 'MEDIUM' ? '#c49b5a' : '#5a8a6e',
                     }}
                   >
-                    优先级：{repair.urgency === 'HIGH' ? '高' : repair.urgency === 'MEDIUM' ? '中' : '低'}
+                    优先级：{repair.urgency === 'URGENT' ? '紧急' : repair.urgency === 'HIGH' ? '高' : repair.urgency === 'MEDIUM' ? '中' : '低'}
                   </span>
                 )}
               </div>
+              {repair.status !== 'COMPLETED' && repair.status !== 'CLOSED' && !repair.owner_confirmed_at && (
+                <button
+                  onClick={() => handleOwnerConfirm(repair.id)}
+                  style={{
+                    marginTop: 10,
+                    padding: '6px 12px',
+                    background: '#22395e',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 6,
+                    fontSize: 12,
+                    cursor: 'pointer',
+                  }}
+                >
+                  确认维修完成
+                </button>
+              )}
+              {repair.owner_confirmed_at && repair.status !== 'COMPLETED' && repair.status !== 'CLOSED' && (
+                <div style={{ marginTop: 10, fontSize: 12, color: '#5a8a6e' }}>已确认，等待师傅确认</div>
+              )}
             </div>
           ))}
       </div>

@@ -15,6 +15,29 @@ export interface User {
   created_at: string
 }
 
+export interface RepairOwnerInfo {
+  id: number
+  real_name: string | null
+  phone: string | null
+}
+
+export interface RepairHouseInfo {
+  id: number
+  community_name: string | null
+  building_no: string | null
+  unit_no: number | null
+  floor_no: number | null
+  room_no: string | null
+}
+
+export interface RepairWorkerInfo {
+  id: number
+  real_name: string | null
+  phone: string | null
+  department: string | null
+  position: string | null
+}
+
 export interface RepairOrder {
   id: number
   order_no: string
@@ -26,8 +49,14 @@ export interface RepairOrder {
   urgency: string
   status: string
   cost: string
+  image_urls: string[] | null
   created_at: string
   completed_at: string | null
+  owner_confirmed_at: string | null
+  worker_confirmed_at: string | null
+  owner: RepairOwnerInfo | null
+  house: RepairHouseInfo | null
+  worker: RepairWorkerInfo | null
 }
 
 export interface UserProfile {
@@ -93,6 +122,7 @@ export interface AgentChatRequest {
   message: string
   user_id?: number | null
   conversation_id?: string | null
+  pending_repair?: Record<string, unknown> | null
 }
 
 export interface AgentChatResponse {
@@ -101,4 +131,5 @@ export interface AgentChatResponse {
   response: string
   tool_results: Record<string, unknown>[]
   requires_human: boolean
+  pending_repair: Record<string, unknown> | null
 }

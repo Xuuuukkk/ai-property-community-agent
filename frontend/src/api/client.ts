@@ -93,6 +93,12 @@ export const api = {
   updateRepairStatus: (repairId: number, payload: { status: string }) =>
     fetchJson<RepairOrder>(`/api/repair/${repairId}/status`, { method: 'POST', body: JSON.stringify(payload) }),
 
+  ownerConfirmRepair: (repairId: number) =>
+    fetchJson<RepairOrder>(`/api/repair/${repairId}/owner-confirm`, { method: 'POST' }),
+
+  workerConfirmRepair: (repairId: number) =>
+    fetchJson<RepairOrder>(`/api/repair/${repairId}/worker-confirm`, { method: 'POST' }),
+
   createRepair: (payload: {
     user_id: number
     house_id?: number | null

@@ -74,6 +74,12 @@ def _extract_urgency(text: str) -> str:
     return "MEDIUM"
 
 
+def _extract_images(text: str) -> list[str]:
+    """Extract base64 data URLs for images embedded in the message."""
+    pattern = r"data:image/[^;]+;base64,[A-Za-z0-9+/=]+"
+    return re.findall(pattern, text)
+
+
 def _tool_output(result: dict[str, Any]) -> dict[str, Any]:
     """Return the output payload from a tool result wrapper.
 
@@ -88,8 +94,28 @@ def _tool_output(result: dict[str, Any]) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
+def _is_repair_intent(text: str) -> bool:
+    """Return True if the message looks like a repair request."""
+    lowered = text.lower()
+    keywords = (
+        "报修", "维修", "修理", "修", "坏了", "故障", "漏水", "跳闸",
+        "repair", "broken", "fix", "leak", "elevator", "water",
+    )
+    return any(k in lowered for k in keywords)
+
+
+def _format_worker_info(worker: dict[str, Any] | None) -> str:
+    """Format assigned worker contact info for the owner."""
+    if not worker:
+        return "暂未分配维修师傅。"
+    name = worker.get("real_name") or f"师傅#{worker.get('id')}"
+    phone = worker.get("phone") or "暂无电话"
+    dept = worker.get("department") or "维修部"
+    return f"已派单给 {name}（{dept}），联系电话：{phone}。"
+
+
 def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
-    """Handle repair intents: create or query repair orders."""
+    """Handle repair intents with multi-turn collection and auto-dispatch."""
     user_text = ""
     for msg in reversed(get_messages(state)):
         if hasattr(msg, "content"):
@@ -97,9 +123,10 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
             break
 
     user_id = _extract_user_id_from_state(state) or 1
+    pending = state.get("pending_repair") or {}
     lowered = user_text.lower()
 
-    # Query path
+    # Query path: user asks about existing orders.
     if any(k in lowered for k in ("查", "进度", "状态", "处理", "status", "query", "list")):
         result = agent_tools.query_repair_order(db, user_id=user_id)
         output = _tool_output(result)
@@ -112,47 +139,107 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
             "tool_results": [result],
         }
 
-    # Create path
-    house_id = _extract_house_id(user_text)
-    repair_type = _extract_repair_type(user_text)
-    urgency = _extract_urgency(user_text)
-
-    # Extract a simple description: remove common prefixes and trailing punctuation.
-    description = user_text
-    for prefix in ("我要报修", "帮我报修", "报修", "repair", "维修"):
-        if description.lower().startswith(prefix):
-            description = description[len(prefix):].strip("，,。.:： ")
-    if not description:
-        description = "业主报修"
-
-    # Auto-resolve house_id from the user's binding if not explicitly provided.
-    if house_id is None:
-        house_id = _get_default_house_id(db, user_id)
-
-    missing = []
-    if house_id is None:
-        missing.append("房屋信息")
-    if not description or description == "业主报修":
-        missing.append("问题描述")
-
-    if missing:
+    # Start a new repair collection if not already pending.
+    if not pending and _is_repair_intent(user_text):
         return {
-            "response": f"请补充以下信息以便创建工单：{', '.join(missing)}",
+            "response": "好的，我来帮您报修。请问是什么东西坏了？可以简单描述一下位置和问题。",
             "tool_results": [],
             "requires_human": False,
+            "pending_repair": {"step": "collect_item"},
         }
 
-    result = agent_tools.create_repair_order(
-        db,
-        user_id=user_id,
-        house_id=house_id,
-        type=repair_type,
-        description=description,
-        urgency=urgency,
-    )
+    # Multi-turn collection flow.
+    if pending:
+        step = pending.get("step")
+        images = _extract_images(user_text)
+
+        if step == "collect_item":
+            item = user_text.strip()
+            if not item or len(item) < 2:
+                return {
+                    "response": "麻烦您再说清楚一点，具体是什么东西坏了？比如‘厨房水龙头漏水’。",
+                    "tool_results": [],
+                    "pending_repair": pending,
+                }
+            pending["item"] = item
+            pending["step"] = "collect_description"
+            return {
+                "response": f"收到，{item}。请问问题严重吗？是否影响正常生活？您也可以直接上传现场照片。",
+                "tool_results": [],
+                "pending_repair": pending,
+            }
+
+        if step == "collect_description":
+            description = user_text.strip()
+            if images:
+                pending.setdefault("image_urls", []).extend(images)
+            if not description or len(description) < 3:
+                return {
+                    "response": "请再补充一下故障现象，或者上传一张照片，方便师傅判断。",
+                    "tool_results": [],
+                    "pending_repair": pending,
+                }
+            pending["description"] = description
+            pending["step"] = "confirm"
+            item = pending.get("item", "报修项目")
+            return {
+                "response": (
+                    f"故障信息已记录：{item}，{description}。\n"
+                    "我现在为您创建工单并自动派单，稍后会把维修师傅的联系方式同步给您。"
+                ),
+                "tool_results": [],
+                "pending_repair": pending,
+            }
+
+        if step == "confirm":
+            # User confirmed or sent additional info; proceed to create order.
+            if images and not pending.get("image_urls"):
+                pending.setdefault("image_urls", []).extend(images)
+            item = pending.get("item", "业主报修")
+            description = pending.get("description", user_text) or item
+            combined_description = f"{item}：{description}"
+
+            house_id = _extract_house_id(user_text) or _get_default_house_id(db, user_id)
+            repair_type = _extract_repair_type(combined_description)
+            urgency = _extract_urgency(combined_description)
+
+            result = agent_tools.create_repair_order(
+                db,
+                user_id=user_id,
+                house_id=house_id,
+                type=repair_type,
+                description=combined_description,
+                urgency=urgency,
+                image_urls=pending.get("image_urls"),
+            )
+            output = _tool_output(result)
+            order_no = output.get("order_no", "")
+            worker = output.get("worker")
+
+            response = (
+                f"工单已创建，编号：{order_no}，紧急程度：{urgency}，当前状态：{output.get('status', 'CREATED')}。\n"
+                + _format_worker_info(worker)
+                + "\n维修完成后，您和师傅都需要在页面上确认，工单才会正式关闭。"
+            )
+            return {
+                "response": response,
+                "tool_results": [result],
+                "pending_repair": None,
+            }
+
+    # Fallback for repair-like messages that don't match collection flow.
+    if _is_repair_intent(user_text):
+        return {
+            "response": "您好，如需报修请告诉我‘是什么坏了’，我会一步步帮您创建工单并派单。",
+            "tool_results": [],
+            "requires_human": False,
+            "pending_repair": {"step": "collect_item"},
+        }
+
     return {
-        "response": _tool_output(result).get("message", "工单已创建"),
-        "tool_results": [result],
+        "response": "抱歉，我不太理解您的维修需求。您可以直接说‘我要报修’。",
+        "tool_results": [],
+        "requires_human": False,
     }
 
 

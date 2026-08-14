@@ -22,6 +22,7 @@ class AgentState(TypedDict, total=False):
     tool_results: list[dict[str, Any]]
     final_response: str | None
     requires_human: bool
+    pending_repair: dict[str, Any] | None
 
 
 def get_user_id(state: AgentState) -> int | None:

@@ -69,11 +69,54 @@ class TestAgentAPI:
     """Integration tests for the /api/agent/chat endpoint."""
 
     def test_agent_chat_repair(self, client: TestClient) -> None:
-        response = client.post("/api/agent/chat", json={"message": "我要报修，厨房漏水，房屋101", "user_id": 1})
+        # First turn: agent collects the broken item.
+        response = client.post("/api/agent/chat", json={"message": "我要报修", "user_id": 1})
+        assert response.status_code == 200
+        data = response.json()
+        assert data["intent"] == "repair"
+        assert "pending_repair" in data
+        assert data["pending_repair"]["step"] == "collect_item"
+
+        # Second turn: provide the item, agent asks for description/photo.
+        response = client.post(
+            "/api/agent/chat",
+            json={
+                "message": "厨房水龙头漏水",
+                "user_id": 1,
+                "pending_repair": data["pending_repair"],
+            },
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["pending_repair"]["step"] == "collect_description"
+
+        # Third turn: provide description and confirm.
+        response = client.post(
+            "/api/agent/chat",
+            json={
+                "message": "漏水比较严重，已经滴了一地",
+                "user_id": 1,
+                "pending_repair": data["pending_repair"],
+            },
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert data["pending_repair"]["step"] == "confirm"
+
+        # Fourth turn: agent creates the order and auto-dispatches.
+        response = client.post(
+            "/api/agent/chat",
+            json={
+                "message": "确认创建工单",
+                "user_id": 1,
+                "pending_repair": data["pending_repair"],
+            },
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["intent"] == "repair"
         assert "工单" in data["response"]
+        assert "师傅" in data["response"]
 
     def test_agent_chat_fee(self, client: TestClient) -> None:
         response = client.post("/api/agent/chat", json={"message": "查物业费", "user_id": 1})

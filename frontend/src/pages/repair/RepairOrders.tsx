@@ -62,6 +62,8 @@ const btnPrimary: React.CSSProperties = {
   fontSize: 11,
   background: '#22395e',
   color: '#fff',
+  border: 'none',
+  cursor: 'pointer',
 }
 
 const btnDefault: React.CSSProperties = {
@@ -70,6 +72,8 @@ const btnDefault: React.CSSProperties = {
   fontSize: 11,
   background: '#f0f1ef',
   color: '#20324b',
+  border: 'none',
+  cursor: 'pointer',
 }
 
 export default function RepairOrders() {
@@ -79,13 +83,17 @@ export default function RepairOrders() {
   const [filter, setFilter] = useState<string>('ALL')
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const load = () => {
     if (!user?.worker_id) return
     setLoading(true)
     api
       .listRepairs({ worker_id: user.worker_id, page_size: 200 })
       .then((res) => setOrders(res.items))
       .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    load()
   }, [user?.worker_id])
 
   const filtered = filter === 'ALL' ? orders : orders.filter((o) => o.status === filter)
@@ -93,6 +101,11 @@ export default function RepairOrders() {
   const updateStatus = async (id: number, status: string) => {
     await api.updateRepairStatus(id, { status })
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)))
+  }
+
+  const handleWorkerConfirm = async (id: number) => {
+    await api.workerConfirmRepair(id)
+    load()
   }
 
   const formatTime = (iso: string) => {
@@ -132,6 +145,29 @@ export default function RepairOrders() {
                 <p style={{ margin: '8px 0', color: '#57616a', fontSize: 12 }}>
                   {TYPE_LABELS[o.type] ?? o.type} · {o.description || '无描述'}
                 </p>
+                {o.owner && (
+                  <div style={{ fontSize: 11, color: '#57616a', marginBottom: 6, background: '#f5f7fa', padding: '6px 8px', borderRadius: 4 }}>
+                    业主：{o.owner.real_name ?? '未命名'} · {o.owner.phone ?? '暂无电话'}
+                    {o.house && (
+                      <span>
+                        {' '}
+                        · {o.house.community_name ?? ''} {o.house.building_no ?? ''}-{o.house.room_no ?? ''}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {o.image_urls && o.image_urls.length > 0 && (
+                  <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+                    {o.image_urls.map((url, idx) => (
+                      <img
+                        key={idx}
+                        src={url}
+                        alt="报修图片"
+                        style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }}
+                      />
+                    ))}
+                  </div>
+                )}
                 <p style={{ margin: 0, color: '#8d9497', fontSize: 10 }}>创建时间：{formatTime(o.created_at)}</p>
 
                 <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
@@ -140,9 +176,14 @@ export default function RepairOrders() {
                       接单并开始处理
                     </button>
                   )}
-                  {o.status === 'PROCESSING' && (
-                    <button style={btnPrimary} onClick={() => updateStatus(o.id, 'COMPLETED')}>
-                      标记完成
+                  {o.status === 'PROCESSING' && !o.worker_confirmed_at && (
+                    <button style={btnPrimary} onClick={() => handleWorkerConfirm(o.id)}>
+                      确认维修完成
+                    </button>
+                  )}
+                  {o.status === 'PROCESSING' && o.worker_confirmed_at && (
+                    <button style={btnDefault} disabled>
+                      已确认，等待业主确认
                     </button>
                   )}
                   {o.status === 'COMPLETED' && (

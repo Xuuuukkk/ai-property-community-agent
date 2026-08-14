@@ -1,7 +1,7 @@
 from datetime import datetime
 from decimal import Decimal
 
-from sqlalchemy import DateTime, ForeignKey, Numeric, String, Text, func
+from sqlalchemy import DateTime, ForeignKey, JSON, Numeric, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -48,6 +48,10 @@ class RepairOrder(Base):
         nullable=False,
         default=Decimal("0.00"),
     )
+    image_urls: Mapped[list[str] | None] = mapped_column(
+        JSON,
+        nullable=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=False),
         server_default=func.now(),
@@ -57,7 +61,18 @@ class RepairOrder(Base):
         DateTime(timezone=False),
         nullable=True,
     )
+    owner_confirmed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=False),
+        nullable=True,
+    )
+    worker_confirmed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=False),
+        nullable=True,
+    )
 
+    user: Mapped["User"] = relationship("User", lazy="selectin")
+    house: Mapped["House | None"] = relationship("House", lazy="selectin")
+    worker: Mapped["Worker | None"] = relationship("Worker", lazy="selectin")
     records: Mapped[list["RepairRecord"]] = relationship(
         back_populates="repair",
         lazy="selectin",
