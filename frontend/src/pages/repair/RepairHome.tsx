@@ -114,7 +114,7 @@ export default function RepairHome() {
           </div>
           <div
             className="progress-ring"
-            style={{ display: 'flex', alignItems: 'baseline', whiteSpace: 'nowrap' }}
+            style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', whiteSpace: 'nowrap' }}
           >
             <span style={{ whiteSpace: 'nowrap' }}>
               {loading ? '-' : todayCompletionRate}
