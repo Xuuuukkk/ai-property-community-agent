@@ -17,3 +17,15 @@ class UserResponse(BaseModel):
     role: str
     worker_id: int | None = None
     created_at: datetime
+
+
+class UserListResponse(BaseModel):
+    """Paginated list of users."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    items: list[UserResponse]
+    total: int
+    page: int
+    page_size: int
+    pages: int

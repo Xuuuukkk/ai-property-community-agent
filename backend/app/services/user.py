@@ -20,5 +20,19 @@ class UserService:
             )
         return user
 
+    def list_users(
+        self,
+        db: Session,
+        *,
+        page: int = 1,
+        page_size: int = 20,
+        role: str | None = None,
+    ) -> tuple[list[User], int]:
+        """Return a paginated list of users with optional role filter."""
+        filters = {"role": role} if role else None
+        return user_repository.list_paginated(
+            db, page=page, page_size=page_size, filters=filters
+        )
+
 
 user_service = UserService()

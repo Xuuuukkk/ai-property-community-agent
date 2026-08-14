@@ -13,23 +13,57 @@ const ROLE_LABELS: Record<string, string> = {
   ADMIN: '管理员',
 }
 
+const ROLE_OPTIONS = [
+  { value: '', label: '全部' },
+  { value: 'OWNER', label: '业主' },
+  { value: 'PROPERTY_STAFF', label: '物业' },
+  { value: 'WORKER', label: '维修' },
+  { value: 'ADMIN', label: '管理员' },
+]
+
 export default function ManagementUsers() {
   const navigate = useNavigate()
   const [users, setUsers] = useState<User[]>([])
+  const [role, setRole] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const ids = [1, 2, 3, 4, 5, 211]
-    Promise.all(ids.map((id) => api.getUser(id).catch(() => null)))
-      .then((results) => setUsers(results.filter(Boolean) as User[]))
+    setLoading(true)
+    api
+      .listUsers({ page_size: 100, role: role || undefined })
+      .then((res) => setUsers(res.items))
+      .catch(() => setUsers([]))
       .finally(() => setLoading(false))
-  }, [])
+  }, [role])
 
   return (
     <div className="page dashboard-page">
       <AppHeader title="用户管理" onBack={() => navigate(-1)} />
       <div className="dashboard-scroll">
         <SectionTitle title="用户列表" />
+
+        <div style={{ padding: '0 16px 12px', display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span style={{ fontSize: 12, color: '#57616a' }}>角色筛选：</span>
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            style={{
+              flex: 1,
+              padding: '8px 10px',
+              borderRadius: 8,
+              border: '1px solid #e1e3e6',
+              fontSize: 12,
+              background: '#fff',
+            }}
+          >
+            {ROLE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {loading ? (
           <div style={{ padding: 40, textAlign: 'center', color: '#7e8587', fontSize: 12 }}>加载中...</div>
         ) : users.length === 0 ? (

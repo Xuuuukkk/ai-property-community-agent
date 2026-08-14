@@ -68,6 +68,11 @@ export interface UserProfile {
   created_at: string
 }
 
+export interface UserListResponse {
+  items: User[]
+  pagination: PageInfo
+}
+
 export interface Worker {
   id: number
   user_id: number
