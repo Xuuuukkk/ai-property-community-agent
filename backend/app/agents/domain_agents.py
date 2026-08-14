@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.agents import tools as agent_tools
 from app.agents.state import AgentState, get_messages, get_user_id
+from app.models.house_binding import HouseBinding
 
 
 # ---------------------------------------------------------------------------
@@ -25,6 +26,17 @@ from app.agents.state import AgentState, get_messages, get_user_id
 def _extract_user_id_from_state(state: AgentState) -> int | None:
     """Return explicit user_id from state if present."""
     return get_user_id(state)
+
+
+def _get_default_house_id(db: Session, user_id: int) -> int | None:
+    """Return the first house_id bound to the user, if any."""
+    binding = (
+        db.query(HouseBinding)
+        .filter(HouseBinding.user_id == user_id)
+        .order_by(HouseBinding.id)
+        .first()
+    )
+    return binding.house_id if binding else None
 
 
 def _extract_house_id(text: str) -> int | None:
@@ -113,10 +125,14 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
     if not description:
         description = "业主报修"
 
+    # Auto-resolve house_id from the user's binding if not explicitly provided.
+    if house_id is None:
+        house_id = _get_default_house_id(db, user_id)
+
     missing = []
     if house_id is None:
-        missing.append("房屋 ID")
-    if not description:
+        missing.append("房屋信息")
+    if not description or description == "业主报修":
         missing.append("问题描述")
 
     if missing:
