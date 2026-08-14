@@ -24,6 +24,20 @@ const STATUS_LABELS: Record<string, string> = {
   CLOSED: '已关闭',
 }
 
+const URGENCY_LABELS: Record<string, string> = {
+  LOW: '低',
+  MEDIUM: '中',
+  HIGH: '高',
+  URGENT: '紧急',
+}
+
+const URGENCY_COLORS: Record<string, { bg: string; color: string }> = {
+  LOW: { bg: '#e8edf0', color: '#57616a' },
+  MEDIUM: { bg: '#f5ecd7', color: '#ad8a45' },
+  HIGH: { bg: '#fde8e8', color: '#c0392b' },
+  URGENT: { bg: '#fadbd8', color: '#922b21' },
+}
+
 const chipBase: React.CSSProperties = {
   whiteSpace: 'nowrap',
   padding: '6px 12px',
@@ -43,23 +57,33 @@ const chipActive: React.CSSProperties = {
 
 const cardStyle: React.CSSProperties = {
   background: '#fff',
-  borderRadius: 10,
-  padding: 14,
+  borderRadius: 12,
+  padding: 16,
   boxShadow: '0 2px 8px rgba(29,45,66,.05)',
 }
 
 const badgeStyle = (status: string): React.CSSProperties => ({
-  fontSize: 10,
-  padding: '3px 7px',
-  borderRadius: 4,
+  fontSize: 11,
+  padding: '4px 8px',
+  borderRadius: 6,
+  fontWeight: 500,
   background: status === 'ASSIGNED' ? '#f5ecd7' : status === 'PROCESSING' ? '#e9effb' : '#e8edf0',
   color: status === 'ASSIGNED' ? '#ad8a45' : status === 'PROCESSING' ? '#203b63' : '#57616a',
 })
 
+const tagStyle = (urgency: string): React.CSSProperties => ({
+  fontSize: 10,
+  padding: '2px 6px',
+  borderRadius: 4,
+  fontWeight: 500,
+  background: URGENCY_COLORS[urgency]?.bg || '#e8edf0',
+  color: URGENCY_COLORS[urgency]?.color || '#57616a',
+})
+
 const btnPrimary: React.CSSProperties = {
-  padding: '7px 12px',
+  padding: '8px 14px',
   borderRadius: 8,
-  fontSize: 11,
+  fontSize: 12,
   background: '#22395e',
   color: '#fff',
   border: 'none',
@@ -67,13 +91,26 @@ const btnPrimary: React.CSSProperties = {
 }
 
 const btnDefault: React.CSSProperties = {
-  padding: '7px 12px',
+  padding: '8px 14px',
   borderRadius: 8,
-  fontSize: 11,
+  fontSize: 12,
   background: '#f0f1ef',
   color: '#20324b',
   border: 'none',
   cursor: 'pointer',
+}
+
+const labelStyle: React.CSSProperties = {
+  color: '#8d9497',
+  fontSize: 11,
+  width: 42,
+  flexShrink: 0,
+}
+
+const valueStyle: React.CSSProperties = {
+  color: '#20324b',
+  fontSize: 12,
+  fontWeight: 500,
 }
 
 export default function RepairOrders() {
@@ -86,9 +123,9 @@ export default function RepairOrders() {
   const load = () => {
     if (!user?.worker_id) return
     setLoading(true)
-      api
-        .listRepairs({ worker_id: user.worker_id, page_size: 100 })
-        .then((res) => setOrders(res.items))
+    api
+      .listRepairs({ worker_id: user.worker_id, page_size: 100 })
+      .then((res) => setOrders(res.items))
       .finally(() => setLoading(false))
   }
 
@@ -113,6 +150,20 @@ export default function RepairOrders() {
     return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
   }
 
+  const formatAddress = (house: RepairOrder['house']) => {
+    if (!house) return '暂无地址'
+    const parts = [house.community_name]
+    const building = house.building_no || ''
+    const room = house.room_no || ''
+    if (room && building && room.startsWith(building)) {
+      parts.push(room)
+    } else {
+      if (building) parts.push(building)
+      if (room) parts.push(room)
+    }
+    return parts.filter(Boolean).join(' ')
+  }
+
   return (
     <div className="page dashboard-page">
       <AppHeader title="我的工单" onBack={() => navigate(-1)} />
@@ -135,42 +186,63 @@ export default function RepairOrders() {
         ) : filtered.length === 0 ? (
           <div style={{ padding: 40, textAlign: 'center', color: '#7e8587', fontSize: 12 }}>暂无工单</div>
         ) : (
-          <div style={{ display: 'grid', gap: 10, padding: '0 16px 80px' }}>
+          <div style={{ display: 'grid', gap: 12, padding: '0 16px 80px' }}>
             {filtered.map((o) => (
               <div key={o.id} style={cardStyle}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <strong style={{ fontSize: 13 }}>{o.order_no}</strong>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <strong style={{ fontSize: 14, color: '#1a2b3c', wordBreak: 'break-all' }}>{o.order_no}</strong>
                   <span style={badgeStyle(o.status)}>{STATUS_LABELS[o.status]}</span>
                 </div>
-                <p style={{ margin: '8px 0', color: '#57616a', fontSize: 12 }}>
-                  {TYPE_LABELS[o.type] ?? o.type} · {o.description || '无描述'}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '10px 0' }}>
+                  <span style={{ fontSize: 12, color: '#57616a' }}>{TYPE_LABELS[o.type] ?? o.type}</span>
+                  <span style={tagStyle(o.urgency)}>{URGENCY_LABELS[o.urgency] ?? o.urgency}</span>
+                </div>
+
+                <p style={{ margin: '0 0 12px', color: '#20324b', fontSize: 13, lineHeight: 1.5 }}>
+                  {o.description || '无描述'}
                 </p>
-                {o.owner && (
-                  <div style={{ fontSize: 11, color: '#57616a', marginBottom: 6, background: '#f5f7fa', padding: '6px 8px', borderRadius: 4 }}>
-                    业主：{o.owner.real_name ?? '未命名'} · {o.owner.phone ?? '暂无电话'}
-                    {o.house && (
-                      <span>
-                        {' '}
-                        · {o.house.community_name ?? ''} {o.house.building_no ?? ''}-{o.house.room_no ?? ''}
-                      </span>
-                    )}
+
+                <div
+                  style={{
+                    background: '#f7f9fb',
+                    borderRadius: 8,
+                    padding: '10px 12px',
+                    marginBottom: 12,
+                    display: 'grid',
+                    gap: 8,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={labelStyle}>业主</span>
+                    <span style={valueStyle}>{o.owner?.real_name ?? '未命名'}</span>
                   </div>
-                )}
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <span style={labelStyle}>电话</span>
+                    <span style={valueStyle}>{o.owner?.phone ?? '暂无电话'}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+                    <span style={labelStyle}>地址</span>
+                    <span style={{ ...valueStyle, flex: 1, lineHeight: 1.4 }}>{formatAddress(o.house)}</span>
+                  </div>
+                </div>
+
                 {o.image_urls && o.image_urls.length > 0 && (
-                  <div style={{ display: 'flex', gap: 6, marginBottom: 8, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
                     {o.image_urls.map((url, idx) => (
                       <img
                         key={idx}
                         src={url}
                         alt="报修图片"
-                        style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }}
+                        style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 6 }}
                       />
                     ))}
                   </div>
                 )}
-                <p style={{ margin: 0, color: '#8d9497', fontSize: 10 }}>创建时间：{formatTime(o.created_at)}</p>
 
-                <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                <p style={{ margin: '0 0 12px', color: '#8d9497', fontSize: 11 }}>创建时间：{formatTime(o.created_at)}</p>
+
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   {o.status === 'ASSIGNED' && (
                     <button style={btnPrimary} onClick={() => updateStatus(o.id, 'PROCESSING')}>
                       接单并开始处理
@@ -201,7 +273,7 @@ export default function RepairOrders() {
         active="work"
         labels={['首页', '工单', '消息', '我的']}
         paths={['/repair', '/repair/orders', '/repair/messages', '/repair/profile']}
-      />
+  />
     </div>
   )
 }
