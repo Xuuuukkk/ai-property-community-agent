@@ -152,16 +152,12 @@ export default function RepairOrders() {
 
   const formatAddress = (house: RepairOrder['house']) => {
     if (!house) return '暂无地址'
-    const parts = [house.community_name]
     const building = house.building_no || ''
     const room = house.room_no || ''
     if (room && building && room.startsWith(building)) {
-      parts.push(room)
-    } else {
-      if (building) parts.push(building)
-      if (room) parts.push(room)
+      return room
     }
-    return parts.filter(Boolean).join(' ')
+    return [building, room].filter(Boolean).join('-')
   }
 
   return (
