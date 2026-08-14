@@ -5,6 +5,12 @@ import WelcomePage from './pages/WelcomePage'
 import RoleSelectPage from './pages/RoleSelectPage'
 import LoginPage from './pages/LoginPage'
 import OwnerHome from './pages/owner/OwnerHome'
+import OwnerFees from './pages/owner/OwnerFees'
+import OwnerRepairs from './pages/owner/OwnerRepairs'
+import OwnerNotices from './pages/owner/OwnerNotices'
+import OwnerServices from './pages/owner/OwnerServices'
+import OwnerAiChat from './pages/owner/OwnerAiChat'
+import OwnerProfile from './pages/owner/OwnerProfile'
 import ManagementHome from './pages/management/ManagementHome'
 import RepairHome from './pages/repair/RepairHome'
 import StatusBar from './components/StatusBar'
@@ -56,6 +62,15 @@ function AppShell({ children }: { children: React.ReactNode }) {
             <button className="nav-item" onClick={() => window.location.href = '/owner'}>
               <span>业主首页</span>
             </button>
+            <button className="nav-item" onClick={() => window.location.href = '/owner/fees'}>
+              <span>业主·费用</span>
+            </button>
+            <button className="nav-item" onClick={() => window.location.href = '/owner/repairs'}>
+              <span>业主·工单</span>
+            </button>
+            <button className="nav-item" onClick={() => window.location.href = '/owner/notices'}>
+              <span>业主·公告</span>
+            </button>
             <button className="nav-item" onClick={() => window.location.href = '/management'}>
               <span>物业首页</span>
             </button>
@@ -95,6 +110,12 @@ function AppRoutes() {
 
       <Route element={<ProtectedLayout allowedRoles={['OWNER']} />}>
         <Route path="/owner" element={<OwnerHome />} />
+        <Route path="/owner/services" element={<OwnerServices />} />
+        <Route path="/owner/fees" element={<OwnerFees />} />
+        <Route path="/owner/repairs" element={<OwnerRepairs />} />
+        <Route path="/owner/notices" element={<OwnerNotices />} />
+        <Route path="/owner/ai" element={<OwnerAiChat />} />
+        <Route path="/owner/profile" element={<OwnerProfile />} />
       </Route>
 
       <Route element={<ProtectedLayout allowedRoles={['WORKER']} />}>

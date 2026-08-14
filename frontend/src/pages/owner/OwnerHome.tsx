@@ -8,6 +8,7 @@ import {
   Wrench,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import AppHeader from '../../components/AppHeader'
 import BottomNav from '../../components/BottomNav'
 import { NoticeList, SectionTitle, ServiceItem } from '../../components/common'
@@ -16,6 +17,7 @@ import { api } from '../../api/client'
 import type { FeeBill, Notice, RepairOrder } from '../../api/types'
 
 export default function OwnerHome() {
+  const navigate = useNavigate()
   const { user } = useAuth()
   const [fees, setFees] = useState<FeeBill[]>([])
   const [notices, setNotices] = useState<Notice[]>([])
@@ -90,10 +92,10 @@ export default function OwnerHome() {
 
         <SectionTitle title="快捷服务" />
         <div className="service-grid four">
-          <ServiceItem icon={<Wrench />} label="报修服务" />
-          <ServiceItem icon={<Receipt />} label="费用查询" />
-          <ServiceItem icon={<Megaphone />} label="社区公告" />
-          <ServiceItem icon={<FileText />} label="我的工单" />
+          <ServiceItem icon={<Wrench />} label="报修服务" onClick={() => navigate('/owner/repairs')} />
+          <ServiceItem icon={<Receipt />} label="费用查询" onClick={() => navigate('/owner/fees')} />
+          <ServiceItem icon={<Megaphone />} label="社区公告" onClick={() => navigate('/owner/notices')} />
+          <ServiceItem icon={<FileText />} label="我的工单" onClick={() => navigate('/owner/repairs')} />
         </div>
 
         {pendingRepairs > 0 && (
@@ -131,7 +133,7 @@ export default function OwnerHome() {
 
         <NoticeList title="社区公告" notices={notices} loading={loading} />
 
-        <div className="ai-card">
+        <div className="ai-card" onClick={() => navigate('/owner/ai')} style={{ cursor: 'pointer' }}>
           <div>
             <strong>AI 社区助手</strong>
             <p>有问题？问问社区助手</p>
@@ -141,7 +143,11 @@ export default function OwnerHome() {
           </div>
         </div>
       </div>
-      <BottomNav active="home" labels={['首页', '服务', 'AI助手', '我的']} />
+      <BottomNav
+        active="home"
+        labels={['首页', '服务', 'AI助手', '我的']}
+        paths={['/owner', '/owner/services', '/owner/ai', '/owner/profile']}
+      />
     </div>
   )
 }

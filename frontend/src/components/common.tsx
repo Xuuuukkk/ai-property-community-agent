@@ -15,9 +15,9 @@ export function SectionTitle({ title, link }: { title: string; link?: string }) 
   )
 }
 
-export function ServiceItem({ icon, label }: { icon: React.ReactNode; label: string }) {
+export function ServiceItem({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick?: () => void }) {
   return (
-    <button className="service-item">
+    <button className="service-item" onClick={onClick}>
       <span>{icon}</span>
       <small>{label}</small>
     </button>
