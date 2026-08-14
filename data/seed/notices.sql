@@ -1,447 +1,446 @@
 -- 8. Notice data (notice table) - 24 notices
--- Generated: 2026-08-12 | Database: PostgreSQL | Encoding: UTF-8
--- Community: Yunxi Garden Community (Yunxi Hua Yuan Xiao Qu)
+-- Generated: 2026-08-14 | Database: PostgreSQL | Encoding: UTF-8
+-- Community: 云溪花园小区
 -- Import order: 1.community -> 2.buildings -> 3.houses -> 4.users -> 5.workers -> 6.repair_orders -> 7.fee_bills -> 8.notices
 
 -- ============================================================
 -- 8. Notices (notice table)
--- 24 property notices
+-- 24 条物业公告
 -- Types: water_power_outage / elevator_maintenance / fire_inspection / community_activity / public_revenue / committee_notice / weather_alert / facility_notice
--- is_pinned: TRUE for pinned notices
--- Publisher: links to worker table admin (id=1~10)
+-- is_pinned: TRUE 为置顶公告
+-- Publisher: 关联 worker 表管理员 (id=1~10)
 -- ============================================================
 
 INSERT INTO notice (id, title, content, publisher_id, notice_type, is_pinned, status, created_at)
 VALUES
-(1, 'Water Supply Suspension Notice - July 15', 'Dear Residents,
+(1, '关于 7 月 15 日小区停水的通知', '尊敬的业主：
 
-Due to annual inspection of the main water supply pipeline, temporary water suspension will be implemented on July 15, 2024 (Monday) from 8:00 to 17:00. Buildings B1-B8 will be affected.
+因小区主供水管道年度检修，定于 2024 年 7 月 15 日（周一）8:00 至 17:00 暂停供水，受影响范围：B1-B8 栋。
 
-Please prepare water storage in advance. For special circumstances, please contact the Property Service Center: 021-5896XXXX.
+请大家提前储备生活用水。如有特殊情况，请联系物业服务中心：021-5896XXXX。
 
-We apologize for the inconvenience!
+给您带来不便，敬请谅解！
 
-Yunxi Property Service Co., Ltd.
-July 12, 2024', 10, 'water_power_outage', TRUE, 'PUBLISHED', '2024-07-12 10:41:00'),
-(2, 'Temporary Power Outage Notice - July 20', 'Dear Residents,
+云溪物业服务有限公司
+2024 年 7 月 12 日', 10, 'water_power_outage', TRUE, 'PUBLISHED', '2024-07-12 10:41:00'),
+(2, '关于 7 月 20 日临时停电的通知', '尊敬的业主：
 
-Per notice from the power company, due to grid upgrade in the Zhangjiang Road area, temporary power outage will be implemented on July 20, 2024 (Saturday) from 9:00 to 12:00. Elevators and water pumps will be suspended during this period.
+接供电局通知，因张江路区域电网改造，2024 年 7 月 20 日（周六）9:00 至 12:00 将临时停电。停电期间电梯及水泵将暂停运行。
 
-Please prepare in advance. If you have special power needs (medical equipment, etc.), please contact the property in advance.
+请大家提前做好安排。如有特殊用电需求（如医疗设备等），请提前与物业联系。
 
-Yunxi Property Service Co., Ltd.
-July 18, 2024', 6, 'water_power_outage', FALSE, 'PUBLISHED', '2024-07-18 15:58:00'),
-(3, 'Q3 2024 Elevator Maintenance Notice', 'Dear Residents,
+云溪物业服务有限公司
+2024 年 7 月 18 日', 6, 'water_power_outage', FALSE, 'PUBLISHED', '2024-07-18 15:58:00'),
+(3, '2024 年第三季度电梯维保通知', '尊敬的业主：
 
-To ensure safe elevator operation, the Property Service Center will conduct Q3 routine elevator maintenance from July 22-26, 2024. Elevators will be serviced in rotation, with each building''s downtime not exceeding 4 hours.
+为确保电梯安全运行，物业服务中心将于 2024 年 7 月 22 日至 26 日进行第三季度电梯例行保养。保养期间将分栋轮换进行，每栋楼停运时间不超过 4 小时。
 
-Schedule:
-  Jul 22: B1, B2
-  Jul 23: B3, B4
-  Jul 24: B5, B6
-  Jul 25: B7, B8
-  Jul 26: Inspection and wrap-up
+具体安排：
+  7 月 22 日：B1、B2 栋
+  7 月 23 日：B3、B4 栋
+  7 月 24 日：B5、B6 栋
+  7 月 25 日：B7、B8 栋
+  7 月 26 日：巡检及收尾
 
-Please plan your travel accordingly. For temporary access arrangements during maintenance, please contact the property.
+请大家合理安排出行。保养期间如需临时通行安排，请联系物业。
 
-Yunxi Property Service Center - Engineering Dept.
-July 19, 2024', 7, 'elevator_maintenance', FALSE, 'PUBLISHED', '2024-07-19 17:54:00'),
-(4, 'Fire Safety Equipment Quarterly Inspection Notice', 'Dear Residents,
+云溪物业服务中心 - 工程部
+2024 年 7 月 19 日', 7, 'elevator_maintenance', FALSE, 'PUBLISHED', '2024-07-19 17:54:00'),
+(4, '消防设施设备季度检查通知', '尊敬的业主：
 
-To ensure community fire safety, the Property Service Center will conduct quarterly fire equipment inspection from August 5-9, 2024.
+为确保小区消防安全，物业服务中心将于 2024 年 8 月 5 日至 9 日进行季度消防设施设备检查。
 
-Inspection includes:
-  1. Fire hydrants and extinguishers on all floors
-  2. Smoke detectors and sprinkler system testing
-  3. Fire escape route clearance check
-  4. Underground garage fire equipment inspection
+检查内容包括：
+  1. 各楼层消火栓、灭火器检查
+  2. 烟感探测器、喷淋系统测试
+  3. 消防疏散通道畅通检查
+  4. 地下车库消防设施检查
 
-Brief alarm test sounds may occur during inspection - please do not be alarmed. For questions, contact the Property Service Center.
+检查期间可能会有短暂报警测试音，请勿惊慌。如有疑问，请联系物业服务中心。
 
-Yunxi Property Service Center - Security Dept.
-August 2, 2024', 7, 'fire_inspection', FALSE, 'PUBLISHED', '2024-08-02 12:14:00'),
-(5, 'Mid-Autumn & National Day Community Event Notice', 'Dear Residents,
+云溪物业服务中心 - 安保部
+2024 年 8 月 2 日', 7, 'fire_inspection', FALSE, 'PUBLISHED', '2024-08-02 12:14:00'),
+(5, '中秋国庆社区活动通知', '尊敬的业主：
 
-To celebrate the Mid-Autumn Festival and National Day, the Property Service Center and Homeowners'' Committee invite you to a community event: ''Moon Over Yunxi - Garden of Joy''
+为庆祝中秋佳节与国庆，物业服务中心联合业委会诚邀各位业主参加社区活动「月满云溪·园聚欢乐」。
 
-Time: September 14, 2024 (Saturday) 15:00-20:00
-Location: Community Central Plaza
-Activities:
-  - Lantern Riddle Guessing (15:00-17:00)
-  - Children''s DIY Mooncake (15:30-17:00)
-  - Community Performance (18:00-20:00)
-  - Prizes and mooncake distribution
+活动时间：2024 年 9 月 14 日（周六）15:00-20:00
+活动地点：小区中央广场
+活动内容：
+  - 猜灯谜（15:00-17:00）
+  - 亲子 DIY 月饼（15:30-17:00）
+  - 社区文艺汇演（18:00-20:00）
+  - 抽奖及月饼派发
 
-All residents are welcome to join!
+欢迎广大业主踊跃参与！
 
-Yunxi Property Service Center - Community Service Dept.
-September 5, 2024', 5, 'community_activity', FALSE, 'PUBLISHED', '2024-09-05 10:18:00'),
-(6, '2024 Community Public Revenue Disclosure', 'Dear Residents,
+云溪物业服务中心 - 社区服务部
+2024 年 9 月 5 日', 5, 'community_activity', FALSE, 'PUBLISHED', '2024-09-05 10:18:00'),
+(6, '2024 年度小区公共收益公示', '尊敬的业主：
 
-Per Shanghai Residential Property Management Regulations, the 2024 H1 public revenue of Yunxi Garden Community is disclosed as follows:
+根据《上海市住宅物业管理规定》，现将云溪花园小区 2024 年上半年公共收益公示如下：
 
-I. Revenue (Jan-Jun 2024)
-  1. Elevator advertising: CNY 48,200.00
-  2. Locker site fee: CNY 12,000.00
-  3. Vending machine site fee: CNY 3,600.00
-  4. Temporary parking: CNY 26,800.00
-  5. Other: CNY 2,400.00
-  Total: CNY 93,000.00
+一、收入（2024 年 1-6 月）
+  1. 电梯广告收入：48,200.00 元
+  2. 快递柜场地费：12,000.00 元
+  3. 自动售货机场地费：3,600.00 元
+  4. 临时停车费：26,800.00 元
+  5. 其他收入：2,400.00 元
+  合计：93,000.00 元
 
-II. Expenditure
-  1. Elevator maintenance (shared): CNY 18,000.00
-  2. Fire equipment maintenance: CNY 8,500.00
-  3. Public lighting renovation: CNY 12,300.00
-  4. Greening supplement: CNY 6,200.00
-  Total: CNY 45,000.00
+二、支出
+  1. 电梯维保（公摊）：18,000.00 元
+  2. 消防设备维护：8,500.00 元
+  3. 公共照明改造：12,300.00 元
+  4. 绿化补种：6,200.00 元
+  合计：45,000.00 元
 
-III. Balance: CNY 48,000.00 (transferred to maintenance fund)
+三、结余：48,000.00 元（已转入维修资金）
 
-Disclosure period: July 1-15, 2024
+公示期：2024 年 7 月 1 日至 15 日
 
-Yunxi Property Service Center - Homeowners'' Committee
-July 1, 2024', 2, 'public_revenue', TRUE, 'PUBLISHED', '2024-07-01 10:05:00'),
-(7, 'Homeowners'' Committee Election Notice', 'Dear Residents,
+云溪物业服务中心 - 业委会
+2024 年 7 月 1 日', 2, 'public_revenue', TRUE, 'PUBLISHED', '2024-07-01 10:05:00'),
+(7, '业主委员会换届选举通知', '尊敬的业主：
 
-The first Homeowners'' Committee term is expiring. Per the Owners'' Assembly Rules, we hereby launch the second committee election.
+首届业主委员会任期即将届满。根据《业主大会议事规则》，现启动第二届业委会换届选举工作。
 
-I. Candidate Registration
-  Period: August 1-20, 2024
-  Location: Property Service Center front desk
-  Requirements: Property owner, enthusiastic about community, responsible
+一、候选人报名
+  时间：2024 年 8 月 1 日至 20 日
+  地点：物业服务中心前台
+  条件：本小区业主、热心公益、责任心强
 
-II. Election Method
-  Written ballot + electronic voting
+二、选举方式
+  书面投票 + 电子投票
 
-III. Voting Period
-  September 10-15, 2024
+三、投票时间
+  2024 年 9 月 10 日至 15 日
 
-All owners are encouraged to participate. Detailed rules available at the Property Service Center.
+欢迎广大业主积极参与。详细规则请到物业服务中心查阅。
 
-Yunxi Garden Homeowners'' Committee Election Working Group
-July 28, 2024', 6, 'committee_notice', FALSE, 'PUBLISHED', '2024-07-28 12:47:00'),
-(8, 'High Temperature Safety Reminder', 'Dear Residents,
+云溪花园业主委员会换届选举工作组
+2024 年 7 月 28 日', 6, 'committee_notice', FALSE, 'PUBLISHED', '2024-07-28 12:47:00'),
+(8, '高温天气安全提示', '尊敬的业主：
 
-Shanghai is experiencing sustained high temperatures with an orange alert issued. The Property Service Center reminds you:
+近期上海持续高温，已发布橙色高温预警。物业服务中心温馨提示：
 
-1. Avoid prolonged outdoor activities during 11:00-15:00
-2. Set AC temperature to 26C+ for energy saving and health
-3. Be careful with electricity - avoid using multiple high-power appliances simultaneously
-4. Check water/gas/electricity before leaving home
-5. Elderly and children should avoid going out; contact property if help is needed
+1. 尽量避免 11:00-15:00 长时间户外活动
+2. 空调温度建议设定 26℃ 以上，既节能又健康
+3. 注意用电安全，避免多个大功率电器同时使用
+4. 外出前检查水、电、燃气是否关闭
+5. 老人儿童尽量减少外出，如需帮助请联系物业
 
-We have equipped outdoor staff with heat protection supplies and set up a free drinking water station at the lobby.
+物业已为户外工作人员配备防暑用品，并在门厅设置免费饮水点。
 
-Wishing you a cool and safe summer!
+祝您清凉度夏、平安健康！
 
-Yunxi Property Service Center
-July 25, 2024', 2, 'weather_alert', FALSE, 'PUBLISHED', '2024-07-25 14:08:00'),
-(9, 'Waste Sorting Compliance Report', 'Dear Residents,
+云溪物业服务中心
+2024 年 7 月 25 日', 2, 'weather_alert', FALSE, 'PUBLISHED', '2024-07-25 14:08:00'),
+(9, '垃圾分类情况通报', '尊敬的业主：
 
-Since the implementation of waste sorting, our community has achieved good results:
+自实施垃圾分类以来，本小区取得了良好成效：
 
-I. Current Status
-  - Wet waste daily: ~280kg
-  - Dry waste daily: ~520kg
-  - Recyclables daily: ~85kg
-  - Sorting accuracy: ~82%
+一、现状
+  - 湿垃圾日均：约 280kg
+  - 干垃圾日均：约 520kg
+  - 可回收物日均：约 85kg
+  - 分类准确率：约 82%
 
-II. Issues
-  1. Some households still mix waste
-  2. Off-schedule disposal occurs
-  3. Bulky waste randomly placed
+二、存在问题
+  1. 部分住户仍存在混投现象
+  2. 非投放时段随意丢弃垃圾
+  3. 大件垃圾随意堆放
 
-III. Measures
-  1. Add guides during peak hours
-  2. Door-to-door education for repeat offenders
-  3. Set up temporary bulky waste storage (Garage B)
+三、改进措施
+  1. 高峰时段增派指导员
+  2. 对屡次违规住户上门宣传
+  3. 设置临时大件垃圾存放点（B 车库）
 
-Please cooperate with waste sorting. Together we build a better community.
+请大家配合做好垃圾分类，共建美好家园。
 
-Yunxi Property Service Center - Environmental Dept.
-August 10, 2024', 6, 'facility_notice', FALSE, 'PUBLISHED', '2024-08-10 15:36:00'),
-(10, 'Underground Garage Fire Lane Clearance Notice', 'Dear Residents,
+云溪物业服务中心 - 环境部
+2024 年 8 月 10 日', 6, 'facility_notice', FALSE, 'PUBLISHED', '2024-08-10 15:36:00'),
+(10, '地下车库消防通道清理通知', '尊敬的业主：
 
-Recent inspections found fire lanes in the underground garage being occupied by debris, posing serious safety hazards.
+近期检查发现地下车库消防通道被杂物占用，存在严重安全隐患。
 
-I. Requirements
-  1. Residents with items in fire lanes/exit areas must clear them by August 20, 2024
-  2. Items not cleared by deadline will be removed by property
-  3. No non-vehicle parking in garage lanes
+一、要求
+  1. 在消防通道、出入口堆放物品的住户请于 2024 年 8 月 20 日前清理
+  2. 逾期未清理的，物业将统一清理
+  3. 车库通道内禁止非机动车停放
 
-II. Legal Liability
-  Per the Fire Protection Law, occupying fire lanes may result in fines of CNY 5,000-50,000.
+二、法律责任
+  根据《消防法》，占用消防通道可处 5,000-50,000 元罚款。
 
-Safety first - please cooperate!
+安全无小事，请大家积极配合！
 
-Yunxi Property Service Center - Security Dept.
-August 15, 2024', 1, 'fire_inspection', FALSE, 'PUBLISHED', '2024-08-15 13:03:00'),
-(11, 'Winter Fire Safety Notice', 'Dear Residents,
+云溪物业服务中心 - 安保部
+2024 年 8 月 15 日', 1, 'fire_inspection', FALSE, 'PUBLISHED', '2024-08-15 13:03:00'),
+(11, '冬季消防安全提示', '尊敬的业主：
 
-Winter is a high-risk season for fires. The Property Service Center reminds you:
+冬季是火灾高发季节。物业服务中心温馨提示：
 
-1. Be mindful of electrical load when using heaters/electric blankets; turn off power when leaving
-2. No flammable materials in hallways/fire lanes
-3. No e-bikes inside buildings for charging
-4. Don''t leave cooking gas unattended; close valves after use
-5. Check home wiring regularly; replace aging circuits
-6. Consider having a home fire extinguisher
+1. 使用取暖器、电热毯时注意用电负荷，人走断电
+2. 楼道、消防通道内不堆放易燃物品
+3. 电动车不进楼入户充电
+4. 做饭时不离人，用完关闭燃气阀门
+5. 定期检查家中线路，及时更换老化电路
+6. 建议家中配备灭火器
 
-Property will conduct winter fire safety home inspections in December.
+物业将于 12 月开展冬季消防安全入户检查。
 
-Yunxi Property Service Center - Security Dept.
-November 20, 2024', 10, 'fire_inspection', FALSE, 'PUBLISHED', '2024-11-20 17:12:00'),
-(12, 'Access Control System Replacement Notice', 'Dear Residents,
+云溪物业服务中心 - 安保部
+2024 年 11 月 20 日', 10, 'fire_inspection', FALSE, 'PUBLISHED', '2024-11-20 17:12:00'),
+(12, '门禁系统更换通知', '尊敬的业主：
 
-The current access control system has been in use for 6 years with aging equipment. Per Homeowners'' Committee proposal and assembly vote, the system will be replaced.
+小区现有门禁系统已使用 6 年，设备老化。经业委会提议并由业主大会表决通过，将对门禁系统进行更换升级。
 
-I. Construction: October 8-20, 2024
-II. Scope: B1-B8, garage, main entrances
-III. New Features:
-  1. Face recognition + card dual mode
-  2. Mobile APP remote unlock
-  3. Visitor QR code access
-IV. Cost: From public revenue, no additional charge to owners
-V. Note: During transition, brief card reader downtime may occur. Register face info at the Property Center after activation.
+一、施工时间：2024 年 10 月 8 日至 20 日
+二、覆盖范围：B1-B8 栋、车库、各主出入口
+三、新系统功能：
+  1. 人脸识别 + 刷卡双模式
+  2. 手机 APP 远程开门
+  3. 访客二维码通行
+四、费用：从公共收益列支，不向业主额外收费
+五、注意事项：切换期间刷卡器可能短暂停用，启用后请到物业中心录入人脸信息。
 
-Yunxi Property Service Center - Engineering Dept.
-September 28, 2024', 7, 'facility_notice', FALSE, 'PUBLISHED', '2024-09-28 15:20:00'),
-(13, 'Winter Greening Maintenance Notice', 'Dear Residents,
+云溪物业服务中心 - 工程部
+2024 年 9 月 28 日', 7, 'facility_notice', FALSE, 'PUBLISHED', '2024-09-28 15:20:00'),
+(13, '冬季绿化养护通知', '尊敬的业主：
 
-To ensure community plants survive winter, the greening team will conduct winter maintenance in December 2024:
+为确保小区绿植安全越冬，绿化队将于 2024 年 12 月开展冬季养护工作：
 
-1. Cold protection wrapping for sensitive species
-2. Pruning dead/diseased branches
-3. Applying winter fertilizer
-4. Clearing fallen leaves to eliminate fire hazards
+1. 对不耐寒植物进行防寒包裹
+2. 修剪枯枝、病枝
+3. 施用冬肥
+4. 清理落叶，消除火灾隐患
 
-Some noise from pruning may occur - thank you for understanding. Greening suggestions welcome at the Property Center.
+修剪作业可能产生一定噪音，敬请谅解。绿化建议欢迎到物业中心反馈。
 
-Yunxi Property Service Center - Greening Dept.
-December 1, 2024', 6, 'facility_notice', FALSE, 'PUBLISHED', '2024-12-01 11:33:00'),
-(14, 'Spring Festival 2025 Duty Arrangement', 'Dear Residents,
+云溪物业服务中心 - 绿化部
+2024 年 12 月 1 日', 6, 'facility_notice', FALSE, 'PUBLISHED', '2024-12-01 11:33:00'),
+(14, '2025 年春节值班安排', '尊敬的业主：
 
-Spring Festival 2025 holiday duty arrangement:
+2025 年春节假期值班安排如下：
 
-I. Holiday: January 28 (New Year''s Eve) to February 4, 8 days
+一、放假时间：1 月 28 日（除夕）至 2 月 4 日，共 8 天
 
-II. Duty:
-  1. Front desk: 9:00-17:00 daily
-  2. Engineering: 24h duty, emergency response within 30 min
-  3. Security: 24h normal patrol
-  4. Cleaning: basic morning service
+二、值班安排：
+  1. 前台：每日 9:00-17:00
+  2. 工程：24 小时值班，应急 30 分钟内响应
+  3. 安保：24 小时正常巡逻
+  4. 保洁：基础晨扫服务
 
-III. Hotline: 021-5896XXXX
-   Emergency: 138-XXXX-XXXX
+三、服务热线：021-5896XXXX
+   紧急电话：138-XXXX-XXXX
 
-IV. Tips:
-  1. Close windows/doors, shut off utilities when away
-  2. Be vigilant against fire and theft
-  3. Fireworks at designated area only
+四、温馨提示：
+  1. 外出关好门窗、关闭水电气
+  2. 注意防火防盗
+  3. 燃放烟花爆竹请到指定区域
 
-Happy Spring Festival!
+祝大家新春快乐！
 
-Yunxi Property Service Center
-January 20, 2025', 10, 'community_activity', FALSE, 'PUBLISHED', '2025-01-20 12:06:00'),
-(15, 'Q1 2025 Elevator Maintenance Notice', 'Dear Residents,
+云溪物业服务中心
+2025 年 1 月 20 日', 10, 'community_activity', FALSE, 'PUBLISHED', '2025-01-20 12:06:00'),
+(15, '2025 年第一季度电梯维保通知', '尊敬的业主：
 
-Q1 2025 elevator maintenance schedule:
+2025 年第一季度电梯维保安排如下：
 
-Dates: March 10-14, 2025
-  Mar 10: B1, B2
-  Mar 11: B3, B4
-  Mar 12: B5, B6
-  Mar 13: B7, B8
-  Mar 14: Final inspection
+时间：3 月 10 日至 14 日
+  3 月 10 日：B1、B2 栋
+  3 月 11 日：B3、B4 栋
+  3 月 12 日：B5、B6 栋
+  3 月 13 日：B7、B8 栋
+  3 月 14 日：最终检查
 
-Time: Max 4h per building (9:00-13:00 or 14:00-18:00)
+维保时段：每栋不超过 4 小时（9:00-13:00 或 14:00-18:00）
 
-Content: Traction machine, wire rope, safety gear, speed limiter, door system, control cabinet
+内容：曳引机、钢丝绳、安全钳、限速器、门系统、控制柜等
 
-Please plan travel in advance. Contact property for temporary access arrangements.
+请大家提前安排出行。如需临时通行协助，请联系物业。
 
-Yunxi Property Service Center - Engineering Dept.
-March 5, 2025', 7, 'elevator_maintenance', FALSE, 'PUBLISHED', '2025-03-05 09:34:00'),
-(16, 'Exterior Wall Renovation Notice', 'Dear Residents,
+云溪物业服务中心 - 工程部
+2025 年 3 月 5 日', 7, 'elevator_maintenance', FALSE, 'PUBLISHED', '2025-03-05 09:34:00'),
+(16, '外墙翻新施工通知', '尊敬的业主：
 
-Inspection found exterior wall paint peeling and localized seepage in some buildings. Per Homeowners'' Committee approval, renovation will proceed.
+经检查，部分楼栋外墙涂料脱落、局部渗水。经业委会同意，将开展外墙翻新及防水施工。
 
-I. Construction: April 15 - May 30, 2025
-II. Scope: B3, B5, B7 exterior walls + waterproofing
-III. Contractor: Shanghai XX Construction Co., Ltd. (fully qualified)
-IV. Notes:
-  1. Noise during 8:00-17:00
-  2. Keep windows closed to prevent dust
-  3. Don''t place items on windowsills
-  4. No parking in suspended platform work areas
+一、施工时间：2025 年 4 月 15 日至 5 月 30 日
+二、施工范围：B3、B5、B7 栋外墙及防水
+三、施工单位：上海 XX 建筑工程有限公司（具备相应资质）
+四、注意事项：
+  1. 施工时间为 8:00-17:00，可能产生噪音
+  2. 请关闭窗户，防止灰尘进入
+  3. 请勿在窗台放置物品
+  4. 吊篮作业区域请勿停车
 
-Funding: Special maintenance fund
+费用来源：专项维修资金
 
-Yunxi Property Service Center - Engineering Dept.
-April 8, 2025', 8, 'facility_notice', FALSE, 'PUBLISHED', '2025-04-08 14:09:00'),
-(17, 'Summer 2025 Typhoon & Flood Prevention Notice', 'Dear Residents,
+云溪物业服务中心 - 工程部
+2025 年 4 月 8 日', 8, 'facility_notice', FALSE, 'PUBLISHED', '2025-04-08 14:09:00'),
+(17, '2025 年夏季防台防汛通知', '尊敬的业主：
 
-Shanghai has entered peak typhoon season. The Property Service Center has activated the flood/typhoon emergency plan:
+上海已进入台风高发期，物业服务中心已启动防汛防台应急预案：
 
-I. Property preparations:
-  1. Checked and cleared all rooftop drainage
-  2. 200 sandbags ready at entrances
-  3. Checked garage drainage pumps
-  4. Pruned dangerous branches
+一、物业准备
+  1. 检查并清理屋顶全部排水口
+  2. 各出入口备足 200 个沙袋
+  3. 检查车库排水泵
+  4. 修剪危险树枝
 
-II. Resident cooperation:
-  1. Secure balcony items (flower pots, drying racks)
-  2. Close windows during typhoon, stay away from glass
-  3. Garage owners: watch for notices, move vehicles to ground if needed
-  4. Stock essential supplies
+二、住户配合
+  1. 固定阳台物品（花盆、晾衣架等）
+  2. 台风期间关好窗户，远离玻璃
+  3. 车库车主留意通知，必要时将车辆移至地面
+  4. 储备必要生活物资
 
-III. Emergency contact: 021-5896XXXX
+三、应急电话：021-5896XXXX
 
-Yunxi Property Service Center - Flood Prevention Group
-July 10, 2025', 5, 'weather_alert', TRUE, 'PUBLISHED', '2025-07-10 12:31:00'),
-(18, 'Mosquito Control Notice', 'Dear Residents,
+云溪物业服务中心 - 防汛小组
+2025 年 7 月 10 日', 5, 'weather_alert', TRUE, 'PUBLISHED', '2025-07-10 12:31:00'),
+(18, '蚊虫消杀通知', '尊敬的业主：
 
-Summer mosquito activity is high. The property will conduct mosquito control in public areas on July 25, 2025.
+夏季蚊虫活跃，物业将于 2025 年 7 月 25 日对公共区域进行蚊虫消杀。
 
-Scope: Underground garage, hallways, garbage area, green belts, drainage
-Time: July 25 (Friday) 8:00-11:00
+范围：地下车库、楼道、垃圾房、绿化带、排水沟
+时间：7 月 25 日（周五）8:00-11:00
 
-Notes:
-  1. Keep windows closed during treatment
-  2. Don''t dry clothes in treatment areas
-  3. Supervise children and pets
-  4. Wait 30 min after treatment before entering
+注意事项：
+  1. 消杀期间请关闭门窗
+  2. 请勿在消杀区域晾晒衣物
+  3. 请看管好儿童及宠物
+  4. 消杀后 30 分钟再进入
 
-Agent: Low-toxicity eco-friendly insecticide, harmless to humans
+药剂：低毒环保型杀虫剂，对人体无害
 
-Yunxi Property Service Center - Environmental Dept.
-July 22, 2025', 8, 'facility_notice', FALSE, 'PUBLISHED', '2025-07-22 11:38:00'),
-(19, 'E-Bike Charging Regulation Notice', 'Dear Residents,
+云溪物业服务中心 - 环境部
+2025 年 7 月 22 日', 8, 'facility_notice', FALSE, 'PUBLISHED', '2025-07-22 11:38:00'),
+(19, '电动车充电管理规定', '尊敬的业主：
 
-Recent e-bike fire incidents nationwide highlight safety risks. New charging rules:
+近期全国多地发生电动车火灾事故，安全隐患突出。现就电动车充电管理作如下规定：
 
-I. Prohibited:
-  1. No e-bikes inside buildings
-  2. No ''flying wire'' charging (from windows)
-  3. No e-bikes in hallways/fire lanes
-  4. No battery removal for indoor charging
+一、禁止行为
+  1. 电动车进入楼内
+  2. "飞线"充电（从窗户拉线）
+  3. 电动车停放在楼道、消防通道
+  4. 将电池拆下带入室内充电
 
-II. Charging Facilities:
-  Centralized charging area in Garage B with 20 smart stations: auto-stop, overload protection
+二、充电设施
+  B 车库设置集中充电区，配备 20 个智能充电桩：充满自停、过载保护
 
-III. Violation Handling:
-  1. First offense: warning + deadline
-  2. Repeat: reported to fire department
+三、违规处理
+  1. 首次违规：警告并限期整改
+  2. 屡次违规：报消防部门处理
 
-IV. Report violations: 021-5896XXXX
+四、违规举报：021-5896XXXX
 
-Safety first!
+安全无小事，请大家共同遵守！
 
-Yunxi Property Service Center - Security Dept.
-August 1, 2025', 5, 'fire_inspection', FALSE, 'PUBLISHED', '2025-08-01 11:47:00'),
-(20, '2025 H1 Public Revenue Disclosure', 'Dear Residents,
+云溪物业服务中心 - 安保部
+2025 年 8 月 1 日', 5, 'fire_inspection', FALSE, 'PUBLISHED', '2025-08-01 11:47:00'),
+(20, '2025 年上半年公共收益公示', '尊敬的业主：
 
-Yunxi Garden Community 2025 H1 (Jan-Jun) public revenue disclosure:
+现将云溪花园小区 2025 年上半年（1-6 月）公共收益公示如下：
 
-I. Revenue
-  1. Elevator advertising: CNY 52,000.00
-  2. Locker site fee: CNY 12,000.00
-  3. Vending machine: CNY 3,600.00
-  4. Temporary parking: CNY 31,200.00
-  5. Charging station share: CNY 8,400.00
-  6. Other: CNY 1,800.00
-  Total: CNY 109,000.00
+一、收入
+  1. 电梯广告收入：52,000.00 元
+  2. 快递柜场地费：12,000.00 元
+  3. 自动售货机收入：3,600.00 元
+  4. 临时停车费：31,200.00 元
+  5. 充电桩分成：8,400.00 元
+  6. 其他收入：1,800.00 元
+  合计：109,000.00 元
 
-II. Expenditure
-  1. Elevator maintenance: CNY 18,000.00
-  2. Fire equipment: CNY 9,500.00
-  3. Access control replacement: CNY 25,000.00
-  4. Greening: CNY 4,800.00
-  5. LED lighting: CNY 15,000.00
-  Total: CNY 72,300.00
+二、支出
+  1. 电梯维保：18,000.00 元
+  2. 消防设备：9,500.00 元
+  3. 门禁更换：25,000.00 元
+  4. 绿化养护：4,800.00 元
+  5. LED 照明改造：15,000.00 元
+  合计：72,300.00 元
 
-III. Balance: CNY 36,700.00
+三、结余：36,700.00 元
 
-Disclosure period: July 1-15, 2025
+公示期：2025 年 7 月 1 日至 15 日
 
-Yunxi Property Service Center - Homeowners'' Committee
-July 1, 2025', 1, 'public_revenue', TRUE, 'PUBLISHED', '2025-07-01 14:19:00'),
-(21, '2025 Annual Fire Drill Notice', 'Dear Residents,
+云溪物业服务中心 - 业委会
+2025 年 7 月 1 日', 1, 'public_revenue', TRUE, 'PUBLISHED', '2025-07-01 14:19:00'),
+(21, '2025 年度消防演练通知', '尊敬的业主：
 
-To improve fire safety awareness and emergency evacuation skills, the annual fire drill will be held on November 9, 2025 (National Fire Day).
+为提高消防安全意识和应急疏散能力，定于 2025 年 11 月 9 日（全国消防日）开展年度消防演练。
 
-I. Time: November 9 (Sunday) 14:00-16:00
-II. Location: Community Central Plaza
-III. Content:
-  1. Fire alarm and evacuation drill
-  2. Extinguisher hands-on practice
-  3. Fire hydrant demonstration
-  4. First aid knowledge
-  5. Fire truck display
+一、时间：11 月 9 日（周日）14:00-16:00
+二、地点：小区中央广场
+三、内容：
+  1. 火灾报警及疏散演练
+  2. 灭火器实操体验
+  3. 消火栓使用演示
+  4. 急救知识讲解
+  5. 消防车展示
 
-IV. Participation: Voluntary, no registration needed
-V. Note: Alarm sounds during drill - do not panic
+四、参与方式：自愿参加，无需报名
+五、注意：演练期间会有报警声，请勿惊慌
 
-Yunxi Property Service Center - Security Dept.
-October 28, 2025', 9, 'fire_inspection', FALSE, 'PUBLISHED', '2025-10-28 10:17:00'),
-(22, 'Roof Waterproofing Repair Notice - B2 & B6', 'Dear Residents,
+云溪物业服务中心 - 安保部
+2025 年 10 月 28 日', 9, 'fire_inspection', FALSE, 'PUBLISHED', '2025-10-28 10:17:00'),
+(22, 'B2、B6 栋屋顶防水维修通知', '尊敬的业主：
 
-Inspection found aging waterproofing on B2 and B6 roofs with localized seepage. Per Homeowners'' Committee approval, repair will proceed.
+经检查，B2、B6 栋屋顶防水层老化，局部存在渗水现象。经业委会同意，将开展屋顶防水维修。
 
-I. Construction: September 5-25, 2025
-II. Scope: B2, B6 roofs
-III. Content:
-  1. Remove old waterproofing layer
-  2. Re-lay SBS modified asphalt membrane
-  3. Restore insulation and protection layers
+一、施工时间：2025 年 9 月 5 日至 25 日
+二、施工范围：B2、B6 栋屋顶
+三、施工内容：
+  1. 铲除原防水层
+  2. 重新铺设 SBS 改性沥青防水卷材
+  3. 恢复保温及保护层
 
-IV. Notes:
-  1. Top floor may experience noise
-  2. Don''t dry items on rooftop
-  3. Rain delays construction
+四、注意事项：
+  1. 顶楼住户可能听到施工噪音
+  2. 请勿在屋顶晾晒物品
+  3. 雨天顺延施工
 
-Funding: Special maintenance fund
+费用来源：专项维修资金
 
-Yunxi Property Service Center - Engineering Dept.
-August 28, 2025', 10, 'facility_notice', FALSE, 'PUBLISHED', '2025-08-28 16:40:00'),
-(23, 'Spring Festival 2026 Duty & Safety Tips', 'Dear Residents,
+云溪物业服务中心 - 工程部
+2025 年 8 月 28 日', 10, 'facility_notice', FALSE, 'PUBLISHED', '2025-08-28 16:40:00'),
+(23, '2026 年春节值班及安全提示', '尊敬的业主：
 
-Spring Festival 2026 duty arrangement:
+2026 年春节假期值班安排如下：
 
-I. Holiday: February 15 (New Year''s Eve) to February 22, 8 days
-II. Duty:
-  Front desk: 9:00-17:00
-  Engineering: 24h
-  Security: 24h
-  Hotline: 021-5896XXXX
+一、放假时间：2 月 15 日（除夕）至 2 月 22 日，共 8 天
+二、值班安排：
+  前台：9:00-17:00
+  工程：24 小时值班
+  安保：24 小时值班
+  热线：021-5896XXXX
 
-III. Tips:
-  1. Close windows/doors, shut off utilities when away
-  2. No flammable items on balconies
-  3. Be vigilant against theft
-  4. Fireworks at designated area (south gate open space)
+三、温馨提示：
+  1. 外出关好门窗、关闭水电气
+  2. 阳台不堆放易燃物品
+  3. 注意防盗
+  4. 燃放烟花爆竹请到指定区域（南门外空地）
 
-Happy New Year!
+祝大家新年快乐！
 
-Yunxi Property Service Center
-February 5, 2026', 4, 'community_activity', FALSE, 'PUBLISHED', '2026-02-05 16:18:00'),
-(24, 'Surveillance System Upgrade Notice', 'Dear Residents,
+云溪物业服务中心
+2026 年 2 月 5 日', 4, 'community_activity', FALSE, 'PUBLISHED', '2026-02-05 16:18:00'),
+(24, '监控系统升级改造通知', '尊敬的业主：
 
-To improve community safety, per Homeowners'' Committee proposal and assembly vote, the surveillance system will be upgraded.
+为提升小区安防水平，经业委会提议并由业主大会表决通过，将对监控系统进行升级改造。
 
-I. Upgrades:
-  1. Replace all cameras with HD network cameras (96 units)
-  2. Add face recognition capture system at entrances
-  3. Upgrade monitoring center storage and displays
-  4. Add e-bike entry alarm system
+一、升级内容：
+  1. 更换全部摄像头为高清网络摄像机（共 96 个）
+  2. 出入口新增人脸识别抓拍系统
+  3. 监控中心存储及显示设备升级
+  4. 新增电动车进入报警系统
 
-II. Construction: March 1-20, 2026
-III. Cost: From public revenue
-IV. Notes:
-  1. Brief surveillance interruption may occur
-  2. Workers in public areas - please do not disturb
-  3. Face data used for security only, strictly confidential
+二、施工时间：2026 年 3 月 1 日至 20 日
+三、费用：从公共收益列支
+四、注意事项：
+  1. 施工期间监控可能短暂中断
+  2. 施工人员在公共区域作业，请勿打扰
+  3. 人脸数据仅用于安防，严格保密
 
-Yunxi Property Service Center - Security Dept.
-February 20, 2026', 7, 'facility_notice', FALSE, 'PUBLISHED', '2026-02-20 09:51:00');
-
+云溪物业服务中心 - 安保部
+2026 年 2 月 20 日', 7, 'facility_notice', FALSE, 'PUBLISHED', '2026-02-20 09:51:00');
