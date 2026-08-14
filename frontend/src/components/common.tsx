@@ -1,4 +1,5 @@
 import { ChevronRight, Sparkles, Wrench } from 'lucide-react'
+import type { Notice } from '../api/types'
 
 export function SectionTitle({ title, link }: { title: string; link?: string }) {
   return (
@@ -32,26 +33,30 @@ export function Stat({ value, label }: { value: string; label: string }) {
   )
 }
 
-export function NoticeList({ title }: { title: string }) {
+export function NoticeList({ title, notices, loading }: { title: string; notices?: Notice[]; loading?: boolean }) {
+  const formatDate = (iso: string) => {
+    const d = new Date(iso)
+    return `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
+
   return (
     <>
       <SectionTitle title={title} link="查看更多" />
       <div className="notice-list">
-        <div>
-          <span className="notice-tag">置顶</span>
-          <b>关于小区停水维修的通知</b>
-          <time>08-11</time>
-        </div>
-        <div>
-          <span>通知</span>
-          <b>社区夏季活动通知</b>
-          <time>08-10</time>
-        </div>
-        <div>
-          <span>通知</span>
-          <b>电梯维护保养通知</b>
-          <time>08-08</time>
-        </div>
+        {loading && (
+          <div style={{ padding: '12px 0', color: '#7e8587', fontSize: 12, textAlign: 'center' }}>加载中...</div>
+        )}
+        {!loading && (!notices || notices.length === 0) && (
+          <div style={{ padding: '12px 0', color: '#7e8587', fontSize: 12, textAlign: 'center' }}>暂无公告</div>
+        )}
+        {!loading &&
+          notices?.slice(0, 3).map((notice) => (
+            <div key={notice.id}>
+              <span className={notice.is_pinned ? 'notice-tag' : ''}>{notice.is_pinned ? '置顶' : '通知'}</span>
+              <b>{notice.title}</b>
+              <time>{formatDate(notice.created_at)}</time>
+            </div>
+          ))}
       </div>
     </>
   )

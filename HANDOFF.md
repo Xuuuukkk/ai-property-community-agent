@@ -21,7 +21,7 @@
 | Phase 1 | Backend Foundation（FastAPI、SQLAlchemy、Alembic、Docker Compose） | ✅ |
 | Phase 2 | Database Models（10 张业务表） | ✅ |
 | Phase 3 | Business APIs（报修、费用、公告、用户） | ✅ |
-| Phase 4 | Frontend UI（React + Vite + TypeScript，已外包改造） | ✅ |
+| Phase 4 | Frontend UI（React + Vite + TypeScript + Tailwind CSS + lucide-react，已整合 Bolt 原型） | ✅ |
 | Phase 5 | AI Agent System（LangGraph 路由 + Tool + RAG 接入） | ✅ |
 | Phase 6 | Agent Evaluation（轨迹表、评估数据集、指标、报告） | ✅ |
 | Phase 7 | Deployment（配置管理、生产 Compose、Nginx、CI/CD、日志监控、备份） | ✅ |
@@ -30,8 +30,8 @@
 | 增强 | ToC 业主端首页前端 | ✅ |
 | 增强 | ToC 业主端 AI 助手聊天页 | ✅ |
 | 增强 | 统一门户 + JWT 登录 + 角色分流（业主/维修/物业） | ✅ |
-| 增强 | 业主端子页面（报修、查费、公告、工单） | ✅ |
-| 增强 | 维修人员端前端（工单处理台） | ✅ |
+| 增强 | 统一门户 + JWT 登录 + 角色分流 | ✅ |
+| 增强 | Bolt 设计原型整合进项目 frontend | ✅ |
 
 **关键验证结果：**
 
@@ -192,30 +192,28 @@ docker compose -f docker-compose.monitoring.yml up -d
    - 演示账号密码已统一设为 `123456`，由 `backend/scripts/import_seed_data.py` 在导入 seed 档案后自动写入 bcrypt 哈希
 
 2. **角色与路由对应**
-   - 业主 `OWNER` → `/owner/*`
-   - 维修人员 `WORKER` → `/worker/*`
-   - 物业人员 `PROPERTY_STAFF` / 管理员 `ADMIN` → `/admin/*`
+   - 业主 `OWNER` → `/owner`
+   - 维修人员 `WORKER` → `/repair`
+   - 物业人员 `PROPERTY_STAFF` / 管理员 `ADMIN` → `/management`
 
-3. **业主端按新设计系统重绘**
-   - 启动页 `/`、角色选择 `/role-select`、登录 `/login`
-   - 业主首页 `/owner`：用户信息卡、待缴费用、报事服务、社区公告、AI 助手入口
-   - 服务聚合页 `/owner/services`、AI 助手 `/owner/ai`、我的 `/owner/profile`
-   - 子页面保留：`/owner/repair`、 `/owner/fees`、 `/owner/notices`、 `/owner/tickets`
-   - 底部导航：首页 / 服务 / AI助手 / 我的
-   - 设计系统：`frontend/src/styles/design-system.css`，主色 `#0E1B33`，辅色 `#BFA46A`
+3. **Bolt 原型整合后的页面**
+   - 启动页 `/`、`/welcome`
+   - 角色选择 `/roles`
+   - 登录 `/login`
+   - 业主首页 `/owner`
+   - 物业首页 `/management`
+   - 维修首页 `/repair`
+   - 样式文件：`frontend/src/index.css`（Tailwind + 自定义 CSS 变量）
 
-4. **物业管理端新首页**
-   - 物业首页 `/admin`：管理员信息卡、数据概览、数据服务、公告、AI 助手
-   - 底部导航：首页 / 工单 / 公告 / 我的
-   - 原桌面端运营台保留在 `/admin/desk`
-
-5. **维修人员端工单处理台**
-   - 路由 `/worker`，支持接单、切换状态（ASSIGNED/PROCESSING/COMPLETED/CLOSED）
+4. **当前前端页面状态**
+   - 首页 UI 已按 Bolt 设计实现
+   - 三端首页仍为静态/占位数据，待接入后端真实 API
+   - 登录已对接 `/api/auth/login`，按角色自动跳转
 
 ### 8.2 当前代码状态
 
 - 工作区：**干净**（`git status --short` 无输出）
-- 最新 commit：`1662561 feat(frontend): implement new design for portal, role select, login, owner and admin home`
+- 最新 commit：`fab64ec feat(frontend): replace UI with Bolt prototype, wire react-router and JWT auth`
 - 远端 `main` 已同步，可直接 `git pull`
 - 后端测试：**61/61 通过**
 - 前端构建：**通过**
@@ -226,11 +224,11 @@ docker compose -f docker-compose.monitoring.yml up -d
 # 1. 启动全栈
 docker compose up -d --build
 
-# 2. 设置演示密码（首次或重新导入种子数据后执行一次）
-docker compose exec backend python scripts/set_demo_passwords.py
-
-# 3. 打开统一门户
+# 2. 打开统一门户（生产镜像）
 open http://localhost:3000/
+
+# 3. 或打开 Vite 开发服务器
+open http://localhost:5173/
 
 # 4. 用演示账号登录
 curl -s http://localhost:3000/api/auth/login \
@@ -258,6 +256,7 @@ npm run build
 ### 8.5 需要队员注意的风险点
 
 - **前端路由**：使用了 `BrowserRouter`，Nginx 已配置 `try_files`，直接访问 `/owner` 不会 404。
-- **演示密码**：`scripts/set_demo_passwords.py` 会把所有用户密码改成 `123456`，**生产环境绝对不能运行**。
+- **演示密码**：seed 导入后所有用户默认密码为 `123456`，**生产环境必须替换**。
+- **当前首页数据多为静态**：业主/物业/维修首页尚未完全接入真实 API，后续需逐项替换。
 - **SECRET_KEY**：生产部署必须替换 `docker-compose.prod.yml` 里的 `SECRET_KEY`。
 - **API 权限待细化**：目前只做了登录 + 路由角色守卫，业务接口本身仍开放。

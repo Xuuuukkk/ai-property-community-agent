@@ -7,13 +7,61 @@ import {
   ScanLine,
   Wrench,
 } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import AppHeader from '../../components/AppHeader'
 import BottomNav from '../../components/BottomNav'
 import { NoticeList, SectionTitle, ServiceItem } from '../../components/common'
 import { useAuth } from '../../contexts/AuthContext'
+import { api } from '../../api/client'
+import type { FeeBill, Notice, RepairOrder } from '../../api/types'
 
 export default function OwnerHome() {
   const { user } = useAuth()
+  const [fees, setFees] = useState<FeeBill[]>([])
+  const [notices, setNotices] = useState<Notice[]>([])
+  const [repairs, setRepairs] = useState<RepairOrder[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const unpaidTotal = useMemo(() => {
+    return fees
+      .filter((f) => f.status === 'UNPAID')
+      .reduce((sum, f) => sum + Number.parseFloat(f.amount), 0)
+  }, [fees])
+
+  const pendingRepairs = useMemo(() => {
+    return repairs.filter((r) => ['CREATED', 'ASSIGNED', 'PROCESSING'].includes(r.status)).length
+  }, [repairs])
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+    setLoading(true)
+    setError('')
+
+    Promise.all([
+      api.listFeesByUser(user.id, { page_size: 20 }),
+      api.listNotices({ page_size: 5, status: 'PUBLISHED' }),
+      api.listRepairs({ user_id: user.id, page_size: 20 }),
+    ])
+      .then(([feeRes, noticeRes, repairRes]) => {
+        if (cancelled) return
+        setFees(feeRes.items)
+        setNotices(noticeRes.items)
+        setRepairs(repairRes.items)
+      })
+      .catch((err) => {
+        if (cancelled) return
+        setError(err instanceof Error ? err.message : '加载失败')
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [user])
 
   return (
     <div className="page dashboard-page">
@@ -35,7 +83,7 @@ export default function OwnerHome() {
         <div className="amount-card">
           <div>
             <span>未缴费用总额（元）</span>
-            <strong>1,280.00</strong>
+            <strong>{unpaidTotal.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
           </div>
           <button>去缴费</button>
         </div>
@@ -48,7 +96,40 @@ export default function OwnerHome() {
           <ServiceItem icon={<FileText />} label="我的工单" />
         </div>
 
-        <NoticeList title="社区公告" />
+        {pendingRepairs > 0 && (
+          <div
+            style={{
+              marginTop: 14,
+              background: '#fff',
+              borderRadius: 10,
+              padding: '13px 15px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              boxShadow: '0 4px 13px rgba(29,45,66,.05)',
+            }}
+          >
+            <span style={{ fontSize: 13, color: '#20324b' }}>进行中工单</span>
+            <span style={{ fontSize: 18, fontWeight: 700, color: '#bfa46a' }}>{pendingRepairs}</span>
+          </div>
+        )}
+
+        {error && (
+          <div
+            style={{
+              marginTop: 14,
+              padding: '12px 14px',
+              background: '#fff0f0',
+              color: '#a94442',
+              borderRadius: 10,
+              fontSize: 12,
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        <NoticeList title="社区公告" notices={notices} loading={loading} />
 
         <div className="ai-card">
           <div>
