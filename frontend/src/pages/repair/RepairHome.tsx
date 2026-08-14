@@ -112,9 +112,14 @@ export default function RepairHome() {
               {loading ? '-' : String(todayPending.length)} <small>项维修任务</small>
             </strong>
           </div>
-          <div className="progress-ring">
-            {loading ? '-' : todayCompletionRate}
-            <small>%</small>
+          <div
+            className="progress-ring"
+            style={{ display: 'flex', alignItems: 'baseline', whiteSpace: 'nowrap' }}
+          >
+            <span style={{ whiteSpace: 'nowrap' }}>
+              {loading ? '-' : todayCompletionRate}
+              <small>%</small>
+            </span>
           </div>
         </div>
 
