@@ -1,7 +1,7 @@
 # 交接文档 / Handoff
 
 > 本文件写给下一个没有上下文的会话。阅读后请直接继续下一步工作。
-> 最后更新：2026-08-15
+> 最后更新：2026-08-16
 
 ---
 
@@ -63,14 +63,15 @@
 
 ### 2.3 关键验证结果
 
-- 后端测试：**61/61 通过**，GitHub Actions CI 全绿（最近 3 个 commit 均 success）
+- 后端测试：**71/71 通过**，GitHub Actions CI 全绿
+- 前端测试：**19/19 通过**（Vitest + React Testing Library）
 - 前端构建通过，`npm audit` 0 漏洞
 - Docker 服务：property-frontend / backend / postgres / redis 全部运行
 - 用户数据：275 个账号（200 业主、50 物业、15 维修、10 管理员），演示密码 `123456`（`backend/scripts/set_demo_passwords.py`）
 - 知识库：22 文档 / 99 切片，使用智谱 `embedding-3`（1024 维）
 - LLM：智谱 `glm-4-flash`（`OPENAI_API_BASE=https://open.bigmodel.cn/api/paas/v4/`）
 - 评估脚本可生成 HTML/JSON 报告
-- 最新代码已 push 到 GitHub `main`（`afe64c6`）
+- 最新代码已 push 到 GitHub `main`（`b2fa209`）
 
 ### 2.4 2026-08-15 新增修复（AI 体验攻坚已完成）
 
@@ -82,6 +83,13 @@
   2. `collect_description` 完成即建单并同轮返回师傅信息（原逻辑要第 4 轮 confirm 才建单，文案却提前承诺，导致业主永远等不到师傅信息）
   3. 派单从"id 最小优先"改为"未完成工单数最少优先"，不再总派给杨飞
 - **测试基础设施**：独立 `property_agent_test` 数据库 + 序列重置 + 384 维列改造，修复 CI 维度不匹配（`test_evaluation.py` 改用模块引用 `SessionLocal`）
+
+### 2.5 2026-08-16 新增（工程加固已部分完成）
+
+- **API 角色权限校验（RBAC）**：`security.py` 新增 `require_roles(*roles)` 依赖，全部业务接口接入认证+授权：
+  - users/workers 列表仅 ADMIN/PROPERTY_STAFF；fee 业主只能查自己；repair 业主/师傅数据隔离、assign 仅 staff、confirm 校验工单归属；notices 发布仅 staff；agent/chat 需登录且业主/师傅强制以自己身份；knowledge reindex 仅 ADMIN
+  - 测试新增 `auth_headers(user_id, role)` helper，补 10 个 401/403 拒绝场景，后端 71 passed
+- **前端单元测试**：引入 Vitest + React Testing Library，覆盖 ProtectedRoute 权限守卫、common 展示组件、client token 管理，19 passed，CI frontend job 已加 `npm test`
 
 ---
 
@@ -95,10 +103,17 @@ LLM 已接入，Notice/Knowledge/Repair Agent 均能生成自然语言回答，�
 
 embedding 从 `deterministic` fallback 换成智谱 `embedding-3`（1024 维），知识库已用真实语义向量重新索引。
 
-### 3.3 待完善项（下一阶段）
+### 3.3 ✅ API 权限校验（已完成）
 
-- API 权限颗粒度待细化（目前只有登录 + 角色路由守卫）
-- 前端测试 / E2E 测试缺失
+全部业务接口已接入角色认证+授权，见 2.5。
+
+### 3.4 ✅ 前端单元测试（已完成）
+
+Vitest 单元测试已就位并接入 CI，见 2.5。
+
+### 3.5 待完善项（下一步）
+
+- 前端 E2E 测试（Playwright）缺失
 - Docker 镜像未自动推送 / 未上云（CI 目前只跑测试，不构建镜像）
 - 生产环境密码、SECRET_KEY 需替换
 - 部署依赖的 `.env` 未入库（需提供生产配置模板）
@@ -108,14 +123,13 @@ embedding 从 `deterministic` fallback 换成智谱 `embedding-3`（1024 维）�
 
 ## 4. 下一步计划是什么
 
-当前 AI 体验与 RAG 质量两个攻坚阶段已完成。下一阶段进入**工程加固 + 上线准备**：
+当前 AI 体验、RAG 质量、API 权限、前端单元测试均已完成。剩余工程加固 + 上线准备：
 
-### 阶段三：工程加固
+### 阶段三（剩余）：工程加固
 
-1. **API 权限校验**：敏感接口（报修、费用、公告发布、用户管理等）接入 `get_current_user` + 角色校验
-2. **前端测试**：补充单元测试 / E2E 测试（Vitest + Playwright）
-3. **生产安全配置**：替换默认密码、SECRET_KEY、JWT 密钥，提供 `.env.production.example`
-4. **CI/CD 推送镜像**：GitHub Actions 构建并推送 Docker 镜像（GHCR/Docker Hub），`docker-compose.prod.yml` 拉取镜像部署
+1. **生产安全配置**：替换默认密码、SECRET_KEY、JWT 密钥，提供 `.env.production.example`
+2. **CI/CD 推送镜像**：GitHub Actions 构建并推送 Docker 镜像（GHCR/Docker Hub），`docker-compose.prod.yml` 拉取镜像部署
+3. **前端 E2E 测试**：Playwright 覆盖核心用户路径（登录→报修→派单）
 
 ### 阶段四：上线准备
 
@@ -173,7 +187,12 @@ embedding 从 `deterministic` fallback 换成智谱 `embedding-3`（1024 维）�
   ```bash
   cd backend && pytest tests/ -q
   ```
+- 前端测试命令：
+  ```bash
+  cd frontend && npm test
+  ```
 - `curl` 发送中文 JSON 不要直接用 `-d '{...}'`，要写进文件再用 `-d @file.json`。
+- 后端测试的 `auth_headers(user_id, role)` helper 在 `tests/conftest.py`，角色 id 段：OWNER 1-200，ADMIN 201-210，WORKER 211-225，PROPERTY_STAFF 226-275。
 
 ### 5.7 代码提交
 
@@ -196,6 +215,9 @@ docker compose exec backend python -m scripts.index_knowledge_base --embedding-m
 
 # 跑后端测试
 cd backend && pytest tests/ -q
+
+# 跑前端测试
+cd frontend && npm test
 
 # 跑前端构建
 cd ../frontend && npm run build
