@@ -4,6 +4,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from fastapi import HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.building import Building
@@ -28,7 +29,8 @@ class RepairService:
         Priority:
         1. Skill type matches the repair type.
         2. Status is ON_DUTY.
-        3. Least recently assigned (lowest worker id as a simple heuristic).
+        3. Fewest currently-open orders (in-progress workload), then lowest id
+           as a deterministic tie-breaker.
         """
         skill_map = {
             "water_leak": "水电",
@@ -40,15 +42,25 @@ class RepairService:
         }
         desired_skill = skill_map.get(repair.type, "维修")
 
-        query = db.query(Worker).filter(Worker.status == "在岗")
+        open_statuses = ("CREATED", "ASSIGNED", "PROCESSING", "IN_PROGRESS")
+        open_count = (
+            db.query(func.count(RepairOrder.id))
+            .filter(RepairOrder.worker_id == Worker.id)
+            .filter(RepairOrder.status.in_(open_statuses))
+            .correlate(Worker)
+            .label("open_count")
+        )
+
+        base = db.query(Worker, open_count).filter(Worker.status == "在岗")
         skilled = (
-            query.filter(Worker.skill_type.ilike(f"%{desired_skill}%"))
-            .order_by(Worker.id)
+            base.filter(Worker.skill_type.ilike(f"%{desired_skill}%"))
+            .order_by(open_count.asc(), Worker.id.asc())
             .first()
         )
         if skilled:
-            return skilled
-        return query.order_by(Worker.id).first()
+            return skilled[0]
+        fallback = base.order_by(open_count.asc(), Worker.id.asc()).first()
+        return fallback[0] if fallback else None
 
     def create_repair(self, db: Session, *, payload: RepairCreate) -> RepairOrder:
         """Create a new repair order from the validated payload."""
