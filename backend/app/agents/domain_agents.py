@@ -182,8 +182,13 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
                 }
             pending["item"] = item
             pending["step"] = "collect_description"
+            # Echo the item back to the user, but avoid sounding like the bot
+            # itself lives in the house ("我家" -> "您家").
+            display_item = item
+            if display_item.startswith("我家"):
+                display_item = "您家" + display_item[2:]
             return {
-                "response": f"收到，{item}。请问问题严重吗？是否影响正常生活？您也可以直接上传现场照片。",
+                "response": f"收到，{display_item}。请问问题严重吗？是否影响正常生活？您也可以直接上传现场照片。",
                 "tool_results": [],
                 "pending_repair": pending,
                 "skip_llm_rewrite": True,
