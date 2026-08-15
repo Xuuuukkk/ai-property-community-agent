@@ -90,7 +90,8 @@ class TestAgentAPI:
         data = response.json()
         assert data["pending_repair"]["step"] == "collect_description"
 
-        # Third turn: provide description and confirm.
+        # Third turn: provide description; order is created and dispatched
+        # immediately in this same turn (no separate confirm step anymore).
         response = client.post(
             "/api/agent/chat",
             json={
@@ -101,22 +102,10 @@ class TestAgentAPI:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["pending_repair"]["step"] == "confirm"
-
-        # Fourth turn: agent creates the order and auto-dispatches.
-        response = client.post(
-            "/api/agent/chat",
-            json={
-                "message": "确认创建工单",
-                "user_id": 1,
-                "pending_repair": data["pending_repair"],
-            },
-        )
-        assert response.status_code == 200
-        data = response.json()
         assert data["intent"] == "repair"
         assert "工单" in data["response"]
         assert "师傅" in data["response"]
+        assert data["pending_repair"] is None
 
     def test_agent_chat_fee(self, client: TestClient) -> None:
         response = client.post("/api/agent/chat", json={"message": "查物业费", "user_id": 1})

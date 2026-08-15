@@ -116,6 +116,47 @@ def _format_worker_info(worker: dict[str, Any] | None) -> str:
     return f"已派单给 {name}（{dept}），联系电话：{phone}。"
 
 
+def _create_repair_order_response(db: Session, user_id: int, pending: dict[str, Any], user_text: str) -> dict[str, Any]:
+    """Create the repair order from collected info and return the response.
+
+    Shared by the ``collect_description`` and ``confirm`` steps so the order
+    (and the assigned worker's contact info) is produced in the same turn the
+    owner finishes describing the problem.
+    """
+    item = pending.get("item", "业主报修")
+    description = pending.get("description", user_text) or item
+    combined_description = f"{item}：{description}"
+
+    house_id = _extract_house_id(user_text) or _get_default_house_id(db, user_id)
+    repair_type = _extract_repair_type(combined_description)
+    urgency = _extract_urgency(combined_description)
+
+    result = agent_tools.create_repair_order(
+        db,
+        user_id=user_id,
+        house_id=house_id,
+        type=repair_type,
+        description=combined_description,
+        urgency=urgency,
+        image_urls=pending.get("image_urls"),
+    )
+    output = _tool_output(result)
+    order_no = output.get("order_no", "")
+    worker = output.get("worker")
+
+    response = (
+        f"工单已创建，编号：{order_no}，紧急程度：{urgency}，当前状态：{output.get('status', 'CREATED')}。\n"
+        + _format_worker_info(worker)
+        + "\n维修完成后，您和师傅都需要在页面上确认，工单才会正式关闭。"
+    )
+    return {
+        "response": response,
+        "tool_results": [result],
+        "pending_repair": None,
+        "skip_llm_rewrite": True,
+    }
+
+
 def _format_notice_time(created_at: Any) -> str:
     """Return a short, human-readable time string for a notice."""
     if created_at is None:
@@ -206,54 +247,17 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
                     "skip_llm_rewrite": True,
                 }
             pending["description"] = description
-            pending["step"] = "confirm"
-            item = pending.get("item", "报修项目")
-            return {
-                "response": (
-                    f"故障信息已记录：{item}，{description}。\n"
-                    "我现在为您创建工单并自动派单，稍后会把维修师傅的联系方式同步给您。"
-                ),
-                "tool_results": [],
-                "pending_repair": pending,
-                "skip_llm_rewrite": True,
-            }
+            # Create the order right away so the worker info is returned in this
+            # same turn instead of promising it "later" (previously the order was
+            # only created on a separate confirm turn, and the owner never saw it).
+            return _create_repair_order_response(db, user_id, pending, user_text)
 
         if step == "confirm":
-            # User confirmed or sent additional info; proceed to create order.
+            # Kept for compatibility with in-flight conversations that already
+            # reached the confirm step; creates the order immediately.
             if images and not pending.get("image_urls"):
                 pending.setdefault("image_urls", []).extend(images)
-            item = pending.get("item", "业主报修")
-            description = pending.get("description", user_text) or item
-            combined_description = f"{item}：{description}"
-
-            house_id = _extract_house_id(user_text) or _get_default_house_id(db, user_id)
-            repair_type = _extract_repair_type(combined_description)
-            urgency = _extract_urgency(combined_description)
-
-            result = agent_tools.create_repair_order(
-                db,
-                user_id=user_id,
-                house_id=house_id,
-                type=repair_type,
-                description=combined_description,
-                urgency=urgency,
-                image_urls=pending.get("image_urls"),
-            )
-            output = _tool_output(result)
-            order_no = output.get("order_no", "")
-            worker = output.get("worker")
-
-            response = (
-                f"工单已创建，编号：{order_no}，紧急程度：{urgency}，当前状态：{output.get('status', 'CREATED')}。\n"
-                + _format_worker_info(worker)
-                + "\n维修完成后，您和师傅都需要在页面上确认，工单才会正式关闭。"
-            )
-            return {
-                "response": response,
-                "tool_results": [result],
-                "pending_repair": None,
-                "skip_llm_rewrite": True,
-            }
+            return _create_repair_order_response(db, user_id, pending, user_text)
 
     # Fallback for repair-like messages that don't match collection flow.
     if _is_repair_intent(user_text):
