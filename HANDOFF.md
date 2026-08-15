@@ -1,7 +1,7 @@
 # 交接文档 / Handoff
 
 > 本文件写给下一个没有上下文的会话。阅读后请直接继续下一步工作。
-> 最后更新：2026-08-14
+> 最后更新：2026-08-15
 
 ---
 
@@ -63,74 +63,67 @@
 
 ### 2.3 关键验证结果
 
-- 后端测试：**61/61 通过**
+- 后端测试：**61/61 通过**，GitHub Actions CI 全绿（最近 3 个 commit 均 success）
 - 前端构建通过，`npm audit` 0 漏洞
 - Docker 服务：property-frontend / backend / postgres / redis 全部运行
-- 用户数据：275 个账号（200 业主、50 物业、15 维修、10 管理员）
-- 知识库：22 文档 / 99 切片
+- 用户数据：275 个账号（200 业主、50 物业、15 维修、10 管理员），演示密码 `123456`（`backend/scripts/set_demo_passwords.py`）
+- 知识库：22 文档 / 99 切片，使用智谱 `embedding-3`（1024 维）
+- LLM：智谱 `glm-4-flash`（`OPENAI_API_BASE=https://open.bigmodel.cn/api/paas/v4/`）
 - 评估脚本可生成 HTML/JSON 报告
-- 最新代码已 push 到 GitHub `main`（`6d835fe`）
+- 最新代码已 push 到 GitHub `main`（`afe64c6`）
+
+### 2.4 2026-08-15 新增修复（AI 体验攻坚已完成）
+
+- **接入真实 LLM**：智谱 `glm-4-flash` + `embedding-3`（1024 维），`.env` 本地配置（gitignored）
+- **意图分类**：改为规则优先、LLM 仅兜底 unknown，避免"停电动车"误判为"停电通知"
+- **Notice / Knowledge Agent**：LLM 可用时生成自然语言回答，否则降级规则模板
+- **Repair Agent 三处修复**：
+  1. 回显"我家"→"您家"，避免 AI 把自己当业主
+  2. `collect_description` 完成即建单并同轮返回师傅信息（原逻辑要第 4 轮 confirm 才建单，文案却提前承诺，导致业主永远等不到师傅信息）
+  3. 派单从"id 最小优先"改为"未完成工单数最少优先"，不再总派给杨飞
+- **测试基础设施**：独立 `property_agent_test` 数据库 + 序列重置 + 384 维列改造，修复 CI 维度不匹配（`test_evaluation.py` 改用模块引用 `SessionLocal`）
 
 ---
 
 ## 3. 当前卡在哪一步 / 核心问题
 
-### 3.1 AI 体验不达标（最高优先级）
+### 3.1 ✅ AI 体验（已完成）
 
-当前 Agent 是**规则兜底实现**，`LLM_API_KEY` 为空，没有真正接入 LLM 做生成。
+LLM 已接入，Notice/Knowledge/Repair Agent 均能生成自然语言回答，意图分类规则优先 + LLM 兜底。
 
-典型表现：
+### 3.2 ✅ RAG 检索质量（已完成）
 
-- 用户问"今天有发公告吗"，回答"公告《社区通知》已发布"
-- 没有时间理解、没有内容摘要、没有自然语言组织
-- RAG 检索后只是把知识片段硬拼，没有 LLM 总结
+embedding 从 `deterministic` fallback 换成智谱 `embedding-3`（1024 维），知识库已用真实语义向量重新索引。
 
-**根因**：RAG 只有 Retrieval，没有 Generation。意图分类和部分回复生成也走了规则路径。
-
-### 3.2 RAG 检索质量差
-
-当前 embedding 用 `deterministic` fallback（无语义），导致检索召回率低。
-
-### 3.3 其他待完善项
+### 3.3 待完善项（下一阶段）
 
 - API 权限颗粒度待细化（目前只有登录 + 角色路由守卫）
 - 前端测试 / E2E 测试缺失
-- Docker 镜像未自动推送 / 未上云
+- Docker 镜像未自动推送 / 未上云（CI 目前只跑测试，不构建镜像）
 - 生产环境密码、SECRET_KEY 需替换
+- 部署依赖的 `.env` 未入库（需提供生产配置模板）
+- 知识库内容覆盖度有限（部分问题如具体垃圾清运时间仍检索不到）
 
 ---
 
 ## 4. 下一步计划是什么
 
-当前已从"功能闭环"进入"体验优化"阶段。后续按优先级分四阶段推进：
-
-### 阶段一：AI 体验攻坚（最高优先级）
-
-1. **接入真实 LLM**：配置 `LLM_API_KEY`，让 Agent 使用 LLM 生成自然语言回复
-2. **公告查询增强**：支持时间理解、内容摘要、空结果处理
-3. **知识问答增强**：LLM 基于 RAG 检索结果生成带引用来源的回答
-4. **修复 Agent 体验优化**：多轮对话更自然，工单创建后信息同步更完整
-5. **评估数据集更新**：补充 AI 体验相关评估用例
-
-### 阶段二：RAG 质量提升
-
-1. **接入语义 Embedding**：换用 sentence-transformers 或云端 embedding API
-2. **优化知识库切片**：调整 chunk 大小、重叠、metadata
-3. **索引重刷与验证**：重新索引知识库，跑评估脚本
+当前 AI 体验与 RAG 质量两个攻坚阶段已完成。下一阶段进入**工程加固 + 上线准备**：
 
 ### 阶段三：工程加固
 
-1. **API 权限校验**：敏感接口接入 `get_current_user`
-2. **前端测试**：补充单元测试 / E2E 测试
-3. **生产安全配置**：替换默认密码、SECRET_KEY
-4. **CI/CD 推送镜像**：GitHub Actions 构建并推送 Docker 镜像
+1. **API 权限校验**：敏感接口（报修、费用、公告发布、用户管理等）接入 `get_current_user` + 角色校验
+2. **前端测试**：补充单元测试 / E2E 测试（Vitest + Playwright）
+3. **生产安全配置**：替换默认密码、SECRET_KEY、JWT 密钥，提供 `.env.production.example`
+4. **CI/CD 推送镜像**：GitHub Actions 构建并推送 Docker 镜像（GHCR/Docker Hub），`docker-compose.prod.yml` 拉取镜像部署
 
 ### 阶段四：上线准备
 
-1. **云服务器部署**
-2. **HTTPS 配置**
-3. **监控告警**
-4. **数据备份**
+1. **云服务器部署**：申请云主机，安装 Docker，配置生产环境
+2. **HTTPS 配置**：申请证书（certbot），Nginx 强制 HTTPS
+3. **监控告警**：容器健康检查、日志采集、资源告警（Prometheus + Grafana 或轻量方案）
+4. **数据备份**：PostgreSQL 定时备份 + 恢复演练
+5. **知识库内容补全**：补充垃圾清运时间等常见业主问题的知识文档，重刷索引
 
 ---
 
