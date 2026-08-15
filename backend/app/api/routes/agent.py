@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session
 from app.agents import run_agent
 from app.agents.graph import AgentResult
 from app.core.database import get_db
+from app.core.security import get_current_user
+from app.models.user import User
 
 router = APIRouter(prefix="/agent", tags=["Agent"])
 
@@ -35,12 +37,18 @@ class AgentChatResponse(BaseModel):
 def agent_chat(
     payload: AgentChatRequest,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> AgentResult:
     """Send a natural-language message to the AI agent system.
 
     The agent will classify the intent, route to the appropriate domain agent,
     call business tools, and return a user-friendly response.
     """
+    # Owners and workers always act as themselves; only staff/admin may pass a
+    # different user_id (e.g. to query a specific owner's context).
+    if current_user.role not in ("ADMIN", "PROPERTY_STAFF"):
+        payload.user_id = current_user.id
+
     try:
         result = run_agent(
             payload.message,

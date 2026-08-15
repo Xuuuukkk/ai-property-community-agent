@@ -12,6 +12,7 @@ from app.core.paths import KNOWLEDGE_BASE_DIR as KNOWLEDGE_DIR, REPO_ROOT
 from app.models.knowledge import EMBEDDING_DIMENSION, KnowledgeChunk, KnowledgeDocument
 from app.services.knowledge import get_index_stats, retrieve_knowledge
 from app.services.knowledge_indexer import index_documents
+from tests.conftest import auth_headers
 
 
 def test_embedding_provider_dimension() -> None:
@@ -83,7 +84,11 @@ def test_knowledge_agent_uses_rag(db: Session) -> None:
 def test_knowledge_api_search(client: TestClient, db: Session) -> None:
     index_documents(db, KNOWLEDGE_DIR, repo_root=REPO_ROOT, clear_existing=True)
 
-    response = client.post("/api/knowledge/search", json={"query": "停车规则", "top_k": 3})
+    response = client.post(
+        "/api/knowledge/search",
+        json={"query": "停车规则", "top_k": 3},
+        headers=auth_headers(1, "OWNER"),
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["query"] == "停车规则"
@@ -93,7 +98,7 @@ def test_knowledge_api_search(client: TestClient, db: Session) -> None:
 def test_knowledge_api_stats(client: TestClient, db: Session) -> None:
     index_documents(db, KNOWLEDGE_DIR, repo_root=REPO_ROOT, clear_existing=True)
 
-    response = client.get("/api/knowledge/stats")
+    response = client.get("/api/knowledge/stats", headers=auth_headers(1, "OWNER"))
     assert response.status_code == 200
     data = response.json()
     assert data["documents"] > 0
@@ -101,7 +106,7 @@ def test_knowledge_api_stats(client: TestClient, db: Session) -> None:
 
 
 def test_knowledge_api_reindex(client: TestClient, db: Session) -> None:
-    response = client.post("/api/knowledge/reindex")
+    response = client.post("/api/knowledge/reindex", headers=auth_headers(201, "ADMIN"))
     assert response.status_code == 200
     data = response.json()
     assert data["documents"] > 0

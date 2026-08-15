@@ -22,6 +22,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.core import database as database_module
 from app.core.config import get_settings
 from app.core.database import get_db
+from app.core.security import create_access_token
 from app.main import app
 
 settings = get_settings()
@@ -244,3 +245,15 @@ def client(db: Session) -> TestClient:
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()
+
+
+def auth_headers(user_id: int, role: str) -> dict[str, str]:
+    """Return an Authorization header for a user with the given role.
+
+    The ``sub`` must reference an existing user id in the seeded test DB, but
+    the role claim is what ``get_current_user`` resolves via the repository, so
+    tests should pass ids/roles that match the seed data (OWNER 1-200,
+    ADMIN 201-210, WORKER 211-225, PROPERTY_STAFF 226-275).
+    """
+    token = create_access_token(data={"sub": str(user_id), "role": role})
+    return {"Authorization": f"Bearer {token}"}

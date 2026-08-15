@@ -15,6 +15,7 @@ from app.agents import run_agent
 from app.agents.graph import agent_graph
 from app.agents.tools import query_payment_status, query_repair_order
 from app.main import app
+from tests.conftest import auth_headers
 
 
 class TestAgentGraph:
@@ -69,8 +70,11 @@ class TestAgentAPI:
     """Integration tests for the /api/agent/chat endpoint."""
 
     def test_agent_chat_repair(self, client: TestClient) -> None:
+        headers = auth_headers(1, "OWNER")
         # First turn: agent collects the broken item.
-        response = client.post("/api/agent/chat", json={"message": "我要报修", "user_id": 1})
+        response = client.post(
+            "/api/agent/chat", json={"message": "我要报修", "user_id": 1}, headers=headers
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["intent"] == "repair"
@@ -85,6 +89,7 @@ class TestAgentAPI:
                 "user_id": 1,
                 "pending_repair": data["pending_repair"],
             },
+            headers=headers,
         )
         assert response.status_code == 200
         data = response.json()
@@ -99,6 +104,7 @@ class TestAgentAPI:
                 "user_id": 1,
                 "pending_repair": data["pending_repair"],
             },
+            headers=headers,
         )
         assert response.status_code == 200
         data = response.json()
@@ -108,18 +114,34 @@ class TestAgentAPI:
         assert data["pending_repair"] is None
 
     def test_agent_chat_fee(self, client: TestClient) -> None:
-        response = client.post("/api/agent/chat", json={"message": "查物业费", "user_id": 1})
+        response = client.post(
+            "/api/agent/chat",
+            json={"message": "查物业费", "user_id": 1},
+            headers=auth_headers(1, "OWNER"),
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["intent"] == "fee"
         assert "账单" in data["response"]
 
     def test_agent_chat_knowledge(self, client: TestClient) -> None:
-        response = client.post("/api/agent/chat", json={"message": "装修可以施工到几点？", "user_id": 1})
+        response = client.post(
+            "/api/agent/chat",
+            json={"message": "装修可以施工到几点？", "user_id": 1},
+            headers=auth_headers(1, "OWNER"),
+        )
         assert response.status_code == 200
         data = response.json()
         assert data["intent"] == "knowledge"
 
     def test_agent_chat_requires_message(self, client: TestClient) -> None:
-        response = client.post("/api/agent/chat", json={"message": "", "user_id": 1})
+        response = client.post(
+            "/api/agent/chat",
+            json={"message": "", "user_id": 1},
+            headers=auth_headers(1, "OWNER"),
+        )
         assert response.status_code == 422
+
+    def test_agent_chat_requires_auth(self, client: TestClient) -> None:
+        response = client.post("/api/agent/chat", json={"message": "查物业费", "user_id": 1})
+        assert response.status_code == 401

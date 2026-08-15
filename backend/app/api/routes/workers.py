@@ -1,6 +1,6 @@
 """Worker management endpoints."""
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.database import get_db
@@ -10,6 +10,9 @@ from app.models.worker import Worker
 from app.schemas.worker import WorkerResponse
 
 router = APIRouter(prefix="/workers", tags=["workers"])
+
+
+_STAFF_ROLES = ("ADMIN", "PROPERTY_STAFF")
 
 
 _STATUS_MAP = {
@@ -33,11 +36,12 @@ def list_workers(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> list[Worker]:
-    """List all workers with optional filters.
-
-    Supports both English enum values and localized Chinese values so the
-    API stays usable while the seed data is in Chinese.
-    """
+    """List all workers with optional filters (management-only)."""
+    if current_user.role not in _STAFF_ROLES:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions",
+        )
     query = db.query(Worker).options(selectinload(Worker.user))
     if status:
         query = query.filter(Worker.status == _STATUS_MAP.get(status, status))

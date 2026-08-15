@@ -113,3 +113,27 @@ def get_current_user_optional(
     if not user_id:
         return None
     return user_repository.get_by_id(db, int(user_id))
+
+
+def require_roles(*roles: str):
+    """Return a FastAPI dependency that requires one of the given roles.
+
+    Usage::
+
+        @router.get("/admin-only")
+        def admin_only(current_user=Depends(require_roles("ADMIN"))):
+            ...
+
+    Raises 401 if unauthenticated (via ``get_current_user``) and 403 if the
+    authenticated user's role is not among ``roles``.
+    """
+
+    def _require_roles(current_user=Depends(get_current_user)) -> Any:
+        if current_user.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions for this operation",
+            )
+        return current_user
+
+    return _require_roles

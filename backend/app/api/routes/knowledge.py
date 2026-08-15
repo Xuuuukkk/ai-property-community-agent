@@ -4,13 +4,15 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.core.database import get_db
 from app.core.paths import KNOWLEDGE_BASE_DIR as KNOWLEDGE_DIR, REPO_ROOT
+from app.core.security import get_current_user
+from app.models.user import User
 from app.services import knowledge as knowledge_service
 from app.services.knowledge_indexer import index_documents
 
@@ -38,6 +40,7 @@ class ReindexResponse(BaseModel):
 def search_knowledge(
     request: KnowledgeSearchRequest,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> dict:
     """Semantic search over the indexed knowledge base."""
     return knowledge_service.retrieve_knowledge(
@@ -51,12 +54,18 @@ def search_knowledge(
 @router.post("/reindex", response_model=ReindexResponse)
 def reindex_knowledge(
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
 ) -> dict:
-    """Rebuild the knowledge base index from ``knowledge-base/*.md``.
+    """Rebuild the knowledge base index from ``knowledge-base/*.md`` (admin only).
 
-    In production this should be restricted to admin users and/or run as a
-    background job.  For the MVP it is exposed as a simple management endpoint.
+    In production this should also be run as a background job.  For the MVP it
+    is exposed as a simple management endpoint restricted to admins.
     """
+    if current_user.role != "ADMIN":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions",
+        )
     settings = get_settings()
     knowledge_dir = KNOWLEDGE_DIR
 
@@ -68,6 +77,9 @@ def reindex_knowledge(
 
 
 @router.get("/stats")
-def knowledge_stats(db: Session = Depends(get_db)) -> dict:
+def knowledge_stats(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> dict:
     """Return current knowledge base indexing statistics."""
     return knowledge_service.get_index_stats(db)
