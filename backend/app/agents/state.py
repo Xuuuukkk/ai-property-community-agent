@@ -23,6 +23,11 @@ class AgentState(TypedDict, total=False):
     final_response: str | None
     requires_human: bool
     pending_repair: dict[str, Any] | None
+    # When True, response_node should not rephrase the agent's answer.
+    # Used by agents whose output already contains required keywords.
+    skip_llm_rewrite: bool
+    # Optional injected database session (used by tests).
+    db: Any
 
 
 def get_user_id(state: AgentState) -> int | None:

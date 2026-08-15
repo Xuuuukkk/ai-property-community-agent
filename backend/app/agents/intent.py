@@ -35,7 +35,9 @@ def classify_intent_rule(text: str) -> str:
 
     # Query: community announcements / outage notifications (checked before
     # repair because phrases like "停水维修" are announcements).
-    if any(k in lowered for k in ("公告", "通知", "停水", "停电", "notice", "announcement", "社区活动")):
+    # "停电" alone is intentionally excluded to avoid misclassifying
+    # "停电动车" as a notice; "停电通知" still matches because it contains "通知".
+    if any(k in lowered for k in ("公告", "通知", "停水", "停电通知", "notice", "announcement", "社区活动")):
         return "notice_query"
 
     # Fee: billing and payment queries.
@@ -80,12 +82,17 @@ def _parse_intent_from_llm_output(content: str) -> str | None:
 def classify_intent(text: str, llm: "ChatOpenAI | None" = None) -> str:
     """Classify user text into one of the supported intents.
 
-    If ``llm`` is provided, the LLM is asked to classify the message and the
-    result is validated. If the LLM fails or returns an unrecognized label,
-    the rule-based classifier is used as a fallback.
+    Rule-first strategy: deterministic keyword rules decide the common cases
+    so tests and high-frequency queries are stable and do not require an LLM.
+    The LLM is only consulted when rules return ``unknown``. This prevents
+    common misclassifications such as "停电动车" being matched as a notice.
     """
+    rule_intent = classify_intent_rule(text)
+    if rule_intent != "unknown":
+        return rule_intent
+
     if llm is None:
-        return classify_intent_rule(text)
+        return "unknown"
 
     system_prompt = (
         "You are an intent classifier for a property community AI assistant. "
@@ -93,6 +100,7 @@ def classify_intent(text: str, llm: "ChatOpenAI | None" = None) -> str:
         "repair, fee, notice_query, notice_publish, knowledge, unknown.\n"
         "- notice_query: the user wants to READ or CHECK community notices.\n"
         "- notice_publish: the user wants to CREATE or SEND a community notice.\n"
+        "- knowledge: the user asks about community regulations, hours, or FAQ.\n"
         "Respond with a JSON object: {\"intent\": \"...\"}. No other text."
     )
 
@@ -114,4 +122,4 @@ def classify_intent(text: str, llm: "ChatOpenAI | None" = None) -> str:
     except Exception as exc:  # pragma: no cover - network failures fall back gracefully
         logger.warning("llm_intent_failed", extra={"input": text, "error": str(exc)})
 
-    return classify_intent_rule(text)
+    return "unknown"

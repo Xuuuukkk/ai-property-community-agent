@@ -65,14 +65,19 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
 
     # ---- AI / LLM (used from Phase 5/6 onward) ----
-    # Provider base URL; defaults to OpenAI. Use a compatible endpoint if needed.
-    OPENAI_API_BASE: str = "https://api.openai.com/v1"
+    # Provider base URL; defaults to Zhipu OpenAI-compatible endpoint.
+    # Use OpenAI (https://api.openai.com/v1) or any compatible service if needed.
+    OPENAI_API_BASE: str = "https://open.bigmodel.cn/api/paas/v4/"
     LLM_API_KEY: str = ""
     # Chat completion model. Must be supported by the provider above.
-    LLM_MODEL: str = "gpt-4o-mini"
-    # Embedding model name. Empty string uses the default sentence-transformers
-    # model; "deterministic" is a test-only fallback with no semantic meaning.
+    LLM_MODEL: str = "glm-4-flash"
+    # Embedding model name.
+    # - "embedding-3" / "embedding-2" -> Zhipu OpenAI-compatible embeddings (1024-d).
+    # - "deterministic" -> test-only fallback with no semantic meaning (384-d).
+    # - empty / other -> sentence-transformers model name.
     EMBEDDING_MODEL: str = ""
+    # Embedding dimension. Must match the chosen EMBEDDING_MODEL.
+    EMBEDDING_DIMENSION: int = 1024
     HF_TOKEN: str = ""  # Optional HuggingFace token for gated models.
 
     @property

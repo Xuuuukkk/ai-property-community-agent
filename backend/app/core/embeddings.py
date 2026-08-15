@@ -46,6 +46,50 @@ class _SentenceTransformerProvider:
         return self.embed_documents([text])[0]
 
 
+class _OpenAIEmbeddingProvider:
+    """OpenAI-compatible embedding provider (e.g. Zhipu embedding-3/embedding-2)."""
+
+    dimension: int
+
+    def __init__(self, model_name: str, api_key: str, base_url: str, dimension: int) -> None:
+        from openai import OpenAI
+
+        self._model = model_name
+        self._client = OpenAI(api_key=api_key, base_url=base_url)
+        self.dimension = dimension
+        # Resolve real dimension with a cheap probe call when possible.
+        try:
+            probe = self._client.embeddings.create(
+                model=self._model, input=["test"], dimensions=dimension
+            )
+            if probe.data and probe.data[0].embedding:
+                self.dimension = len(probe.data[0].embedding)
+        except Exception:
+            # Provider may not support `dimensions`; keep configured dimension.
+            pass
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        if not texts:
+            return []
+        # OpenAI-compatible endpoints typically support up to 64 inputs per batch.
+        batch_size = 64
+        embeddings: list[list[float]] = []
+        for i in range(0, len(texts), batch_size):
+            batch = texts[i : i + batch_size]
+            response = self._client.embeddings.create(
+                model=self._model, input=batch, dimensions=self.dimension
+            )
+            # Sort by index because API responses are not guaranteed to be ordered.
+            batch_embeddings = sorted(
+                response.data, key=lambda d: d.index  # type: ignore[arg-type]
+            )
+            embeddings.extend([d.embedding for d in batch_embeddings])
+        return embeddings
+
+    def embed_query(self, text: str) -> list[float]:
+        return self.embed_documents([text])[0]
+
+
 class _DeterministicProvider:
     """Fallback deterministic embedding for tests and CI environments.
 
@@ -81,10 +125,14 @@ class _DeterministicProvider:
 def get_embedding_provider() -> EmbeddingProvider:
     """Return a cached embedding provider based on configuration.
 
-    Falls back to the deterministic provider if the configured sentence-
-    transformer model cannot be loaded (e.g. no network access or a corrupted
-    local cache).  This keeps the RAG plumbing functional, but semantic search
-    quality will be poor until a real model is available.
+    Routing:
+    - "deterministic" -> hash-based fallback (no API key, no semantics).
+    - "embedding-3" / "embedding-2" -> Zhipu/OpenAI-compatible embeddings.
+    - other non-empty value -> sentence-transformers model name.
+    - empty -> default sentence-transformers model.
+
+    Falls back to the deterministic provider if the configured provider cannot
+    be initialised.
     """
     import warnings
 
@@ -92,6 +140,32 @@ def get_embedding_provider() -> EmbeddingProvider:
     model_name = settings.EMBEDDING_MODEL.strip()
 
     if model_name.lower() == "deterministic":
+        return _DeterministicProvider()
+
+    # OpenAI-compatible providers (Zhipu embedding-3 / embedding-2).
+    if model_name.lower() in {"embedding-3", "embedding-2"}:
+        api_key = settings.LLM_API_KEY
+        base_url = settings.OPENAI_API_BASE
+        if api_key and base_url:
+            try:
+                return _OpenAIEmbeddingProvider(
+                    model_name=model_name,
+                    api_key=api_key,
+                    base_url=base_url,
+                    dimension=settings.EMBEDDING_DIMENSION,
+                )
+            except Exception as exc:  # pragma: no cover - network/auth dependent
+                warnings.warn(
+                    f"Failed to load OpenAI-compatible embedding model {model_name!r}: {exc}. "
+                    "Falling back to deterministic embeddings.",
+                    stacklevel=2,
+                )
+        else:
+            warnings.warn(
+                f"EMBEDDING_MODEL={model_name!r} requires LLM_API_KEY and OPENAI_API_BASE. "
+                "Falling back to deterministic embeddings.",
+                stacklevel=2,
+            )
         return _DeterministicProvider()
 
     candidate = model_name or "all-MiniLM-L6-v2"

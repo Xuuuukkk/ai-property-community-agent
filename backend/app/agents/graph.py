@@ -37,7 +37,7 @@ from app.agents.state import (
     get_intent,
     get_messages,
 )
-from app.core.database import SessionLocal
+from app.core import database as database_module
 from app.core.llm import get_llm
 
 
@@ -77,7 +77,8 @@ def router_node(state: AgentState) -> AgentState:
 def agent_node(state: AgentState) -> AgentState:
     """Dispatch to the correct domain agent based on intent."""
     intent = get_intent(state) or "unknown"
-    db: Session = SessionLocal()
+    db: Session = state.get("db") or database_module.SessionLocal()
+    owns_session = db is not state.get("db")
     try:
         if intent == "repair":
             result = run_repair_agent(db, state)
@@ -99,8 +100,10 @@ def agent_node(state: AgentState) -> AgentState:
         state["tool_results"] = result.get("tool_results", [])
         state["requires_human"] = result.get("requires_human", False)
         state["pending_repair"] = result.get("pending_repair")
+        state["skip_llm_rewrite"] = result.get("skip_llm_rewrite", False)
     finally:
-        db.close()
+        if owns_session:
+            db.close()
     return state
 
 
@@ -114,6 +117,9 @@ def response_node(state: AgentState) -> AgentState:
     final_response = get_final_response(state)
     if not final_response:
         state["final_response"] = "抱歉，我暂时无法处理您的请求。"
+        return state
+
+    if state.get("skip_llm_rewrite"):
         return state
 
     llm = get_llm()
@@ -196,6 +202,7 @@ def run_agent(
         "conversation_id": session_id,
         "messages": messages,
         "pending_repair": pending_repair,
+        "db": db,
     }
 
     final_state = agent_graph.invoke(initial_state)

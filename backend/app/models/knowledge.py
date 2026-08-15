@@ -14,12 +14,13 @@ from sqlalchemy import BigInteger, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.config import get_settings
 from app.core.database import Base
 
 if TYPE_CHECKING:
     pass
 
-EMBEDDING_DIMENSION = 384
+EMBEDDING_DIMENSION = get_settings().EMBEDDING_DIMENSION
 
 
 class KnowledgeDocument(Base):

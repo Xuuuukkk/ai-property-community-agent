@@ -14,7 +14,9 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from app.agents import tools as agent_tools
+from app.agents.response import generate_response
 from app.agents.state import AgentState, get_messages, get_user_id
+from app.core.llm import get_llm
 from app.models.house_binding import HouseBinding
 
 
@@ -114,6 +116,16 @@ def _format_worker_info(worker: dict[str, Any] | None) -> str:
     return f"已派单给 {name}（{dept}），联系电话：{phone}。"
 
 
+def _format_notice_time(created_at: Any) -> str:
+    """Return a short, human-readable time string for a notice."""
+    if created_at is None:
+        return ""
+    if isinstance(created_at, str):
+        return created_at[:10] if len(created_at) >= 10 else created_at
+    # datetime-like object.
+    return created_at.strftime("%Y-%m-%d") if hasattr(created_at, "strftime") else str(created_at)[:10]
+
+
 def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
     """Handle repair intents with multi-turn collection and auto-dispatch."""
     user_text = ""
@@ -132,11 +144,16 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
         output = _tool_output(result)
         orders = output.get("orders", [])
         if not orders:
-            return {"response": "您当前没有维修工单。", "tool_results": [result]}
+            return {
+                "response": "您当前没有维修工单。",
+                "tool_results": [result],
+                "skip_llm_rewrite": True,
+            }
         lines = [f"• {o['order_no']} | {o['type']} | {o['status']} | {o['description'] or '无描述'}" for o in orders]
         return {
             "response": f"您最近的维修工单：\n" + "\n".join(lines),
             "tool_results": [result],
+            "skip_llm_rewrite": True,
         }
 
     # Start a new repair collection if not already pending.
@@ -146,6 +163,7 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
             "tool_results": [],
             "requires_human": False,
             "pending_repair": {"step": "collect_item"},
+            "skip_llm_rewrite": True,
         }
 
     # Multi-turn collection flow.
@@ -160,6 +178,7 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
                     "response": "麻烦您再说清楚一点，具体是什么东西坏了？比如‘厨房水龙头漏水’。",
                     "tool_results": [],
                     "pending_repair": pending,
+                    "skip_llm_rewrite": True,
                 }
             pending["item"] = item
             pending["step"] = "collect_description"
@@ -167,6 +186,7 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
                 "response": f"收到，{item}。请问问题严重吗？是否影响正常生活？您也可以直接上传现场照片。",
                 "tool_results": [],
                 "pending_repair": pending,
+                "skip_llm_rewrite": True,
             }
 
         if step == "collect_description":
@@ -178,6 +198,7 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
                     "response": "请再补充一下故障现象，或者上传一张照片，方便师傅判断。",
                     "tool_results": [],
                     "pending_repair": pending,
+                    "skip_llm_rewrite": True,
                 }
             pending["description"] = description
             pending["step"] = "confirm"
@@ -189,6 +210,7 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
                 ),
                 "tool_results": [],
                 "pending_repair": pending,
+                "skip_llm_rewrite": True,
             }
 
         if step == "confirm":
@@ -225,6 +247,7 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
                 "response": response,
                 "tool_results": [result],
                 "pending_repair": None,
+                "skip_llm_rewrite": True,
             }
 
     # Fallback for repair-like messages that don't match collection flow.
@@ -234,12 +257,14 @@ def run_repair_agent(db: Session, state: AgentState) -> dict[str, Any]:
             "tool_results": [],
             "requires_human": False,
             "pending_repair": {"step": "collect_item"},
+            "skip_llm_rewrite": True,
         }
 
     return {
         "response": "抱歉，我不太理解您的维修需求。您可以直接说‘我要报修’。",
         "tool_results": [],
         "requires_human": False,
+        "skip_llm_rewrite": True,
     }
 
 
@@ -297,10 +322,49 @@ def run_notice_query_agent(db: Session, state: AgentState) -> dict[str, Any]:
             "tool_results": [result],
         }
 
+    llm = get_llm()
+    if llm is not None:
+        context_items = []
+        for n in notices:
+            pinned = "[置顶]" if n.get("is_pinned") else ""
+            created = _format_notice_time(n.get("created_at"))
+            context_items.append(
+                f"{pinned}标题：{n.get('title', '无标题')}\n"
+                f"日期：{created}\n"
+                f"内容：{n.get('content', '')[:400]}"
+            )
+        prompt = (
+            "你是云溪花园小区的 AI 物业助手。请根据以下公告，用自然、口语化的中文回答业主的问题。\n"
+            "要求：\n"
+            "1. 直接给出答案，先说明有没有相关公告；\n"
+            "2. 提及公告标题和发布日期；\n"
+            "3. 对置顶公告可优先说明；\n"
+            "4. 不要编造公告中没有的信息。\n\n"
+            f"业主问题：{user_text}\n\n"
+            "公告列表：\n" + "\n---\n".join(context_items) + "\n\n请回答业主。"
+        )
+        try:
+            from langchain_core.messages import HumanMessage, SystemMessage
+
+            answer = llm.invoke([
+                SystemMessage(content="你是一位热情的物业客服助手。"),
+                HumanMessage(content=prompt),
+            ])
+            if answer and isinstance(answer.content, str) and answer.content.strip():
+                return {
+                    "response": answer.content.strip(),
+                    "tool_results": [result],
+                }
+        except Exception:
+            # Fall back to deterministic formatting on LLM failure.
+            pass
+
     lines = ["最新公告："]
     for n in notices:
         pinned = "【置顶】" if n.get("is_pinned") else ""
-        lines.append(f"{pinned}{n.get('title', '无标题')}\n  {n.get('content', '')}")
+        created = _format_notice_time(n.get("created_at"))
+        time_label = f"（{created}）" if created else ""
+        lines.append(f"{pinned}{n.get('title', '无标题')}{time_label}\n  {n.get('content', '')}")
 
     return {
         "response": "\n\n".join(lines),
@@ -369,15 +433,53 @@ def run_knowledge_agent(db: Session, state: AgentState) -> dict[str, Any]:
             user_text = str(msg.content)
             break
 
-    result = agent_tools.search_knowledge(db, user_text, top_k=5)
+    result = agent_tools.search_knowledge(db, user_text, top_k=10)
     output = _tool_output(result)
     chunks = output.get("results", [])
 
     if not chunks:
+        msg = output.get("message", "知识库中未找到相关内容。")
         return {
-            "response": output.get("message", "知识库中未找到相关内容。"),
+            "response": (
+                f"{msg} 建议您联系物业服务中心（021-5896XXXX）确认，"
+                "或者告诉我更具体的关键词，我帮您再查。"
+            ),
             "tool_results": [result],
         }
+
+    llm = get_llm()
+    if llm is not None:
+        context_items = []
+        for idx, chunk in enumerate(chunks, start=1):
+            source = chunk.get("source_path", "未知来源")
+            content = chunk.get("content", "").replace("\n", " ")
+            context_items.append(f"[{idx}] {content}（来源：{source}）")
+        prompt = (
+            "你是云溪花园小区的 AI 物业助手。请根据知识库检索到的内容，"
+            "用自然、口语化的中文回答业主的问题。\n"
+            "要求：\n"
+            "1. 直接给出答案，优先说明具体的时间、地点、规定等可执行信息；\n"
+            "2. 如果知识库内容不够完整，给出最接近的线索，并建议业主联系物业确认；\n"
+            "3. 不要编造知识库中没有的信息；\n"
+            "4. 回答控制在 200 字以内，方便微信/手机阅读。\n\n"
+            f"业主问题：{user_text}\n\n"
+            "知识库片段：\n" + "\n".join(context_items) + "\n\n请回答业主。"
+        )
+        try:
+            from langchain_core.messages import HumanMessage, SystemMessage
+
+            answer = llm.invoke([
+                SystemMessage(content="你是一位熟悉小区规定的物业客服助手。"),
+                HumanMessage(content=prompt),
+            ])
+            if answer and isinstance(answer.content, str) and answer.content.strip():
+                return {
+                    "response": answer.content.strip(),
+                    "tool_results": [result],
+                }
+        except Exception:
+            # Fall back to deterministic formatting on LLM failure.
+            pass
 
     # Build a concise, cited answer from the retrieved chunks.
     lines = ["根据知识库相关规定："]
