@@ -141,6 +141,21 @@ def _alter_vector_dimension_to_384(engine) -> None:
         )
         connection.commit()
 
+        # Verify the column was actually resized; otherwise deterministic 384-d
+        # embeddings cannot be inserted into a 1024-d vector column.
+        result = connection.execute(
+            text(
+                "SELECT atttypmod FROM pg_attribute "
+                "WHERE attrelid = 'knowledge_chunk'::regclass AND attname = 'embedding'"
+            )
+        )
+        dim = result.scalar()
+        if dim != 384:
+            raise RuntimeError(
+                f"knowledge_chunk.embedding dimension is {dim}, expected 384. "
+                "The ALTER COLUMN resize in the test fixture did not take effect."
+            )
+
 
 def _create_test_db() -> None:
     """Create a fresh isolated test database, dropping any existing one."""

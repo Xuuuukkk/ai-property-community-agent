@@ -21,17 +21,16 @@ from app.agents.evaluation.runner import (
     evaluate_tools,
     evaluate_workflows,
 )
-from app.core.database import SessionLocal
+from app.core import database as database_module
 from app.core.paths import KNOWLEDGE_BASE_DIR as KNOWLEDGE_DIR, REPO_ROOT
 from app.models.knowledge import KnowledgeChunk
 from app.services.knowledge_indexer import index_documents
 
 
 @pytest.fixture(scope="session", autouse=True)
-def _ensure_knowledge_indexed() -> None:
-    """Ensure the dev database has knowledge chunks before RAG evaluation tests."""
-    os.environ.setdefault("EMBEDDING_MODEL", "deterministic")
-    db = SessionLocal()
+def _ensure_knowledge_indexed(test_database) -> None:
+    """Ensure the test database has knowledge chunks before RAG evaluation tests."""
+    db = database_module.SessionLocal()
     try:
         count = db.query(KnowledgeChunk).count()
         if count == 0:
