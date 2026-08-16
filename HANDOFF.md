@@ -84,12 +84,14 @@
   3. 派单从"id 最小优先"改为"未完成工单数最少优先"，不再总派给杨飞
 - **测试基础设施**：独立 `property_agent_test` 数据库 + 序列重置 + 384 维列改造，修复 CI 维度不匹配（`test_evaluation.py` 改用模块引用 `SessionLocal`）
 
-### 2.5 2026-08-16 新增（工程加固已部分完成）
+### 2.5 2026-08-16 新增（工程加固已完成）
 
 - **API 角色权限校验（RBAC）**：`security.py` 新增 `require_roles(*roles)` 依赖，全部业务接口接入认证+授权：
   - users/workers 列表仅 ADMIN/PROPERTY_STAFF；fee 业主只能查自己；repair 业主/师傅数据隔离、assign 仅 staff、confirm 校验工单归属；notices 发布仅 staff；agent/chat 需登录且业主/师傅强制以自己身份；knowledge reindex 仅 ADMIN
   - 测试新增 `auth_headers(user_id, role)` helper，补 10 个 401/403 拒绝场景，后端 71 passed
 - **前端单元测试**：引入 Vitest + React Testing Library，覆盖 ProtectedRoute 权限守卫、common 展示组件、client token 管理，19 passed，CI frontend job 已加 `npm test`
+- **生产安全配置**：`config.py` 加 model_validator（生产环境 SECRET_KEY 缺失/弱/占位符即拒绝启动）；`set_demo_passwords.py` 生产保护（需 `--force`）；新增 `.env.production.example`（强密码占位 + 带密码 Redis URL + 智谱配置）
+- **CI/CD 推镜像**：`.github/workflows/docker-publish.yml` 构建并推送 backend/frontend 到 GHCR；`docker-compose.prod.yml` 加 image 字段支持 `docker compose pull` 部署
 
 ---
 
@@ -111,25 +113,28 @@ embedding 从 `deterministic` fallback 换成智谱 `embedding-3`（1024 维）�
 
 Vitest 单元测试已就位并接入 CI，见 2.5。
 
-### 3.5 待完善项（下一步）
+### 3.5 ✅ 生产安全配置（已完成）
+
+SECRET_KEY 生产强制校验、`set_demo_passwords.py` 生产保护、`.env.production.example` 已就位，见 2.5。
+
+### 3.6 ✅ CI/CD 推送镜像（已完成）
+
+`.github/workflows/docker-publish.yml` 构建并推送 backend/frontend 镜像到 GHCR，`docker-compose.prod.yml` 加 image 字段支持 pull 部署，见 2.5。
+
+### 3.7 待完善项（下一步）
 
 - 前端 E2E 测试（Playwright）缺失
-- Docker 镜像未自动推送 / 未上云（CI 目前只跑测试，不构建镜像）
-- 生产环境密码、SECRET_KEY 需替换
-- 部署依赖的 `.env` 未入库（需提供生产配置模板）
 - 知识库内容覆盖度有限（部分问题如具体垃圾清运时间仍检索不到）
 
 ---
 
 ## 4. 下一步计划是什么
 
-当前 AI 体验、RAG 质量、API 权限、前端单元测试均已完成。剩余工程加固 + 上线准备：
+当前 AI 体验、RAG 质量、API 权限、前端单测、生产安全配置、CI 推镜像均已完成。剩余上线准备：
 
 ### 阶段三（剩余）：工程加固
 
-1. **生产安全配置**：替换默认密码、SECRET_KEY、JWT 密钥，提供 `.env.production.example`
-2. **CI/CD 推送镜像**：GitHub Actions 构建并推送 Docker 镜像（GHCR/Docker Hub），`docker-compose.prod.yml` 拉取镜像部署
-3. **前端 E2E 测试**：Playwright 覆盖核心用户路径（登录→报修→派单）
+1. **前端 E2E 测试**：Playwright 覆盖核心用户路径（登录→报修→派单）
 
 ### 阶段四：上线准备
 
