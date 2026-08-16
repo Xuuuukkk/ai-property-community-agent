@@ -53,6 +53,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    image: ghcr.io/xuuuukkk/ai-property-community-agent/backend:latest
     container_name: property-backend
     restart: unless-stopped
     environment:
@@ -94,6 +95,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    image: ghcr.io/xuuuukkk/ai-property-community-agent/frontend:latest
     container_name: property-frontend
     restart: unless-stopped
     environment:
