@@ -11,6 +11,7 @@ handled by pgvector inside PostgreSQL (see technical-design V2.1 §13).
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -43,6 +44,10 @@ class Settings(BaseSettings):
 
     # ---- Security ----
     # Used for signed tokens / session cookies when authentication is enabled.
+    # This default is deliberately weak: it keeps local dev and tests working
+    # out of the box, but production startup (see the validator below) rejects
+    # it. Always set a strong random value in production, e.g.:
+    #   python -c "import secrets; print(secrets.token_urlsafe(32))"
     SECRET_KEY: str = "change-me-in-production-please-generate-a-32-byte-key"
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
@@ -84,6 +89,30 @@ class Settings(BaseSettings):
     def cors_origins(self) -> list[str]:
         """Parse BACKEND_CORS_ORIGINS into a list of trimmed strings."""
         return [origin.strip() for origin in self.BACKEND_CORS_ORIGINS.split(",") if origin.strip()]
+
+    @model_validator(mode="after")
+    def _reject_insecure_production_secrets(self) -> "Settings":
+        """Refuse to boot in production with an insecure SECRET_KEY.
+
+        The default/placeholder key is fine for local dev and tests, but a
+        production deployment must supply a strong random key. Failing early
+        here is safer than silently signing JWTs with a publicly-known secret.
+        """
+        insecure_keys = {
+            "change-me-in-production-please-generate-a-32-byte-key",
+            "dev-only-insecure-key",
+        }
+        if self.APP_ENV == "production" and (
+            not self.SECRET_KEY
+            or self.SECRET_KEY in insecure_keys
+            or len(self.SECRET_KEY) < 32
+        ):
+            raise ValueError(
+                "SECRET_KEY must be set to a strong random value (>=32 chars) "
+                "in production. Generate one with: "
+                "python -c \"import secrets; print(secrets.token_urlsafe(32))\""
+            )
+        return self
 
 
 @lru_cache
