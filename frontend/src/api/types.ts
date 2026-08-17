@@ -265,6 +265,24 @@ export interface DashboardInsights {
   report: string
 }
 
+export interface KnowledgeGap {
+  id: number
+  question: string
+  suggested_answer: string | null
+  source: string
+  status: string
+  created_at: string
+  resolved_at: string | null
+}
+
+export interface FeedbackStats {
+  total: number
+  up: number
+  down: number
+  down_rate: number
+  top_problems: { question: string; count: number }[]
+}
+
 
 
 

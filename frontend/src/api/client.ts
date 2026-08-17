@@ -21,6 +21,8 @@ import type {
   IssueOptions,
   DashboardStats,
   DashboardInsights,
+  KnowledgeGap,
+  FeedbackStats,
 } from './types'
 
 const API_BASE = '' // Vite dev proxy forwards /api to backend
@@ -220,6 +222,30 @@ export const api = {
   getDashboardStats: () => fetchJson<DashboardStats>('/api/stats/dashboard'),
 
   getDashboardInsights: () => fetchJson<DashboardInsights>('/api/stats/insights'),
+
+  submitFeedback: (payload: {
+    conversation_id?: number | null
+    question: string
+    answer: string
+    rating: 'up' | 'down'
+    correction?: string | null
+  }) => fetchJson('/api/feedback', { method: 'POST', body: JSON.stringify(payload) }),
+
+  listKnowledgeGaps: (status?: string) => {
+    const search = status ? `?gap_status=${status}` : ''
+    return fetchJson<{ items: KnowledgeGap[] }>(`/api/knowledge-gaps${search}`)
+  },
+
+  approveKnowledgeGap: (gapId: number, answer?: string) =>
+    fetchJson<KnowledgeGap>(`/api/knowledge-gaps/${gapId}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ answer: answer ?? null }),
+    }),
+
+  rejectKnowledgeGap: (gapId: number) =>
+    fetchJson<KnowledgeGap>(`/api/knowledge-gaps/${gapId}/reject`, { method: 'POST', body: '{}' }),
+
+  getFeedbackStats: () => fetchJson<FeedbackStats>('/api/feedback/stats'),
 }
 
 // Re-export types for convenience

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Send, ImagePlus, X } from 'lucide-react'
+import { Send, ImagePlus, X, ThumbsUp, ThumbsDown } from 'lucide-react'
 import AppHeader from '../../components/AppHeader'
 import BottomNav from '../../components/BottomNav'
 import { useAuth } from '../../contexts/AuthContext'
@@ -29,6 +29,9 @@ export default function OwnerAiChat() {
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [pendingRepair, setPendingRepair] = useState<PendingRepair | null>(null)
   const [pendingImages, setPendingImages] = useState<string[]>([])
+  const [feedback, setFeedback] = useState<Record<string, 'up' | 'down'>>({})
+  const [correctingId, setCorrectingId] = useState<string | null>(null)
+  const [correction, setCorrection] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -130,6 +133,27 @@ export default function OwnerAiChat() {
     { label: '公告咨询', text: '我想了解社区公告，或咨询小区停车/装修/垃圾分类等问题' },
   ]
 
+  const rate = async (msgId: string, rating: 'up' | 'down', question: string, answer: string, correctionText?: string) => {
+    setFeedback((prev) => ({ ...prev, [msgId]: rating }))
+    setCorrectingId(null)
+    setCorrection('')
+    try {
+      await api.submitFeedback({
+        question,
+        answer,
+        rating,
+        correction: correctionText || null,
+      })
+    } catch {
+      // 反馈失败不打断用户
+    }
+  }
+
+  const startCorrecting = (msgId: string) => {
+    setCorrectingId(msgId)
+    setCorrection('')
+  }
+
   return (
     <div className="page dashboard-page" style={{ display: 'flex', flexDirection: 'column' }}>
       <AppHeader title="AI 社区助手" onBack={() => window.history.back()} />
@@ -144,37 +168,84 @@ export default function OwnerAiChat() {
           gap: 12,
         }}
       >
-        {messages.map((m) => (
-          <div
-            key={m.id}
-            style={{
-              alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
-              maxWidth: '80%',
-              padding: '10px 14px',
-              borderRadius: 12,
-              background: m.role === 'user' ? '#22395e' : '#fff',
-              color: m.role === 'user' ? '#fff' : '#20324b',
-              fontSize: 13,
-              lineHeight: 1.5,
-              boxShadow: '0 2px 8px rgba(29,45,66,.06)',
-              whiteSpace: 'pre-line',
-            }}
-          >
-            {m.content}
-            {m.images && m.images.length > 0 && (
-              <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
-                {m.images.map((img, idx) => (
-                  <img
-                    key={idx}
-                    src={img}
-                    alt="上传图片"
-                    style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8 }}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+        {messages.map((m, idx) => {
+          const prevUser = [...messages.slice(0, idx)].reverse().find((x) => x.role === 'user')
+          const question = prevUser?.content ?? ''
+          const isRated = feedback[m.id] != null
+          return (
+            <div
+              key={m.id}
+              style={{
+                alignSelf: m.role === 'user' ? 'flex-end' : 'flex-start',
+                maxWidth: '80%',
+                padding: '10px 14px',
+                borderRadius: 12,
+                background: m.role === 'user' ? '#22395e' : '#fff',
+                color: m.role === 'user' ? '#fff' : '#20324b',
+                fontSize: 13,
+                lineHeight: 1.5,
+                boxShadow: '0 2px 8px rgba(29,45,66,.06)',
+                whiteSpace: 'pre-line',
+              }}
+            >
+              {m.content}
+              {m.images && m.images.length > 0 && (
+                <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                  {m.images.map((img, i2) => (
+                    <img
+                      key={i2}
+                      src={img}
+                      alt="上传图片"
+                      style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8 }}
+                    />
+                  ))}
+                </div>
+              )}
+              {m.role === 'assistant' && m.id !== '0' && !loading && (
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 8 }}>
+                  <button
+                    onClick={() => rate(m.id, 'up', question, m.content)}
+                    disabled={isRated}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 3, padding: '3px 8px',
+                      borderRadius: 12, border: '1px solid #d6d8d6', background: feedback[m.id] === 'up' ? '#e1f5ee' : '#fff',
+                      color: feedback[m.id] === 'up' ? '#0f6e56' : '#8b9194', fontSize: 11, cursor: 'pointer',
+                    }}
+                  >
+                    <ThumbsUp size={13} />
+                  </button>
+                  <button
+                    onClick={() => (correctingId === m.id ? setCorrectingId(null) : startCorrecting(m.id))}
+                    disabled={isRated}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 3, padding: '3px 8px',
+                      borderRadius: 12, border: '1px solid #d6d8d6', background: feedback[m.id] === 'down' ? '#fee2e2' : '#fff',
+                      color: feedback[m.id] === 'down' ? '#a32d2d' : '#8b9194', fontSize: 11, cursor: 'pointer',
+                    }}
+                  >
+                    <ThumbsDown size={13} />
+                  </button>
+                  {correctingId === m.id && (
+                    <div style={{ display: 'flex', gap: 6, flex: 1 }}>
+                      <input
+                        value={correction}
+                        onChange={(e) => setCorrection(e.target.value)}
+                        placeholder="正确的答案应该是？"
+                        style={{ flex: 1, border: '1px solid #dedfdd', borderRadius: 8, padding: '4px 8px', fontSize: 12 }}
+                      />
+                      <button
+                        onClick={() => rate(m.id, 'down', question, m.content, correction.trim() || undefined)}
+                        style={{ padding: '4px 10px', borderRadius: 8, background: '#22395e', color: '#fff', fontSize: 12, border: 'none' }}
+                      >
+                        提交
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        })}
         {messages.length === 1 && (
           <div style={{ alignSelf: 'flex-start', display: 'flex', gap: 8, flexWrap: 'wrap', maxWidth: '90%' }}>
             {quickActions.map((qa) => (

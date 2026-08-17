@@ -5,6 +5,7 @@ from app.models.building import Building
 from app.models.community import Community
 from app.models.conversation import AgentTrace, Conversation, Message
 from app.models.fee_bill import FeeBill
+from app.models.feedback import KnowledgeGap, MessageFeedback
 from app.models.house import House
 from app.models.house_binding import HouseBinding
 from app.models.inspection import InspectionCamera, InspectionRecord
@@ -27,6 +28,8 @@ __all__ = [
     "RepairOrder",
     "RepairRecord",
     "FeeBill",
+    "MessageFeedback",
+    "KnowledgeGap",
     "Notice",
     "InspectionCamera",
     "InspectionRecord",

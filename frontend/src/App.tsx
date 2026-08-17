@@ -21,6 +21,7 @@ import ManagementUsers from './pages/management/ManagementUsers'
 import ManagementInspection from './pages/management/ManagementInspection'
 import ManagementIssue from './pages/management/ManagementIssue'
 import ManagementStats from './pages/management/ManagementStats'
+import ManagementKnowledgeGaps from './pages/management/ManagementKnowledgeGaps'
 import ManagementProfile from './pages/management/ManagementProfile'
 import RepairHome from './pages/repair/RepairHome'
 import RepairOrders from './pages/repair/RepairOrders'
@@ -161,6 +162,7 @@ function AppRoutes() {
         <Route path="/management/inspection" element={<ManagementInspection />} />
         <Route path="/management/issue" element={<ManagementIssue />} />
         <Route path="/management/stats" element={<ManagementStats />} />
+        <Route path="/management/knowledge-gaps" element={<ManagementKnowledgeGaps />} />
         <Route path="/management/profile" element={<ManagementProfile />} />
       </Route>
 

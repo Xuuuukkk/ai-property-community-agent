@@ -3,6 +3,7 @@
 from app.api.routes.agent import router as agent_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.fee import router as fee_router
+from app.api.routes.feedback import router as feedback_router
 from app.api.routes.health import router as health_router
 from app.api.routes.inspection import router as inspection_router
 from app.api.routes.issue import router as issue_router
@@ -17,6 +18,7 @@ __all__ = [
     "agent_router",
     "auth_router",
     "fee_router",
+    "feedback_router",
     "health_router",
     "inspection_router",
     "issue_router",

@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Bell,
+  BookOpen,
   Camera,
   CircleUserRound,
   ClipboardList,
@@ -134,6 +135,11 @@ export default function ManagementHome() {
             icon={<BarChart3 />}
             label="数据统计"
             onClick={() => navigate('/management/stats')}
+          />
+          <ServiceItem
+            icon={<BookOpen />}
+            label="知识缺口"
+            onClick={() => navigate('/management/knowledge-gaps')}
           />
         </div>
 

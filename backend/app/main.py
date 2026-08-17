@@ -10,6 +10,7 @@ from app.api.routes import (
     agent_router,
     auth_router,
     fee_router,
+    feedback_router,
     health_router,
     inspection_router,
     issue_router,
@@ -76,6 +77,9 @@ def create_app() -> FastAPI:
 
     # Dashboard statistics router
     app.include_router(stats_router, prefix=settings.API_PREFIX)
+
+    # Feedback and knowledge-gap router
+    app.include_router(feedback_router, prefix=settings.API_PREFIX)
 
     @app.get("/", tags=["root"])
     def root() -> dict:
