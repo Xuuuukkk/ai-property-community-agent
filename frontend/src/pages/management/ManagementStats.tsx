@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../api/client'
-import type { DashboardStats } from '../../api/types'
+import type { DashboardStats, DashboardInsights } from '../../api/types'
 import AppHeader from '../../components/AppHeader'
 import BottomNav from '../../components/BottomNav'
 import { SectionTitle } from '../../components/common'
@@ -61,6 +61,7 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
 export default function ManagementStats() {
   const navigate = useNavigate()
   const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [insights, setInsights] = useState<DashboardInsights | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -68,6 +69,7 @@ export default function ManagementStats() {
       .getDashboardStats()
       .then(setStats)
       .finally(() => setLoading(false))
+    api.getDashboardInsights().then(setInsights).catch(() => {})
   }, [])
 
   if (loading) {
@@ -96,6 +98,40 @@ export default function ManagementStats() {
             <StatCard label="上报待处理" value={String(stats.issue.processing + stats.issue.submitted)} sub={`共 ${stats.issue.total} 条上报`} />
           </div>
         </div>
+
+        <SectionTitle title="数据洞察报告" />
+        {insights && (
+          <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {insights.report && (
+              <div style={{ background: 'linear-gradient(135deg, #22395e, #2f4a78)', borderRadius: 12, padding: '14px 16px', color: '#fff' }}>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', marginBottom: 6 }}>智能总结</div>
+                <div style={{ fontSize: 13, lineHeight: 1.7, whiteSpace: 'pre-line' }}>{insights.report}</div>
+              </div>
+            )}
+            {insights.insights.map((ins, idx) => (
+              <div key={idx} style={{ background: '#fff', borderRadius: 10, padding: '12px 14px', boxShadow: '0 2px 8px rgba(29,45,66,.05)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <span
+                    style={{
+                      color: ins.severity === 'critical' ? '#b91c1c' : ins.severity === 'warning' ? '#a16207' : '#185fa5',
+                      background: ins.severity === 'critical' ? '#fee2e2' : ins.severity === 'warning' ? '#fef3c7' : '#e6f1fb',
+                      padding: '2px 8px',
+                      borderRadius: 4,
+                      fontSize: 11,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {ins.severity === 'critical' ? '严重' : ins.severity === 'warning' ? '关注' : '提示'}
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#20324b' }}>{ins.title}</span>
+                  <span style={{ flex: 1 }} />
+                  <span style={{ fontSize: 11, color: '#a3a5a4' }}>{ins.category}</span>
+                </div>
+                <div style={{ fontSize: 12, color: '#4a5568', lineHeight: 1.6 }}>{ins.detail}</div>
+              </div>
+            ))}
+          </div>
+        )}
 
         <SectionTitle title="社区概览" />
         <div style={{ padding: '0 16px' }}>

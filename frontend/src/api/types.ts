@@ -253,5 +253,18 @@ export interface DashboardStats {
   }
 }
 
+export interface Insight {
+  category: string
+  severity: 'info' | 'warning' | 'critical'
+  title: string
+  detail: string
+}
+
+export interface DashboardInsights {
+  insights: Insight[]
+  report: string
+}
+
+
 
 

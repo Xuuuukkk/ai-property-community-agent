@@ -20,6 +20,7 @@ import type {
   IssueListResponse,
   IssueOptions,
   DashboardStats,
+  DashboardInsights,
 } from './types'
 
 const API_BASE = '' // Vite dev proxy forwards /api to backend
@@ -217,6 +218,8 @@ export const api = {
   },
 
   getDashboardStats: () => fetchJson<DashboardStats>('/api/stats/dashboard'),
+
+  getDashboardInsights: () => fetchJson<DashboardInsights>('/api/stats/insights'),
 }
 
 // Re-export types for convenience
