@@ -85,15 +85,20 @@ Access:
 > documented in `nginx/nginx.prod.conf`.
 
 ```bash
-cp .env.example .env
+cp .env.production.example .env
 # Fill in production values
 
+# One-shot deploy: pull images, start services, wait for health.
+# The backend entrypoint applies database migrations automatically.
+./deploy.sh
+```
+
+Or manually, without the helper script:
+
+```bash
 docker compose -f docker-compose.prod.yml up -d --build
 
-# Apply migrations (one-time)
-docker compose -f docker-compose.prod.yml exec backend alembic -c /app/database/alembic.ini upgrade head
-
-# Import seed data (one-time)
+# Import seed data (one-time; migrations are applied automatically on boot)
 docker compose -f docker-compose.prod.yml exec backend python scripts/import_seed_data.py
 
 # Index knowledge base
@@ -167,15 +172,19 @@ For local demo without certificates, use the HTTP-only server block in
 Sequence:
 
 1. Start PostgreSQL container
-2. Run Alembic migrations
+2. Alembic migrations run automatically via `backend/entrypoint.sh` on container boot
 3. Import seed data from `data/seed/`
 4. (Optional) Index knowledge base into pgvector
 
 ```bash
-docker compose exec backend alembic -c /app/database/alembic.ini upgrade head
-docker compose exec backend python scripts/import_seed_data.py
-docker compose exec backend python -m scripts.index_knowledge_base --embedding-model deterministic
+# Migrations run automatically on boot. Seed + knowledge indexing are one-time:
+docker compose -f docker-compose.prod.yml exec backend python scripts/import_seed_data.py
+docker compose -f docker-compose.prod.yml exec backend python -m scripts.index_knowledge_base --embedding-model deterministic
 ```
+
+> In development (`docker-compose.yml`) the backend runs plain `uvicorn` without
+> the migration entrypoint, so apply migrations manually:
+> `docker compose exec backend alembic -c /app/database/alembic.ini upgrade head`
 
 ---
 

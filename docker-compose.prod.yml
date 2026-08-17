@@ -51,8 +51,8 @@ services:
 
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     image: ghcr.io/xuuuukkk/ai-property-community-agent/backend:latest
     container_name: property-backend
     restart: unless-stopped
