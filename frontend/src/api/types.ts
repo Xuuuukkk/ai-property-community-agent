@@ -155,6 +155,9 @@ export interface AgentChatResponse {
 export interface InspectionCamera {
   id: number
   name: string
+  zone: string | null
+  location: string | null
+  manager: string | null
   provider_type: string
   source_config: Record<string, unknown> | null
   enabled: boolean

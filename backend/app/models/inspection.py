@@ -23,6 +23,12 @@ class InspectionCamera(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(128), nullable=False)
+    # Community zone, e.g. "东区" / "西区" / "南区" / "北区".
+    zone: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    # Concrete location within the zone, e.g. "B1栋东侧分类垃圾房".
+    location: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    # Responsible person for this point (for zone-based assignment).
+    manager: Mapped[str | None] = mapped_column(String(64), nullable=True)
     # Capture source type, e.g. "local_dir" (read images from a directory) or
     # "rtsp" (pull a frame from an RTSP stream). New types are added by
     # implementing a matching provider in services/camera_providers.py.

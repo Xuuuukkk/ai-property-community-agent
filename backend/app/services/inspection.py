@@ -19,6 +19,9 @@ class InspectionService:
     def create_camera(self, db: Session, *, payload) -> InspectionCamera:
         camera = InspectionCamera(
             name=payload.name,
+            zone=getattr(payload, "zone", None),
+            location=getattr(payload, "location", None),
+            manager=getattr(payload, "manager", None),
             provider_type=payload.provider_type,
             source_config=payload.source_config,
             enabled=payload.enabled,

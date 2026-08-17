@@ -11,6 +11,9 @@ class CameraCreate(BaseModel):
     """Payload for creating a monitored point."""
 
     name: str = Field(..., min_length=1, max_length=128, description="监控点名称")
+    zone: str | None = Field(None, description="所属区域，如 东区/西区/南区/北区")
+    location: str | None = Field(None, description="具体点位，如 B1栋东侧分类垃圾房")
+    manager: str | None = Field(None, description="负责人")
     provider_type: str = Field(default="local_dir", description="截图源类型：local_dir / rtsp")
     source_config: dict | None = Field(None, description="截图源配置，如 {directory: ...} 或 {rtsp_url: ...}")
     enabled: bool = Field(default=True, description="是否启用")
@@ -23,6 +26,9 @@ class CameraResponse(BaseModel):
 
     id: int
     name: str
+    zone: str | None
+    location: str | None
+    manager: str | None
     provider_type: str
     source_config: dict | None
     enabled: bool

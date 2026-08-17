@@ -196,15 +196,36 @@ export default function ManagementInspection() {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  minHeight: 46,
+                  minHeight: 50,
                   borderBottom: '1px solid #f0f1ef',
                   gap: 10,
-                  fontSize: 13,
+                  padding: '8px 0',
                 }}
               >
-                <Camera size={16} style={{ color: '#22395e' }} />
-                <b style={{ flex: 1, fontWeight: 500 }}>{c.name}</b>
-                <span style={{ fontSize: 11, color: c.enabled ? '#2f9e63' : '#a3a5a4' }}>
+                <Camera size={16} style={{ color: '#22395e', flexShrink: 0 }} />
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {c.zone && (
+                      <span
+                        style={{
+                          color: '#185fa5',
+                          background: '#e6f1fb',
+                          padding: '1px 5px',
+                          borderRadius: 4,
+                          fontSize: 11,
+                          fontWeight: 500,
+                        }}
+                      >
+                        {c.zone}
+                      </span>
+                    )}
+                    <b style={{ fontWeight: 500, fontSize: 13 }}>{c.location || c.name}</b>
+                  </div>
+                  {c.manager && (
+                    <span style={{ fontSize: 11, color: '#8b9194' }}>负责人：{c.manager}</span>
+                  )}
+                </div>
+                <span style={{ fontSize: 11, color: c.enabled ? '#2f9e63' : '#a3a5a4', flexShrink: 0 }}>
                   {c.enabled ? '启用' : '停用'}
                 </span>
                 <button
@@ -220,6 +241,7 @@ export default function ManagementInspection() {
                     background: runningId === c.id ? '#f0f1ef' : '#fff',
                     color: '#22395e',
                     fontSize: 12,
+                    flexShrink: 0,
                   }}
                 >
                   <RefreshCw size={13} />
@@ -272,7 +294,10 @@ export default function ManagementInspection() {
                       <time style={{ color: '#8b9194', whiteSpace: 'nowrap' }}>{formatTime(r.created_at)}</time>
                     </div>
                     <div style={{ color: '#4a5568', lineHeight: 1.6 }}>
-                      <span style={{ color: '#22395e', fontWeight: 500 }}>{cam?.name ?? `监控点 ${r.camera_id}`}</span>
+                      <span style={{ color: '#22395e', fontWeight: 500 }}>
+                        {cam?.zone && `${cam.zone} · `}
+                        {cam?.location ?? cam?.name ?? `监控点 ${r.camera_id}`}
+                      </span>
                       {r.status === 'error' ? ` · ${r.error || '巡检失败'}` : ` · ${r.summary || ''}`}
                     </div>
                   </div>
