@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth, type UserRole } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -74,40 +76,108 @@ function AppShell({ children }: { children: React.ReactNode }) {
   )
 }
 
-const NAV_GROUPS: ({ section: string } | { label: string; path: string })[] = [
-  { section: '公开' },
-  { label: '启动页', path: '/' },
-  { label: '身份选择', path: '/roles' },
-  { label: '账号登录', path: '/login' },
-  { section: '业主' },
-  { label: '业主首页', path: '/owner' },
-  { label: '服务', path: '/owner/services' },
-  { label: '房屋报修', path: '/owner/repair-form' },
-  { label: '报修记录', path: '/owner/repairs' },
-  { label: '费用查询', path: '/owner/fees' },
-  { label: '社区公告', path: '/owner/notices' },
-  { label: '问题上报', path: '/owner/issue' },
-  { label: 'AI 助手', path: '/owner/ai' },
-  { label: '我的', path: '/owner/profile' },
-  { section: '物业' },
-  { label: '物业首页', path: '/management' },
-  { label: '工单管理', path: '/management/repairs' },
-  { label: '公告管理', path: '/management/notices' },
-  { label: '费用管理', path: '/management/fees' },
-  { label: '用户管理', path: '/management/users' },
-  { label: '自动巡检', path: '/management/inspection' },
-  { label: '业主上报', path: '/management/issue' },
-  { label: '数据统计', path: '/management/stats' },
-  { label: '知识缺口', path: '/management/knowledge-gaps' },
-  { label: '我的', path: '/management/profile' },
-  { section: '维修' },
-  { label: '维修首页', path: '/repair' },
-  { label: '工单', path: '/repair/orders' },
-  { label: '消息', path: '/repair/messages' },
-  { label: '我的', path: '/repair/profile' },
+interface NavGroup {
+  key: string
+  title: string
+  items: { label: string; path: string }[]
+}
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    key: 'public',
+    title: '公开',
+    items: [
+      { label: '启动页', path: '/' },
+      { label: '身份选择', path: '/roles' },
+      { label: '账号登录', path: '/login' },
+    ],
+  },
+  {
+    key: 'owner',
+    title: '业主',
+    items: [
+      { label: '业主首页', path: '/owner' },
+      { label: '服务', path: '/owner/services' },
+      { label: '房屋报修', path: '/owner/repair-form' },
+      { label: '报修记录', path: '/owner/repairs' },
+      { label: '费用查询', path: '/owner/fees' },
+      { label: '社区公告', path: '/owner/notices' },
+      { label: '问题上报', path: '/owner/issue' },
+      { label: 'AI 助手', path: '/owner/ai' },
+      { label: '我的', path: '/owner/profile' },
+    ],
+  },
+  {
+    key: 'management',
+    title: '物业',
+    items: [
+      { label: '物业首页', path: '/management' },
+      { label: '工单管理', path: '/management/repairs' },
+      { label: '公告管理', path: '/management/notices' },
+      { label: '费用管理', path: '/management/fees' },
+      { label: '用户管理', path: '/management/users' },
+      { label: '自动巡检', path: '/management/inspection' },
+      { label: '业主上报', path: '/management/issue' },
+      { label: '数据统计', path: '/management/stats' },
+      { label: '知识缺口', path: '/management/knowledge-gaps' },
+      { label: '我的', path: '/management/profile' },
+    ],
+  },
+  {
+    key: 'repair',
+    title: '维修',
+    items: [
+      { label: '维修首页', path: '/repair' },
+      { label: '工单', path: '/repair/orders' },
+      { label: '消息', path: '/repair/messages' },
+      { label: '我的', path: '/repair/profile' },
+    ],
+  },
 ]
 
+function roleToGroup(role?: string): string | null {
+  if (role === 'OWNER') return 'owner'
+  if (role === 'WORKER') return 'repair'
+  if (role === 'PROPERTY_STAFF' || role === 'ADMIN') return 'management'
+  return null
+}
+
+function pathToGroup(pathname: string): string {
+  if (pathname.startsWith('/owner')) return 'owner'
+  if (pathname.startsWith('/management')) return 'management'
+  if (pathname.startsWith('/repair')) return 'repair'
+  return 'public'
+}
+
 function PrototypeNav() {
+  const { user } = useAuth()
+  const location = useLocation()
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({
+    public: true,
+    owner: false,
+    management: false,
+    repair: false,
+  })
+
+  // When the logged-in role changes, collapse everything except public + that role.
+  useEffect(() => {
+    const group = roleToGroup(user?.role)
+    setExpanded({
+      public: true,
+      owner: group === 'owner',
+      management: group === 'management',
+      repair: group === 'repair',
+    })
+  }, [user?.role])
+
+  // Auto-expand the group the current route belongs to.
+  useEffect(() => {
+    const group = pathToGroup(location.pathname)
+    setExpanded((prev) => ({ ...prev, [group]: true }))
+  }, [location.pathname])
+
+  const toggle = (key: string) => setExpanded((prev) => ({ ...prev, [key]: !prev[key] }))
+
   return (
     <aside className="prototype-nav">
       <div className="nav-brand">
@@ -116,20 +186,28 @@ function PrototypeNav() {
       </div>
       <p className="nav-caption">智慧社区 · UI 原型</p>
       <div className="nav-list">
-        {NAV_GROUPS.map((item, idx) =>
-          'section' in item ? (
-            <div key={idx} className="nav-section">{item.section}</div>
-          ) : (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end
-              className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
-            >
-              <span>{item.label}</span>
-            </NavLink>
-          ),
-        )}
+        {NAV_GROUPS.map((group) => (
+          <div key={group.key}>
+            <button className="nav-group-title" onClick={() => toggle(group.key)}>
+              <span>{group.title}</span>
+              <ChevronDown
+                size={14}
+                style={{ transform: expanded[group.key] ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}
+              />
+            </button>
+            {expanded[group.key] &&
+              group.items.map((item) => (
+                <NavLink
+                  key={item.path}
+                  to={item.path}
+                  end
+                  className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+                >
+                  <span>{item.label}</span>
+                </NavLink>
+              ))}
+          </div>
+        ))}
       </div>
       <div className="nav-footer">
         <span className="status-dot" />
