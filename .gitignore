@@ -234,6 +234,10 @@ backups/
 # Automated patrol inspection runtime artifacts
 inspection-images/
 
+# Generated evaluation reports (reproducible via the evaluation CLI)
+evaluation/output/
+evaluation/output-ci/
+
 # Automated patrol inspection demo data
 inspection-demo/
 inspection-test/
