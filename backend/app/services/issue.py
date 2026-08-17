@@ -7,10 +7,11 @@ from datetime import datetime
 from pathlib import Path
 
 from fastapi import HTTPException, status
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.core.enums import IssueStatus
-from app.models.issue import IssueReport
+from app.models.issue import ZONE_ASSIGNEES, IssueReport
 
 
 class IssueService:
@@ -27,9 +28,40 @@ class IssueService:
             status=IssueStatus.SUBMITTED.value,
         )
         db.add(issue)
+        db.flush()  # obtain issue.id before dispatch
+
+        # Auto-dispatch to a zone assignee when the report has a zone.
+        if issue.zone and issue.zone in ZONE_ASSIGNEES:
+            assignee_id = self._pick_assignee(db, issue.zone)
+            if assignee_id is not None:
+                issue.assignee_id = assignee_id
+                issue.assigned_at = datetime.now()
+                issue.status = IssueStatus.PROCESSING.value
+
         db.commit()
         db.refresh(issue)
         return issue
+
+    @staticmethod
+    def _pick_assignee(db: Session, zone: str) -> int | None:
+        """Pick the zone candidate with the fewest open issues (load balancing)."""
+        candidates = ZONE_ASSIGNEES.get(zone, [])
+        if not candidates:
+            return None
+
+        open_statuses = (IssueStatus.SUBMITTED.value, IssueStatus.PROCESSING.value)
+        loads: list[tuple[int, int]] = []
+        for candidate in candidates:
+            count = (
+                db.query(func.count(IssueReport.id))
+                .filter(IssueReport.assignee_id == candidate)
+                .filter(IssueReport.status.in_(open_statuses))
+                .scalar()
+                or 0
+            )
+            loads.append((count, candidate))
+        loads.sort()
+        return loads[0][1] if loads else None
 
     @staticmethod
     def _save_images(images: list[str] | None) -> list[str] | None:

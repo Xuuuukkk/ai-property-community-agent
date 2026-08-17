@@ -38,6 +38,17 @@ CATEGORY_LABELS = {
     IssueCategory.REPORT.value: "随手拍问题",
 }
 
+# Zone -> candidate assignee user ids (ADMIN accounts). Auto-dispatch picks the
+# candidate with the fewest open issues (load balancing), mirroring the repair
+# worker dispatch logic. Complaint-only issues without a zone stay unassigned
+# for manual triage.
+ZONE_ASSIGNEES: dict[str, list[int]] = {
+    "东区": [202, 203],  # 丁辉、黄琳
+    "西区": [204, 205],  # 周强、魏颖
+    "南区": [206, 207],  # 何伟、吕云
+    "北区": [208, 209],  # 吴鑫、曹磊
+}
+
 
 class IssueReport(Base):
     """An owner-submitted community issue report."""
@@ -66,6 +77,13 @@ class IssueReport(Base):
     status: Mapped[str] = mapped_column(
         String(16), nullable=False, default=IssueStatus.SUBMITTED.value
     )
+    # Property staff (admin) this issue is auto-dispatched to, by zone.
+    assignee_id: Mapped[int | None] = mapped_column(
+        ForeignKey("user.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    assigned_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=False), nullable=True
+    )
     # Property staff's reply, filled once resolved (市长信箱 style).
     reply: Mapped[str | None] = mapped_column(Text, nullable=True)
     replied_at: Mapped[datetime | None] = mapped_column(
@@ -75,4 +93,14 @@ class IssueReport(Base):
         DateTime(timezone=False), server_default=func.now(), nullable=False
     )
 
-    user: Mapped["User"] = relationship("User", lazy="selectin")
+    user: Mapped["User"] = relationship("User", foreign_keys=[user_id], lazy="selectin")
+    assignee: Mapped["User | None"] = relationship(
+        "User", foreign_keys=[assignee_id], lazy="selectin"
+    )
+
+    @property
+    def assignee_name(self) -> str | None:
+        """Human-readable name of the assigned staff member."""
+        if self.assignee is None:
+            return None
+        return self.assignee.real_name or self.assignee.username

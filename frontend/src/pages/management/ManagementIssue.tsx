@@ -130,6 +130,11 @@ export default function ManagementIssue() {
                     </span>
                   </div>
                   <div style={{ color: '#4a5568', lineHeight: 1.6 }}>{i.description}</div>
+                  {i.assignee_name && (
+                    <div style={{ fontSize: 11, color: '#185fa5' }}>
+                      负责人：{i.assignee_name}
+                    </div>
+                  )}
                   <time style={{ color: '#a3a5a4', fontSize: 11 }}>{formatTime(i.created_at)}</time>
 
                   {expanded && (

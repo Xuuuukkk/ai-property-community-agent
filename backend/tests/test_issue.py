@@ -33,8 +33,30 @@ def test_create_issue(client: TestClient) -> None:
     data = resp.json()
     assert data["category"] == "public_facility"
     assert data["zone"] == "东区"
-    assert data["status"] == "submitted"
     assert data["user_id"] == 1
+
+
+def test_create_issue_auto_dispatches_by_zone(client: TestClient) -> None:
+    """A zoned report is auto-assigned to a zone admin and marked processing."""
+    resp = client.post(
+        "/api/issues", json=_issue_payload(), headers=auth_headers(1, "OWNER")
+    )
+    data = resp.json()
+    assert data["status"] == "processing"
+    assert data["assignee_id"] in (202, 203)  # 东区 candidate admins
+    assert data["assignee_name"]
+
+
+def test_create_issue_without_zone_stays_submitted(client: TestClient) -> None:
+    """A complaint without a zone is not auto-dispatched."""
+    resp = client.post(
+        "/api/issues",
+        json=_issue_payload(category="complaint", zone=None, location=None),
+        headers=auth_headers(1, "OWNER"),
+    )
+    data = resp.json()
+    assert data["status"] == "submitted"
+    assert data["assignee_id"] is None
 
 
 def test_owner_sees_only_own_issues(client: TestClient) -> None:

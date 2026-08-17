@@ -195,6 +195,9 @@ export interface Issue {
   description: string
   images: string[] | null
   status: string
+  assignee_id: number | null
+  assignee_name: string | null
+  assigned_at: string | null
   reply: string | null
   replied_at: string | null
   created_at: string

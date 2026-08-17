@@ -36,6 +36,9 @@ class IssueResponse(BaseModel):
     description: str
     images: list | None
     status: str
+    assignee_id: int | None
+    assignee_name: str | None
+    assigned_at: datetime | None
     reply: str | None
     replied_at: datetime | None
     created_at: datetime
