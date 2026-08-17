@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../api/client'
 import type { Issue } from '../../api/types'
+import { useAuth } from '../../contexts/AuthContext'
 import AppHeader from '../../components/AppHeader'
 import BottomNav from '../../components/BottomNav'
 import { SectionTitle } from '../../components/common'
@@ -26,9 +27,11 @@ const STATUS_STYLES: Record<string, { color: string; bg: string }> = {
 
 export default function ManagementIssue() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [issues, setIssues] = useState<Issue[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
+  const [mineFilter, setMineFilter] = useState(false)
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const [replyText, setReplyText] = useState('')
   const [replyingId, setReplyingId] = useState<number | null>(null)
@@ -36,14 +39,14 @@ export default function ManagementIssue() {
   const load = () => {
     setLoading(true)
     api
-      .listIssues({ page_size: 100, issue_status: statusFilter || undefined })
+      .listIssues({ page_size: 100, issue_status: statusFilter || undefined, mine: mineFilter || undefined })
       .then((res) => setIssues(res.items))
       .finally(() => setLoading(false))
   }
 
   useEffect(() => {
     load()
-  }, [statusFilter])
+  }, [statusFilter, mineFilter])
 
   const reply = async (issueId: number) => {
     if (!replyText.trim() || replyingId !== null) return
@@ -76,6 +79,24 @@ export default function ManagementIssue() {
         </div>
 
         <SectionTitle title="上报列表" />
+        <div style={{ padding: '0 16px 8px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {([false, true] as const).map((m) => (
+            <button
+              key={String(m)}
+              onClick={() => setMineFilter(m)}
+              style={{
+                padding: '5px 12px',
+                borderRadius: 14,
+                border: mineFilter === m ? '1px solid #185fa5' : '1px solid #d6d8d6',
+                background: mineFilter === m ? '#185fa5' : '#fff',
+                color: mineFilter === m ? '#fff' : '#4a5568',
+                fontSize: 12,
+              }}
+            >
+              {m ? '我的' : '全部'}
+            </button>
+          ))}
+        </div>
         <div style={{ padding: '0 16px 12px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {([null, 'submitted', 'processing', 'resolved'] as const).map((s) => (
             <button
@@ -146,6 +167,10 @@ export default function ManagementIssue() {
                         <div style={{ background: '#f0f7f4', borderRadius: 8, padding: '10px 12px' }}>
                           <div style={{ color: '#0f6e56', fontWeight: 500, marginBottom: 4 }}>已答复</div>
                           <div style={{ color: '#4a5568', lineHeight: 1.6 }}>{i.reply}</div>
+                        </div>
+                      ) : i.assignee_id != null && i.assignee_id !== user?.id ? (
+                        <div style={{ background: '#f5f7fa', borderRadius: 8, padding: '10px 12px', color: '#8b9194', fontSize: 12 }}>
+                          等待负责人 {i.assignee_name || ''} 处理
                         </div>
                       ) : (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

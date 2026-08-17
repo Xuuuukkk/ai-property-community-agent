@@ -189,12 +189,13 @@ export const api = {
     images?: string[] | null
   }) => fetchJson<Issue>('/api/issues', { method: 'POST', body: JSON.stringify(payload) }),
 
-  listIssues: (params: { page?: number; page_size?: number; category?: string; issue_status?: string } = {}) => {
+  listIssues: (params: { page?: number; page_size?: number; category?: string; issue_status?: string; mine?: boolean } = {}) => {
     const search = new URLSearchParams()
     if (params.page) search.append('page', String(params.page))
     if (params.page_size) search.append('page_size', String(params.page_size))
     if (params.category) search.append('category', params.category)
     if (params.issue_status) search.append('issue_status', params.issue_status)
+    if (params.mine) search.append('mine', 'true')
     return fetchJson<IssueListResponse>(`/api/issues?${search.toString()}`)
   },
 

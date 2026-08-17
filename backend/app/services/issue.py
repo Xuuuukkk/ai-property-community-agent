@@ -106,6 +106,7 @@ class IssueService:
         user_id: int | None = None,
         category: str | None = None,
         issue_status: str | None = None,
+        assignee_id: int | None = None,
     ) -> tuple[list[IssueReport], int]:
         query = db.query(IssueReport)
         if user_id is not None:
@@ -114,6 +115,8 @@ class IssueService:
             query = query.filter(IssueReport.category == category)
         if issue_status:
             query = query.filter(IssueReport.status == issue_status)
+        if assignee_id is not None:
+            query = query.filter(IssueReport.assignee_id == assignee_id)
 
         total = query.with_entities(IssueReport.id).count()
         items = (

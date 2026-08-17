@@ -54,13 +54,17 @@ def list_issues(
     page_size: int = Query(20, ge=1, le=100, description="Items per page"),
     category: str | None = Query(None, description="Filter by category"),
     issue_status: str | None = Query(None, description="Filter by status"),
+    mine: bool = Query(False, description="Staff: only issues assigned to me"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> IssueListResponse:
-    """List issues: owners see only their own; staff see all."""
+    """List issues: owners see only their own; staff see all (or only theirs)."""
     user_id = None
+    assignee_id = None
     if current_user.role not in _STAFF_ROLES:
         user_id = current_user.id
+    elif mine:
+        assignee_id = current_user.id
 
     items, total = issue_service.list_issues(
         db,
@@ -69,6 +73,7 @@ def list_issues(
         user_id=user_id,
         category=category,
         issue_status=issue_status,
+        assignee_id=assignee_id,
     )
     pages = (total + page_size - 1) // page_size
     return IssueListResponse(
@@ -84,10 +89,19 @@ def reply_issue(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> IssueResponse:
-    """Property staff replies to an issue and marks it resolved (staff only)."""
+    """The assigned staff member replies and marks the issue resolved.
+
+    Only the assignee may fill in the feedback; unassigned issues (e.g. a
+    complaint without a zone) can be replied to by any staff member.
+    """
     if current_user.role not in _STAFF_ROLES:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
     issue = issue_service.get_issue(db, issue_id)
+    if issue.assignee_id is not None and issue.assignee_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="只能由该上报的负责人填写反馈",
+        )
     return issue_service.reply_issue(db, issue, payload.reply)
 
 

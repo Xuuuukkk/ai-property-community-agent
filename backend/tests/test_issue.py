@@ -90,19 +90,54 @@ def test_reply_issue_requires_staff(client: TestClient) -> None:
     assert resp.status_code == 403
 
 
-def test_reply_issue_as_staff(client: TestClient) -> None:
+def test_reply_issue_as_assignee(client: TestClient) -> None:
     created = client.post(
         "/api/issues", json=_issue_payload(), headers=auth_headers(1, "OWNER")
     ).json()
+    assignee_id = created["assignee_id"]
+    assert assignee_id is not None
     resp = client.post(
         f"/api/issues/{created['id']}/reply",
         json={"reply": "已联系工程部维修"},
-        headers=auth_headers(201, "ADMIN"),
+        headers=auth_headers(assignee_id, "ADMIN"),
     )
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "resolved"
     assert data["reply"] == "已联系工程部维修"
+
+
+def test_reply_issue_rejects_non_assignee(client: TestClient) -> None:
+    """A non-assignee admin cannot fill in the feedback."""
+    created = client.post(
+        "/api/issues", json=_issue_payload(), headers=auth_headers(1, "OWNER")
+    ).json()
+    assignee_id = created["assignee_id"]
+    # Pick a different admin id.
+    other_admin = 201 if assignee_id != 201 else 210
+    resp = client.post(
+        f"/api/issues/{created['id']}/reply",
+        json={"reply": "越权答复"},
+        headers=auth_headers(other_admin, "ADMIN"),
+    )
+    assert resp.status_code == 403
+
+
+def test_list_issues_mine_filter(client: TestClient) -> None:
+    """mine=true returns only issues assigned to the current admin."""
+    created = client.post(
+        "/api/issues", json=_issue_payload(), headers=auth_headers(1, "OWNER")
+    ).json()
+    assignee_id = created["assignee_id"]
+
+    mine = client.get("/api/issues?mine=true", headers=auth_headers(assignee_id, "ADMIN")).json()
+    assert all(item["assignee_id"] == assignee_id for item in mine["items"])
+
+    # Another admin with no assigned issues sees none (in a fresh test DB there
+    # may be other issues, so just assert they are all assigned to them).
+    other_admin = 201 if assignee_id != 201 else 210
+    other = client.get("/api/issues?mine=true", headers=auth_headers(other_admin, "ADMIN")).json()
+    assert all(item["assignee_id"] == other_admin for item in other["items"])
 
 
 def test_create_issue_requires_auth(client: TestClient) -> None:
