@@ -46,6 +46,7 @@ class InspectionRecordResponse(BaseModel):
     anomaly_type: str | None
     confidence: float | None
     summary: str | None
+    bbox: list | None
     status: str
     error: str | None
     created_at: datetime

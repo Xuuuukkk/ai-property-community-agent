@@ -81,6 +81,7 @@ class InspectionService:
             record.anomaly_type = result.get("anomaly_type") or None
             record.confidence = result.get("confidence")
             record.summary = result.get("summary")
+            record.bbox = result.get("bbox")
             record.raw_result = result
         except Exception as exc:  # noqa: BLE001 - record and return a failed run
             record.status = "error"
@@ -103,15 +104,16 @@ class InspectionService:
 
     @staticmethod
     def _save_image(camera_id: int, image_bytes: bytes) -> str:
-        """Persist a captured image to the inspection images directory."""
+        """Persist a captured image into a per-camera subdirectory."""
         from app.core.paths import REPO_ROOT
 
-        images_dir = REPO_ROOT / "inspection-images"
-        images_dir.mkdir(exist_ok=True)
-        filename = f"camera_{camera_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
+        # Each camera keeps its own subdirectory so shots are stored per source.
+        images_dir = REPO_ROOT / "inspection-images" / f"camera_{camera_id}"
+        images_dir.mkdir(parents=True, exist_ok=True)
+        filename = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
         path = images_dir / filename
         path.write_bytes(image_bytes)
-        return f"inspection-images/{filename}"
+        return f"inspection-images/camera_{camera_id}/{filename}"
 
 
 inspection_service = InspectionService()

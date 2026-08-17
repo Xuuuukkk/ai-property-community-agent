@@ -239,3 +239,6 @@ inspection-demo/
 inspection-test/
 data/inspection-demo/
 data/inspection-test/
+
+# WorkBuddy project data (automations, memory) - not for git
+.workbuddy/

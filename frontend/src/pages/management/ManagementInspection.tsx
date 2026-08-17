@@ -16,9 +16,10 @@ const ANOMALY_STYLES: Record<string, { color: string; bg: string }> = {
   楼道堆物: { color: '#a16207', bg: '#fef3c7' },
 }
 
-function InspectionImage({ recordId }: { recordId: number }) {
+function InspectionImage({ recordId, bbox }: { recordId: number; bbox?: number[] | null }) {
   const [url, setUrl] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
+  const [zoomed, setZoomed] = useState(false)
 
   useEffect(() => {
     let objectUrl: string | null = null
@@ -38,8 +39,8 @@ function InspectionImage({ recordId }: { recordId: number }) {
     return (
       <div
         style={{
-          width: 56,
-          height: 42,
+          width: 72,
+          height: 48,
           borderRadius: 6,
           background: '#f0f1ef',
           display: 'flex',
@@ -54,9 +55,79 @@ function InspectionImage({ recordId }: { recordId: number }) {
     )
   }
   if (!url) {
-    return <div style={{ width: 56, height: 42, borderRadius: 6, background: '#f0f1ef' }} />
+    return <div style={{ width: 72, height: 48, borderRadius: 6, background: '#f0f1ef' }} />
   }
-  return <img src={url} alt="巡检截图" style={{ width: 56, height: 42, borderRadius: 6, objectFit: 'cover' }} />
+
+  const [x1, y1, x2, y2] = bbox && bbox.length === 4 ? bbox : [0, 0, 0, 0]
+  const hasBox = bbox && bbox.length === 4 && (x2 - x1 > 0.01 || y2 - y1 > 0.01)
+
+  return (
+    <>
+      <div
+        onClick={() => setZoomed(true)}
+        style={{
+          position: 'relative',
+          width: 72,
+          height: 48,
+          borderRadius: 6,
+          overflow: 'hidden',
+          flexShrink: 0,
+          cursor: 'zoom-in',
+          background: '#000',
+        }}
+      >
+        <img src={url} alt="巡检截图" style={{ width: '100%', height: '100%', objectFit: 'fill' }} />
+        {hasBox && (
+          <div
+            style={{
+              position: 'absolute',
+              left: `${x1 * 100}%`,
+              top: `${y1 * 100}%`,
+              width: `${(x2 - x1) * 100}%`,
+              height: `${(y2 - y1) * 100}%`,
+              border: '2px solid #e24b4a',
+              background: 'rgba(226, 75, 74, 0.15)',
+              boxSizing: 'border-box',
+            }}
+          />
+        )}
+      </div>
+
+      {zoomed && (
+        <div
+          onClick={() => setZoomed(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.75)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 999,
+          }}
+        >
+          <div style={{ position: 'relative', width: '90%', maxWidth: 420 }}>
+            <img src={url} alt="巡检截图大图" style={{ width: '100%', borderRadius: 10, display: 'block' }} />
+            {hasBox && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: `${x1 * 100}%`,
+                  top: `${y1 * 100}%`,
+                  width: `${(x2 - x1) * 100}%`,
+                  height: `${(y2 - y1) * 100}%`,
+                  border: '3px solid #e24b4a',
+                  background: 'rgba(226, 75, 74, 0.15)',
+                  boxSizing: 'border-box',
+                  borderRadius: 3,
+                }}
+              />
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  )
 }
 
 export default function ManagementInspection() {
@@ -180,7 +251,7 @@ export default function ManagementInspection() {
                     padding: '10px 0',
                   }}
                 >
-                  {r.image_path && r.status === 'success' && <InspectionImage recordId={r.id} />}
+                  {r.image_path && r.status === 'success' && <InspectionImage recordId={r.id} bbox={r.bbox} />}
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span

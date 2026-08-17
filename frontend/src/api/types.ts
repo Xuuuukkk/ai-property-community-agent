@@ -172,6 +172,7 @@ export interface InspectionRecord {
   anomaly_type: string | null
   confidence: number | null
   summary: string | null
+  bbox: number[] | null
   status: string
   error: string | null
   created_at: string

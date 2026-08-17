@@ -25,8 +25,11 @@ ANALYSIS_USER_PROMPT = (
     "输出 JSON，字段如下：\n"
     '{{"anomaly_type": "异常类型，正常则为 null", '
     '"confidence": 0.0到1.0之间的数值, '
-    '"summary": "一句话描述画面内容"}}\n'
-    "如果画面正常，anomaly_type 返回 null，confidence 返回 0。"
+    '"summary": "一句话描述画面内容", '
+    '"bbox": [x1, y1, x2, y2]}}\n'
+    "其中 bbox 是异常区域的外接框，四个值都是相对图片宽高的归一化值（0 到 1 之间），"
+    "左上角为原点 (0,0)，右下角为 (1,1)。如果画面正常，anomaly_type 和 bbox 都返回 null，"
+    "confidence 返回 0。"
 )
 
 
@@ -82,10 +85,18 @@ def _parse_json_result(content: str) -> dict:
             text = text[4:]
         text = text.strip()
     try:
-        return json.loads(text)
+        result = json.loads(text)
+        result.setdefault("bbox", None)
+        result.setdefault("confidence", 0.0)
+        return result
     except json.JSONDecodeError:
         # Fall back to treating the raw text as the summary.
-        return {"anomaly_type": None, "confidence": 0.0, "summary": content.strip()}
+        return {
+            "anomaly_type": None,
+            "confidence": 0.0,
+            "summary": content.strip(),
+            "bbox": None,
+        }
 
 
 @lru_cache

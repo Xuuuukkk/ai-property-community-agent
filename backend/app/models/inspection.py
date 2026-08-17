@@ -60,6 +60,9 @@ class InspectionRecord(Base):
     confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     # Human-readable summary produced by the vision model.
     summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Normalized bounding box of the anomaly region, [x1, y1, x2, y2] with each
+    # value in 0..1 relative to the image width/height (top-left origin).
+    bbox: Mapped[list | None] = mapped_column(JSONB, nullable=True)
     # Full structured result returned by the vision model (for debugging).
     raw_result: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
     # "success" or "error".
