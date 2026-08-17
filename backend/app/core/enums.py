@@ -84,3 +84,19 @@ class NoticeStatus(StrEnum):
     DRAFT = "DRAFT"
     PUBLISHED = "PUBLISHED"
     ARCHIVED = "ARCHIVED"
+
+
+class IssueCategory(StrEnum):
+    """Category of an owner-submitted issue report."""
+
+    PUBLIC_FACILITY = "public_facility"  # 公共设施报修
+    COMPLAINT = "complaint"  # 意见投诉
+    REPORT = "report"  # 随手拍问题
+
+
+class IssueStatus(StrEnum):
+    """Lifecycle of an owner-submitted issue report."""
+
+    SUBMITTED = "submitted"  # 已提交
+    PROCESSING = "processing"  # 处理中
+    RESOLVED = "resolved"  # 已解决（含答复）

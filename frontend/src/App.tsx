@@ -10,6 +10,7 @@ import OwnerRepairs from './pages/owner/OwnerRepairs'
 import OwnerNotices from './pages/owner/OwnerNotices'
 import OwnerServices from './pages/owner/OwnerServices'
 import OwnerAiChat from './pages/owner/OwnerAiChat'
+import OwnerIssue from './pages/owner/OwnerIssue'
 import OwnerProfile from './pages/owner/OwnerProfile'
 import ManagementHome from './pages/management/ManagementHome'
 import ManagementRepairs from './pages/management/ManagementRepairs'
@@ -17,6 +18,7 @@ import ManagementNotices from './pages/management/ManagementNotices'
 import ManagementFees from './pages/management/ManagementFees'
 import ManagementUsers from './pages/management/ManagementUsers'
 import ManagementInspection from './pages/management/ManagementInspection'
+import ManagementIssue from './pages/management/ManagementIssue'
 import ManagementProfile from './pages/management/ManagementProfile'
 import RepairHome from './pages/repair/RepairHome'
 import RepairOrders from './pages/repair/RepairOrders'
@@ -136,6 +138,7 @@ function AppRoutes() {
         <Route path="/owner/repairs" element={<OwnerRepairs />} />
         <Route path="/owner/notices" element={<OwnerNotices />} />
         <Route path="/owner/ai" element={<OwnerAiChat />} />
+        <Route path="/owner/issue" element={<OwnerIssue />} />
         <Route path="/owner/profile" element={<OwnerProfile />} />
       </Route>
 
@@ -153,6 +156,7 @@ function AppRoutes() {
         <Route path="/management/fees" element={<ManagementFees />} />
         <Route path="/management/users" element={<ManagementUsers />} />
         <Route path="/management/inspection" element={<ManagementInspection />} />
+        <Route path="/management/issue" element={<ManagementIssue />} />
         <Route path="/management/profile" element={<ManagementProfile />} />
       </Route>
 

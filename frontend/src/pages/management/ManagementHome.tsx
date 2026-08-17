@@ -4,6 +4,7 @@ import {
   CircleUserRound,
   ClipboardList,
   Megaphone,
+  MessageSquareText,
   Receipt,
   UsersRound,
 } from 'lucide-react'
@@ -122,6 +123,11 @@ export default function ManagementHome() {
             icon={<Camera />}
             label="自动巡检"
             onClick={() => navigate('/management/inspection')}
+          />
+          <ServiceItem
+            icon={<MessageSquareText />}
+            label="业主上报"
+            onClick={() => navigate('/management/issue')}
           />
         </div>
 

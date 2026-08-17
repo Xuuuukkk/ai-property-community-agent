@@ -5,6 +5,7 @@ from app.api.routes.auth import router as auth_router
 from app.api.routes.fee import router as fee_router
 from app.api.routes.health import router as health_router
 from app.api.routes.inspection import router as inspection_router
+from app.api.routes.issue import router as issue_router
 from app.api.routes.knowledge import router as knowledge_router
 from app.api.routes.notices import router as notices_router
 from app.api.routes.repair import router as repair_router
@@ -17,6 +18,7 @@ __all__ = [
     "fee_router",
     "health_router",
     "inspection_router",
+    "issue_router",
     "knowledge_router",
     "notices_router",
     "repair_router",

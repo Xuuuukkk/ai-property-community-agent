@@ -12,6 +12,7 @@ from app.api.routes import (
     fee_router,
     health_router,
     inspection_router,
+    issue_router,
     knowledge_router,
     notices_router,
     repair_router,
@@ -68,6 +69,9 @@ def create_app() -> FastAPI:
 
     # Automated patrol inspection router
     app.include_router(inspection_router, prefix=settings.API_PREFIX)
+
+    # Owner-submitted issue reports router
+    app.include_router(issue_router, prefix=settings.API_PREFIX)
 
     @app.get("/", tags=["root"])
     def root() -> dict:

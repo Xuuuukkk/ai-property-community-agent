@@ -16,6 +16,9 @@ import type {
   InspectionCameraListResponse,
   InspectionRecord,
   InspectionRecordListResponse,
+  Issue,
+  IssueListResponse,
+  IssueOptions,
 } from './types'
 
 const API_BASE = '' // Vite dev proxy forwards /api to backend
@@ -171,6 +174,39 @@ export const api = {
     const headers: Record<string, string> = {}
     if (token) headers.Authorization = `Bearer ${token}`
     const response = await fetch(`${API_BASE}/api/inspection/records/${recordId}/image`, { headers })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    const blob = await response.blob()
+    return URL.createObjectURL(blob)
+  },
+
+  getIssueOptions: () => fetchJson<IssueOptions>('/api/issues/options'),
+
+  createIssue: (payload: {
+    category: string
+    zone?: string | null
+    location?: string | null
+    description: string
+    images?: string[] | null
+  }) => fetchJson<Issue>('/api/issues', { method: 'POST', body: JSON.stringify(payload) }),
+
+  listIssues: (params: { page?: number; page_size?: number; category?: string; issue_status?: string } = {}) => {
+    const search = new URLSearchParams()
+    if (params.page) search.append('page', String(params.page))
+    if (params.page_size) search.append('page_size', String(params.page_size))
+    if (params.category) search.append('category', params.category)
+    if (params.issue_status) search.append('issue_status', params.issue_status)
+    return fetchJson<IssueListResponse>(`/api/issues?${search.toString()}`)
+  },
+
+  replyIssue: (issueId: number, reply: string) =>
+    fetchJson<Issue>(`/api/issues/${issueId}/reply`, { method: 'POST', body: JSON.stringify({ reply }) }),
+
+  getIssueImageUrl: async (imagePath: string): Promise<string> => {
+    const filename = imagePath.split('/').pop() ?? imagePath
+    const token = authToken ?? loadAuthToken()
+    const headers: Record<string, string> = {}
+    if (token) headers.Authorization = `Bearer ${token}`
+    const response = await fetch(`${API_BASE}/api/issues/images/${filename}`, { headers })
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     const blob = await response.blob()
     return URL.createObjectURL(blob)

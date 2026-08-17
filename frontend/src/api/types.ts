@@ -186,3 +186,29 @@ export interface InspectionRecordListResponse {
   pagination: PageInfo
 }
 
+export interface Issue {
+  id: number
+  user_id: number
+  category: string
+  zone: string | null
+  location: string | null
+  description: string
+  images: string[] | null
+  status: string
+  reply: string | null
+  replied_at: string | null
+  created_at: string
+}
+
+export interface IssueListResponse {
+  items: Issue[]
+  pagination: PageInfo
+}
+
+export interface IssueOptions {
+  zones: string[]
+  locations: string[]
+  categories: { value: string; label: string }[]
+}
+
+
