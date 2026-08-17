@@ -3,6 +3,8 @@
 Phase 1: Backend foundation — app factory, health routes, config wiring.
 Business routers (user/repair/fee/notice) are added in Phase 3.
 """
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -15,6 +17,7 @@ from app.api.routes import (
     inspection_router,
     issue_router,
     knowledge_router,
+    maintenance_router,
     notices_router,
     repair_router,
     stats_router,
@@ -23,11 +26,19 @@ from app.api.routes import (
 )
 from app.core.config import get_settings
 from app.core.logging import RequestLoggingMiddleware, configure_logging
+from app.core.scheduler import shutdown_scheduler, start_scheduler
 
 settings = get_settings()
 
 # Configure logging once at import time so it applies to all workers.
 configure_logging()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    start_scheduler()
+    yield
+    shutdown_scheduler()
 
 
 def create_app() -> FastAPI:
@@ -36,6 +47,7 @@ def create_app() -> FastAPI:
         title=settings.APP_NAME,
         version="0.1.0",
         description="AI Property Community Agent - Backend API",
+        lifespan=lifespan,
     )
 
     # CORS — origins are controlled via the BACKEND_CORS_ORIGINS env variable.
@@ -80,6 +92,9 @@ def create_app() -> FastAPI:
 
     # Feedback and knowledge-gap router
     app.include_router(feedback_router, prefix=settings.API_PREFIX)
+
+    # Data maintenance router
+    app.include_router(maintenance_router, prefix=settings.API_PREFIX)
 
     @app.get("/", tags=["root"])
     def root() -> dict:

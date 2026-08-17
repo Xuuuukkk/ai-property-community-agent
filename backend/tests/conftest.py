@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 
 os.environ.setdefault("EMBEDDING_MODEL", "deterministic")
 os.environ.setdefault("EMBEDDING_DIMENSION", "384")
+os.environ.setdefault("ENABLE_SCHEDULER", "false")
 
 import pytest
 from alembic import command

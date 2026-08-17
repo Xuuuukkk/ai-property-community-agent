@@ -89,6 +89,18 @@ class Settings(BaseSettings):
     # Multimodal model used to analyze patrol screenshots (Zhipu GLM-4V family).
     VISION_MODEL: str = "glm-4v-plus"
 
+    # ---- Data retention (days) ----
+    # Rows older than these limits are removed by the periodic cleanup job.
+    AGENT_TRACE_RETENTION_DAYS: int = 30
+    MESSAGE_RETENTION_DAYS: int = 90
+    CONVERSATION_RETENTION_DAYS: int = 90
+    INSPECTION_RETENTION_DAYS: int = 180
+    # Cron schedule for the daily cleanup job (hour, minute).
+    CLEANUP_HOUR: int = 3
+    CLEANUP_MINUTE: int = 0
+    # Master switch for the background scheduler (disable in tests).
+    ENABLE_SCHEDULER: bool = True
+
     @property
     def cors_origins(self) -> list[str]:
         """Parse BACKEND_CORS_ORIGINS into a list of trimmed strings."""
