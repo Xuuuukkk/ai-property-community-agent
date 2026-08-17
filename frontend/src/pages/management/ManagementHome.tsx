@@ -1,5 +1,6 @@
 import {
   Bell,
+  Camera,
   CircleUserRound,
   ClipboardList,
   Megaphone,
@@ -116,6 +117,11 @@ export default function ManagementHome() {
             icon={<Receipt />}
             label="费用管理"
             onClick={() => navigate('/management/fees')}
+          />
+          <ServiceItem
+            icon={<Camera />}
+            label="自动巡检"
+            onClick={() => navigate('/management/inspection')}
           />
         </div>
 

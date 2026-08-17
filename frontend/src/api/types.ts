@@ -151,3 +151,34 @@ export interface AgentChatResponse {
   requires_human: boolean
   pending_repair: Record<string, unknown> | null
 }
+
+export interface InspectionCamera {
+  id: number
+  name: string
+  provider_type: string
+  source_config: Record<string, unknown> | null
+  enabled: boolean
+  created_at: string
+}
+
+export interface InspectionCameraListResponse {
+  items: InspectionCamera[]
+}
+
+export interface InspectionRecord {
+  id: number
+  camera_id: number
+  image_path: string | null
+  anomaly_type: string | null
+  confidence: number | null
+  summary: string | null
+  status: string
+  error: string | null
+  created_at: string
+}
+
+export interface InspectionRecordListResponse {
+  items: InspectionRecord[]
+  pagination: PageInfo
+}
+

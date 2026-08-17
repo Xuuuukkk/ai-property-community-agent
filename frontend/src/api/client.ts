@@ -13,6 +13,9 @@ import type {
   Worker,
   AgentChatRequest,
   AgentChatResponse,
+  InspectionCameraListResponse,
+  InspectionRecord,
+  InspectionRecordListResponse,
 } from './types'
 
 const API_BASE = '' // Vite dev proxy forwards /api to backend
@@ -149,6 +152,19 @@ export const api = {
 
   chatAgent: (payload: AgentChatRequest) =>
     fetchJson<AgentChatResponse>('/api/agent/chat', { method: 'POST', body: JSON.stringify(payload) }),
+
+  listInspectionCameras: () => fetchJson<InspectionCameraListResponse>('/api/inspection/cameras'),
+
+  listInspectionRecords: (params: { page?: number; page_size?: number; camera_id?: number } = {}) => {
+    const search = new URLSearchParams()
+    if (params.page) search.append('page', String(params.page))
+    if (params.page_size) search.append('page_size', String(params.page_size))
+    if (params.camera_id) search.append('camera_id', String(params.camera_id))
+    return fetchJson<InspectionRecordListResponse>(`/api/inspection/records?${search.toString()}`)
+  },
+
+  runInspection: (cameraId: number) =>
+    fetchJson<{ record: InspectionRecord }>(`/api/inspection/cameras/${cameraId}/run`, { method: 'POST' }),
 }
 
 // Re-export types for convenience

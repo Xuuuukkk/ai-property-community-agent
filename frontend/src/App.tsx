@@ -16,6 +16,7 @@ import ManagementRepairs from './pages/management/ManagementRepairs'
 import ManagementNotices from './pages/management/ManagementNotices'
 import ManagementFees from './pages/management/ManagementFees'
 import ManagementUsers from './pages/management/ManagementUsers'
+import ManagementInspection from './pages/management/ManagementInspection'
 import ManagementProfile from './pages/management/ManagementProfile'
 import RepairHome from './pages/repair/RepairHome'
 import RepairOrders from './pages/repair/RepairOrders'
@@ -88,6 +89,9 @@ function AppShell({ children }: { children: React.ReactNode }) {
             <button className="nav-item" onClick={() => window.location.href = '/management/notices'}>
               <span>物业·公告</span>
             </button>
+            <button className="nav-item" onClick={() => window.location.href = '/management/inspection'}>
+              <span>物业·巡检</span>
+            </button>
             <button className="nav-item" onClick={() => window.location.href = '/repair'}>
               <span>维修首页</span>
             </button>
@@ -148,6 +152,7 @@ function AppRoutes() {
         <Route path="/management/notices" element={<ManagementNotices />} />
         <Route path="/management/fees" element={<ManagementFees />} />
         <Route path="/management/users" element={<ManagementUsers />} />
+        <Route path="/management/inspection" element={<ManagementInspection />} />
         <Route path="/management/profile" element={<ManagementProfile />} />
       </Route>
 
