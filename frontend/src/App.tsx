@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth, type UserRole } from './contexts/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import WelcomePage from './pages/WelcomePage'
@@ -57,59 +57,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
       <div className="ambient ambient-one" />
       <div className="ambient ambient-two" />
       <div className="prototype-layout">
-        <aside className="prototype-nav">
-          <div className="nav-brand">
-            <span className="brand-mark">✦</span>
-            <span>云溪花园</span>
-          </div>
-          <p className="nav-caption">智慧社区 · UI 原型</p>
-          <div className="nav-list">
-            <button className="nav-item active" onClick={() => window.location.href = '/'}>
-              <span>启动页</span>
-            </button>
-            <button className="nav-item" onClick={() => window.location.href = '/roles'}>
-              <span>身份选择</span>
-            </button>
-            <button className="nav-item" onClick={() => window.location.href = '/login'}>
-              <span>账号登录</span>
-            </button>
-            <button className="nav-item" onClick={() => window.location.href = '/owner'}>
-              <span>业主首页</span>
-            </button>
-            <button className="nav-item" onClick={() => window.location.href = '/owner/fees'}>
-              <span>业主·费用</span>
-            </button>
-            <button className="nav-item" onClick={() => window.location.href = '/owner/repairs'}>
-              <span>业主·工单</span>
-            </button>
-            <button className="nav-item" onClick={() => window.location.href = '/owner/notices'}>
-              <span>业主·公告</span>
-            </button>
-            <button className="nav-item" onClick={() => window.location.href = '/management'}>
-              <span>物业首页</span>
-            </button>
-            <button className="nav-item" onClick={() => window.location.href = '/management/repairs'}>
-              <span>物业·工单</span>
-            </button>
-            <button className="nav-item" onClick={() => window.location.href = '/management/notices'}>
-              <span>物业·公告</span>
-            </button>
-            <button className="nav-item" onClick={() => window.location.href = '/management/inspection'}>
-              <span>物业·巡检</span>
-            </button>
-            <button className="nav-item" onClick={() => window.location.href = '/repair'}>
-              <span>维修首页</span>
-            </button>
-            <button className="nav-item" onClick={() => window.location.href = '/repair/orders'}>
-              <span>维修·工单</span>
-            </button>
-          </div>
-          <div className="nav-footer">
-            <span className="status-dot" />
-            开发中<br />
-            <small>路由已打通</small>
-          </div>
-        </aside>
+        <PrototypeNav />
         <section className="phone-stage">
           <div className="phone-screen">
             <StatusBar />
@@ -123,6 +71,72 @@ function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
     </main>
+  )
+}
+
+const NAV_GROUPS: ({ section: string } | { label: string; path: string })[] = [
+  { section: '公开' },
+  { label: '启动页', path: '/' },
+  { label: '身份选择', path: '/roles' },
+  { label: '账号登录', path: '/login' },
+  { section: '业主' },
+  { label: '业主首页', path: '/owner' },
+  { label: '服务', path: '/owner/services' },
+  { label: '房屋报修', path: '/owner/repair-form' },
+  { label: '报修记录', path: '/owner/repairs' },
+  { label: '费用查询', path: '/owner/fees' },
+  { label: '社区公告', path: '/owner/notices' },
+  { label: '问题上报', path: '/owner/issue' },
+  { label: 'AI 助手', path: '/owner/ai' },
+  { label: '我的', path: '/owner/profile' },
+  { section: '物业' },
+  { label: '物业首页', path: '/management' },
+  { label: '工单管理', path: '/management/repairs' },
+  { label: '公告管理', path: '/management/notices' },
+  { label: '费用管理', path: '/management/fees' },
+  { label: '用户管理', path: '/management/users' },
+  { label: '自动巡检', path: '/management/inspection' },
+  { label: '业主上报', path: '/management/issue' },
+  { label: '数据统计', path: '/management/stats' },
+  { label: '知识缺口', path: '/management/knowledge-gaps' },
+  { label: '我的', path: '/management/profile' },
+  { section: '维修' },
+  { label: '维修首页', path: '/repair' },
+  { label: '工单', path: '/repair/orders' },
+  { label: '消息', path: '/repair/messages' },
+  { label: '我的', path: '/repair/profile' },
+]
+
+function PrototypeNav() {
+  return (
+    <aside className="prototype-nav">
+      <div className="nav-brand">
+        <span className="brand-mark">✦</span>
+        <span>云溪花园</span>
+      </div>
+      <p className="nav-caption">智慧社区 · UI 原型</p>
+      <div className="nav-list">
+        {NAV_GROUPS.map((item, idx) =>
+          'section' in item ? (
+            <div key={idx} className="nav-section">{item.section}</div>
+          ) : (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end
+              className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+            >
+              <span>{item.label}</span>
+            </NavLink>
+          ),
+        )}
+      </div>
+      <div className="nav-footer">
+        <span className="status-dot" />
+        开发中<br />
+        <small>路由已打通</small>
+      </div>
+    </aside>
   )
 }
 

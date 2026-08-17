@@ -40,6 +40,25 @@ export default function LoginPage() {
     }
   }
 
+  const fillAndLogin = async (u: string, p: string) => {
+    setUsername(u)
+    setPassword(p)
+    setError('')
+    setLoading(true)
+    try {
+      await login(u, p)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '登录失败')
+      setLoading(false)
+    }
+  }
+
+  const demoAccounts = [
+    { role: '业主', username: 'guoyi378', password: '123456' },
+    { role: '物业', username: 'mayun420', password: '123456' },
+    { role: '维修', username: 'yangfei423', password: '123456' },
+  ]
+
   return (
     <div className="page art-page login-page">
       <AppHeader onBack={() => navigate('/roles')} />
@@ -80,6 +99,33 @@ export default function LoginPage() {
           还没有账号？<button type="button">联系物业管理处</button>
         </p>
       </form>
+      <div style={{ margin: '20px 0 8px' }}>
+        <div style={{ fontSize: 12, color: '#7e8587', marginBottom: 10 }}>演示账号 · 点击一键登录</div>
+        <div style={{ display: 'grid', gap: 8 }}>
+          {demoAccounts.map((acc) => (
+            <button
+              key={acc.role}
+              type="button"
+              disabled={loading}
+              onClick={() => fillAndLogin(acc.username, acc.password)}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '10px 14px',
+                border: '1px solid #dedfdd',
+                borderRadius: 10,
+                background: '#f5f7fa',
+                fontSize: 12,
+                color: '#20324b',
+              }}
+            >
+              <span style={{ fontWeight: 600, color: '#22395e' }}>{acc.role}</span>
+              <span style={{ color: '#7e8587' }}>{acc.username} / {acc.password}</span>
+            </button>
+          ))}
+        </div>
+      </div>
       <WaveLine />
     </div>
   )
