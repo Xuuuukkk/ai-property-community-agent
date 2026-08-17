@@ -30,8 +30,6 @@ export default function OwnerAiChat() {
   const [pendingRepair, setPendingRepair] = useState<PendingRepair | null>(null)
   const [pendingImages, setPendingImages] = useState<string[]>([])
   const [feedback, setFeedback] = useState<Record<string, 'up' | 'down'>>({})
-  const [correctingId, setCorrectingId] = useState<string | null>(null)
-  const [correction, setCorrection] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -133,25 +131,13 @@ export default function OwnerAiChat() {
     { label: '公告咨询', text: '我想了解社区公告，或咨询小区停车/装修/垃圾分类等问题' },
   ]
 
-  const rate = async (msgId: string, rating: 'up' | 'down', question: string, answer: string, correctionText?: string) => {
+  const rate = async (msgId: string, rating: 'up' | 'down', question: string, answer: string) => {
     setFeedback((prev) => ({ ...prev, [msgId]: rating }))
-    setCorrectingId(null)
-    setCorrection('')
     try {
-      await api.submitFeedback({
-        question,
-        answer,
-        rating,
-        correction: correctionText || null,
-      })
+      await api.submitFeedback({ question, answer, rating, correction: null })
     } catch {
       // 反馈失败不打断用户
     }
-  }
-
-  const startCorrecting = (msgId: string) => {
-    setCorrectingId(msgId)
-    setCorrection('')
   }
 
   return (
@@ -215,7 +201,7 @@ export default function OwnerAiChat() {
                     <ThumbsUp size={13} />
                   </button>
                   <button
-                    onClick={() => (correctingId === m.id ? setCorrectingId(null) : startCorrecting(m.id))}
+                    onClick={() => rate(m.id, 'down', question, m.content)}
                     disabled={isRated}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 3, padding: '3px 8px',
@@ -225,22 +211,6 @@ export default function OwnerAiChat() {
                   >
                     <ThumbsDown size={13} />
                   </button>
-                  {correctingId === m.id && (
-                    <div style={{ display: 'flex', gap: 6, flex: 1 }}>
-                      <input
-                        value={correction}
-                        onChange={(e) => setCorrection(e.target.value)}
-                        placeholder="正确的答案应该是？"
-                        style={{ flex: 1, border: '1px solid #dedfdd', borderRadius: 8, padding: '4px 8px', fontSize: 12 }}
-                      />
-                      <button
-                        onClick={() => rate(m.id, 'down', question, m.content, correction.trim() || undefined)}
-                        style={{ padding: '4px 10px', borderRadius: 8, background: '#22395e', color: '#fff', fontSize: 12, border: 'none' }}
-                      >
-                        提交
-                      </button>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
