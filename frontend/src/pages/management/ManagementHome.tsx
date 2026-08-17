@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   Bell,
   Camera,
   CircleUserRound,
@@ -128,6 +129,11 @@ export default function ManagementHome() {
             icon={<MessageSquareText />}
             label="业主上报"
             onClick={() => navigate('/management/issue')}
+          />
+          <ServiceItem
+            icon={<BarChart3 />}
+            label="数据统计"
+            onClick={() => navigate('/management/stats')}
           />
         </div>
 

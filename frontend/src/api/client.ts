@@ -19,6 +19,7 @@ import type {
   Issue,
   IssueListResponse,
   IssueOptions,
+  DashboardStats,
 } from './types'
 
 const API_BASE = '' // Vite dev proxy forwards /api to backend
@@ -214,6 +215,8 @@ export const api = {
     const blob = await response.blob()
     return URL.createObjectURL(blob)
   },
+
+  getDashboardStats: () => fetchJson<DashboardStats>('/api/stats/dashboard'),
 }
 
 // Re-export types for convenience

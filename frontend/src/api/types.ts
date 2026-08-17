@@ -215,4 +215,43 @@ export interface IssueOptions {
   categories: { value: string; label: string }[]
 }
 
+export interface DashboardStats {
+  repair: {
+    total: number
+    pending: number
+    completed: number
+    completion_rate: number
+    by_status: Record<string, number>
+    by_type: Record<string, number>
+  }
+  fee: {
+    total_count: number
+    total_amount: number
+    paid_amount: number
+    paid_count: number
+    unpaid_count: number
+    overdue_count: number
+    collection_rate: number
+  }
+  inspection: {
+    total: number
+    anomaly_count: number
+    anomaly_rate: number
+    by_anomaly: Record<string, number>
+  }
+  issue: {
+    total: number
+    submitted: number
+    processing: number
+    resolved: number
+    by_category: Record<string, number>
+  }
+  community: {
+    users: number
+    houses: number
+    buildings: number
+  }
+}
+
+
 

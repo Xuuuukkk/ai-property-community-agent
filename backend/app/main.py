@@ -16,6 +16,7 @@ from app.api.routes import (
     knowledge_router,
     notices_router,
     repair_router,
+    stats_router,
     users_router,
     workers_router,
 )
@@ -72,6 +73,9 @@ def create_app() -> FastAPI:
 
     # Owner-submitted issue reports router
     app.include_router(issue_router, prefix=settings.API_PREFIX)
+
+    # Dashboard statistics router
+    app.include_router(stats_router, prefix=settings.API_PREFIX)
 
     @app.get("/", tags=["root"])
     def root() -> dict:
