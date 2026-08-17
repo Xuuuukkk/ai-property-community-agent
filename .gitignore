@@ -230,3 +230,6 @@ frontend/.npm-cache/
 ssl/*.pem
 ssl/*.key
 backups/
+
+# Automated patrol inspection runtime artifacts
+inspection-images/

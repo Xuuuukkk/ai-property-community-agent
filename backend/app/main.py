@@ -11,6 +11,7 @@ from app.api.routes import (
     auth_router,
     fee_router,
     health_router,
+    inspection_router,
     knowledge_router,
     notices_router,
     repair_router,
@@ -64,6 +65,9 @@ def create_app() -> FastAPI:
 
     # Phase 6 RAG knowledge router
     app.include_router(knowledge_router, prefix=settings.API_PREFIX)
+
+    # Automated patrol inspection router
+    app.include_router(inspection_router, prefix=settings.API_PREFIX)
 
     @app.get("/", tags=["root"])
     def root() -> dict:

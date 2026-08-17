@@ -7,6 +7,7 @@ from app.models.conversation import AgentTrace, Conversation, Message
 from app.models.fee_bill import FeeBill
 from app.models.house import House
 from app.models.house_binding import HouseBinding
+from app.models.inspection import InspectionCamera, InspectionRecord
 from app.models.knowledge import KnowledgeChunk, KnowledgeDocument
 from app.models.notice import Notice
 from app.models.repair_order import RepairOrder
@@ -26,6 +27,8 @@ __all__ = [
     "RepairRecord",
     "FeeBill",
     "Notice",
+    "InspectionCamera",
+    "InspectionRecord",
     "KnowledgeDocument",
     "KnowledgeChunk",
     "Conversation",

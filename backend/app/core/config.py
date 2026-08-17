@@ -85,6 +85,10 @@ class Settings(BaseSettings):
     EMBEDDING_DIMENSION: int = 1024
     HF_TOKEN: str = ""  # Optional HuggingFace token for gated models.
 
+    # ---- Vision (automated patrol inspection) ----
+    # Multimodal model used to analyze patrol screenshots (Zhipu GLM-4V family).
+    VISION_MODEL: str = "glm-4v-plus"
+
     @property
     def cors_origins(self) -> list[str]:
         """Parse BACKEND_CORS_ORIGINS into a list of trimmed strings."""
