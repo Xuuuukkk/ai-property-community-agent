@@ -124,10 +124,10 @@ export default function OwnerAiChat() {
   }
 
   const quickActions = [
-    { label: '报修', text: '我要报修，家里设施有问题需要维修' },
+    { label: '房屋报修', text: '我要报修，家里设施有问题需要维修' },
     { label: '费用查询', text: '我想查询我的物业费账单' },
-    { label: '问题上报', text: '我要上报小区里的问题' },
-    { label: '社区公告', text: '最近有什么社区公告' },
+    { label: '问题上报', text: '我要上报小区里的问题（电梯/垃圾/违停等）' },
+    { label: '公告咨询', text: '我想了解社区公告，或咨询小区停车/装修/垃圾分类等问题' },
   ]
 
   return (

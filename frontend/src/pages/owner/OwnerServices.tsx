@@ -1,15 +1,14 @@
-import { FileText, Megaphone, Receipt, Wrench, Camera, ClipboardEdit } from 'lucide-react'
+import { Megaphone, Receipt, Wrench, Camera, ClipboardEdit } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import AppHeader from '../../components/AppHeader'
 import BottomNav from '../../components/BottomNav'
 
 const services = [
-  { icon: <ClipboardEdit size={24} />, label: '在线报修', path: '/owner/repair-form' },
-  { icon: <Wrench size={24} />, label: '报修服务', path: '/owner/repairs' },
+  { icon: <ClipboardEdit size={24} />, label: '房屋报修', path: '/owner/repair-form' },
+  { icon: <Wrench size={24} />, label: '报修记录', path: '/owner/repairs' },
   { icon: <Receipt size={24} />, label: '费用查询', path: '/owner/fees' },
   { icon: <Megaphone size={24} />, label: '社区公告', path: '/owner/notices' },
   { icon: <Camera size={24} />, label: '问题上报', path: '/owner/issue' },
-  { icon: <FileText size={24} />, label: '我的工单', path: '/owner/repairs' },
 ]
 
 export default function OwnerServices() {
