@@ -10,7 +10,9 @@ from sqlalchemy.orm import Session
 
 from app.core.vision import get_vision_provider
 from app.models.inspection import InspectionCamera, InspectionRecord
+from app.models.user import User
 from app.services.camera_providers import get_camera_provider
+from app.services.notification import notify_many
 
 
 class InspectionService:
@@ -91,6 +93,29 @@ class InspectionService:
             record.error = str(exc)[:500]
 
         db.add(record)
+        db.flush()  # obtain record.id before alerting
+
+        # Alert property staff in real time when an anomaly is detected.
+        if record.status == "success" and record.anomaly_type:
+            staff_ids = [
+                uid
+                for (uid,) in db.query(User.id)
+                .filter(User.role.in_(("ADMIN", "PROPERTY_STAFF")))
+                .all()
+            ]
+            notify_many(
+                db,
+                user_ids=staff_ids,
+                type="inspection_anomaly",
+                title="巡检发现异常",
+                content=(
+                    f"{camera.name}：检测到{record.anomaly_type}"
+                    f"（置信度 {record.confidence or '-'}）"
+                ),
+                related_type="inspection",
+                related_id=record.id,
+            )
+
         db.commit()
         db.refresh(record)
         return record
