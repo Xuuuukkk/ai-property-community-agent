@@ -1,0 +1,8 @@
+# Normalize line endings so shell scripts and Dockerfiles keep LF line
+# endings even when checked out on Windows (CRLF would break `#!/bin/sh`).
+*.sh        text eol=lf
+Dockerfile  text eol=lf
+*.py        text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.conf      text eol=lf
