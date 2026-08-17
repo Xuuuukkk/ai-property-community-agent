@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage'
 import OwnerHome from './pages/owner/OwnerHome'
 import OwnerFees from './pages/owner/OwnerFees'
 import OwnerRepairs from './pages/owner/OwnerRepairs'
+import OwnerRepairForm from './pages/owner/OwnerRepairForm'
 import OwnerNotices from './pages/owner/OwnerNotices'
 import OwnerServices from './pages/owner/OwnerServices'
 import OwnerAiChat from './pages/owner/OwnerAiChat'
@@ -136,6 +137,7 @@ function AppRoutes() {
         <Route path="/owner/services" element={<OwnerServices />} />
         <Route path="/owner/fees" element={<OwnerFees />} />
         <Route path="/owner/repairs" element={<OwnerRepairs />} />
+        <Route path="/owner/repair-form" element={<OwnerRepairForm />} />
         <Route path="/owner/notices" element={<OwnerNotices />} />
         <Route path="/owner/ai" element={<OwnerAiChat />} />
         <Route path="/owner/issue" element={<OwnerIssue />} />

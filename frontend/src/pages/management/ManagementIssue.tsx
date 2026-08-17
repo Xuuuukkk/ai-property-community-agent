@@ -144,7 +144,11 @@ export default function ManagementIssue() {
                     <span style={{ color: '#22395e', fontWeight: 500 }}>
                       {CATEGORY_LABELS[i.category] ?? i.category}
                     </span>
-                    {i.zone && <span style={{ color: '#8b9194' }}>{i.zone}{i.location ? ` · ${i.location}` : ''}</span>}
+                    {i.zone && (
+                      <span style={{ color: '#8b9194' }}>
+                        {i.zone}{i.location ? ` · ${i.location}` : ''}{i.location_detail ? ` · ${i.location_detail}` : ''}
+                      </span>
+                    )}
                     <span style={{ flex: 1 }} />
                     <span style={{ color: st.color, background: st.bg, padding: '2px 6px', borderRadius: 4, fontWeight: 500 }}>
                       {STATUS_LABELS[i.status] ?? i.status}

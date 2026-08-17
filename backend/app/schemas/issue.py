@@ -13,6 +13,7 @@ class IssueCreate(BaseModel):
     category: str = Field(..., description="类型：public_facility / complaint / report")
     zone: str | None = Field(None, description="区域：东区/西区/南区/北区")
     location: str | None = Field(None, description="点位，如 电梯/垃圾投放点/消防通道")
+    location_detail: str | None = Field(None, description="具体位置（选填），如 3单元5楼电梯口")
     description: str = Field(..., min_length=1, description="问题描述")
     images: list[str] | None = Field(None, description="照片路径列表")
 
@@ -33,6 +34,7 @@ class IssueResponse(BaseModel):
     category: str
     zone: str | None
     location: str | None
+    location_detail: str | None
     description: str
     images: list | None
     status: str

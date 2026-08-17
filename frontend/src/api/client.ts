@@ -128,6 +128,7 @@ export const api = {
     type: string
     description?: string
     urgency: string
+    image_urls?: string[] | null
   }) => fetchJson<RepairOrder>('/api/repair', { method: 'POST', body: JSON.stringify(payload) }),
 
   listFeesByUser: (userId: number, params: { page?: number; page_size?: number } = {}) => {
@@ -185,6 +186,7 @@ export const api = {
     category: string
     zone?: string | null
     location?: string | null
+    location_detail?: string | null
     description: string
     images?: string[] | null
   }) => fetchJson<Issue>('/api/issues', { method: 'POST', body: JSON.stringify(payload) }),

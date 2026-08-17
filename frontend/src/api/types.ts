@@ -192,6 +192,7 @@ export interface Issue {
   category: string
   zone: string | null
   location: string | null
+  location_detail: string | null
   description: string
   images: string[] | null
   status: string

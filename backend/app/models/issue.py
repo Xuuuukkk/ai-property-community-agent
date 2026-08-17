@@ -70,6 +70,8 @@ class IssueReport(Base):
     zone: Mapped[str | None] = mapped_column(String(32), nullable=True)
     # Concrete location within the zone, one of LOCATIONS.
     location: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # Optional free-text detail, e.g. "3单元5楼电梯口", for precise positioning.
+    location_detail: Mapped[str | None] = mapped_column(String(255), nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     # Image paths (reuse the inspection-images storage).
     images: Mapped[list | None] = mapped_column(JSONB, nullable=True)

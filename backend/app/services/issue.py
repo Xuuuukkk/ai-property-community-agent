@@ -23,6 +23,7 @@ class IssueService:
             category=payload.category,
             zone=payload.zone,
             location=payload.location,
+            location_detail=payload.location_detail,
             description=payload.description,
             images=self._save_images(payload.images),
             status=IssueStatus.SUBMITTED.value,

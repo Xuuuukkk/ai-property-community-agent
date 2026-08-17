@@ -58,7 +58,6 @@ export default function OwnerAiChat() {
   const send = async () => {
     const text = input.trim()
     if ((!text && pendingImages.length === 0) || loading) return
-
     const imageTags = pendingImages.length ? `\n${pendingImages.join('\n')}` : ''
     const fullMessage = text + imageTags
 
@@ -95,6 +94,41 @@ export default function OwnerAiChat() {
       setLoading(false)
     }
   }
+
+  const sendText = async (text: string) => {
+    if (!text || loading) return
+    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: text }
+    setMessages((prev) => [...prev, userMsg])
+    setLoading(true)
+    try {
+      const res = await api.chatAgent({
+        message: text,
+        user_id: user?.id ?? null,
+        conversation_id: conversationId,
+        pending_repair: pendingRepair as Record<string, unknown> | null,
+      })
+      setConversationId(res.conversation_id)
+      setPendingRepair(res.pending_repair as PendingRepair | null)
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now().toString() + 'r', role: 'assistant', content: res.response },
+      ])
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        { id: Date.now().toString() + 'r', role: 'assistant', content: '抱歉，服务暂时不可用，请稍后再试。' },
+      ])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const quickActions = [
+    { label: '报修', text: '我要报修，家里设施有问题需要维修' },
+    { label: '费用查询', text: '我想查询我的物业费账单' },
+    { label: '问题上报', text: '我要上报小区里的问题' },
+    { label: '社区公告', text: '最近有什么社区公告' },
+  ]
 
   return (
     <div className="page dashboard-page" style={{ display: 'flex', flexDirection: 'column' }}>
@@ -141,6 +175,28 @@ export default function OwnerAiChat() {
             )}
           </div>
         ))}
+        {messages.length === 1 && (
+          <div style={{ alignSelf: 'flex-start', display: 'flex', gap: 8, flexWrap: 'wrap', maxWidth: '90%' }}>
+            {quickActions.map((qa) => (
+              <button
+                key={qa.label}
+                onClick={() => sendText(qa.text)}
+                disabled={loading}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: 18,
+                  border: '1px solid #c9d3e0',
+                  background: '#f5f7fa',
+                  color: '#22395e',
+                  fontSize: 12,
+                  cursor: 'pointer',
+                }}
+              >
+                {qa.label}
+              </button>
+            ))}
+          </div>
+        )}
         {loading && (
           <div style={{ alignSelf: 'flex-start', fontSize: 12, color: '#7e8587' }}>助手思考中...</div>
         )}

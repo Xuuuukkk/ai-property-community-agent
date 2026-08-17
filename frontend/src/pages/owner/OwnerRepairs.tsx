@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import AppHeader from '../../components/AppHeader'
 import BottomNav from '../../components/BottomNav'
 import { useAuth } from '../../contexts/AuthContext'
@@ -25,6 +26,7 @@ const typeMap: Record<string, string> = {
 
 export default function OwnerRepairs() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [repairs, setRepairs] = useState<RepairOrder[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -61,6 +63,22 @@ export default function OwnerRepairs() {
     <div className="page dashboard-page">
       <AppHeader title="我的工单" onBack={() => window.history.back()} />
       <div className="dashboard-scroll">
+        <div style={{ padding: '0 16px 12px' }}>
+          <button
+            onClick={() => navigate('/owner/repair-form')}
+            style={{
+              width: '100%',
+              padding: '12px',
+              borderRadius: 9,
+              background: '#22395e',
+              color: '#fff',
+              fontSize: 14,
+              border: 'none',
+            }}
+          >
+            + 发起报修
+          </button>
+        </div>
         {error && (
           <div
             style={{

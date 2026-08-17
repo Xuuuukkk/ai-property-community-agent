@@ -31,7 +31,7 @@ export default function OwnerIssue() {
   const [issues, setIssues] = useState<Issue[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const [form, setForm] = useState({ category: 'report', zone: '', location: '', description: '' })
+  const [form, setForm] = useState({ category: 'report', zone: '', location: '', location_detail: '', description: '' })
   const [images, setImages] = useState<string[]>([])
   const [expandedId, setExpandedId] = useState<number | null>(null)
 
@@ -69,10 +69,11 @@ export default function OwnerIssue() {
         category: form.category,
         zone: form.zone || null,
         location: form.location || null,
+        location_detail: form.location_detail || null,
         description: form.description,
         images: images.length ? images : null,
       })
-      setForm({ category: 'report', zone: '', location: '', description: '' })
+      setForm({ category: 'report', zone: '', location: '', location_detail: '', description: '' })
       setImages([])
       load()
     } finally {
@@ -140,6 +141,12 @@ export default function OwnerIssue() {
               <option key={l} value={l}>{l}</option>
             ))}
           </select>
+          <input
+            value={form.location_detail}
+            onChange={(e) => setForm({ ...form, location_detail: e.target.value })}
+            placeholder="具体位置（选填），如 3单元5楼电梯口"
+            style={selectStyle}
+          />
           <textarea
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -240,7 +247,11 @@ export default function OwnerIssue() {
                     <span style={{ color: '#22395e', fontWeight: 500 }}>
                       {CATEGORY_LABELS[i.category] ?? i.category}
                     </span>
-                    {i.zone && <span style={{ color: '#8b9194' }}>{i.zone}{i.location ? ` · ${i.location}` : ''}</span>}
+                    {i.zone && (
+                      <span style={{ color: '#8b9194' }}>
+                        {i.zone}{i.location ? ` · ${i.location}` : ''}{i.location_detail ? ` · ${i.location_detail}` : ''}
+                      </span>
+                    )}
                     <span style={{ flex: 1 }} />
                     <span style={{ color: st.color, background: st.bg, padding: '2px 6px', borderRadius: 4, fontWeight: 500 }}>
                       {STATUS_LABELS[i.status] ?? i.status}
