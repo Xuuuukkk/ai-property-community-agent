@@ -165,6 +165,16 @@ export const api = {
 
   runInspection: (cameraId: number) =>
     fetchJson<{ record: InspectionRecord }>(`/api/inspection/cameras/${cameraId}/run`, { method: 'POST' }),
+
+  getInspectionImageUrl: async (recordId: number): Promise<string> => {
+    const token = authToken ?? loadAuthToken()
+    const headers: Record<string, string> = {}
+    if (token) headers.Authorization = `Bearer ${token}`
+    const response = await fetch(`${API_BASE}/api/inspection/records/${recordId}/image`, { headers })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    const blob = await response.blob()
+    return URL.createObjectURL(blob)
+  },
 }
 
 // Re-export types for convenience

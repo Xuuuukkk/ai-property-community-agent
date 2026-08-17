@@ -1,10 +1,15 @@
 """Automated patrol inspection API endpoints."""
 
+from pathlib import Path
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.paths import REPO_ROOT
 from app.core.security import get_current_user
+from app.models.inspection import InspectionRecord
 from app.models.user import User
 from app.schemas.common import PageInfo
 from app.schemas.inspection import (
@@ -78,3 +83,27 @@ def run_inspection(
     camera = inspection_service.get_camera(db, camera_id)
     record = inspection_service.run_inspection(db, camera)
     return RunInspectionResponse(record=InspectionRecordResponse.model_validate(record))
+
+
+@router.get("/records/{record_id}/image")
+def get_record_image(
+    record_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> FileResponse:
+    """Return the captured screenshot for an inspection record (staff/admin)."""
+    if current_user.role not in _STAFF_ROLES:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Insufficient permissions")
+    record = db.get(InspectionRecord, record_id)
+    if not record or not record.image_path:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image not found")
+
+    # image_path is stored relative to the repository root.
+    path = Path(record.image_path)
+    if not path.is_absolute():
+        path = REPO_ROOT / path
+    if not path.is_file():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image file missing")
+
+    return FileResponse(path, media_type="image/jpeg")
+

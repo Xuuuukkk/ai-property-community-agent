@@ -16,6 +16,49 @@ const ANOMALY_STYLES: Record<string, { color: string; bg: string }> = {
   楼道堆物: { color: '#a16207', bg: '#fef3c7' },
 }
 
+function InspectionImage({ recordId }: { recordId: number }) {
+  const [url, setUrl] = useState<string | null>(null)
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    let objectUrl: string | null = null
+    api
+      .getInspectionImageUrl(recordId)
+      .then((u) => {
+        objectUrl = u
+        setUrl(u)
+      })
+      .catch(() => setFailed(true))
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+    }
+  }, [recordId])
+
+  if (failed) {
+    return (
+      <div
+        style={{
+          width: 56,
+          height: 42,
+          borderRadius: 6,
+          background: '#f0f1ef',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#a3a5a4',
+          fontSize: 10,
+        }}
+      >
+        无图
+      </div>
+    )
+  }
+  if (!url) {
+    return <div style={{ width: 56, height: 42, borderRadius: 6, background: '#f0f1ef' }} />
+  }
+  return <img src={url} alt="巡检截图" style={{ width: 56, height: 42, borderRadius: 6, objectFit: 'cover' }} />
+}
+
 export default function ManagementInspection() {
   const navigate = useNavigate()
   const [cameras, setCameras] = useState<InspectionCamera[]>([])
@@ -131,35 +174,36 @@ export default function ManagementInspection() {
                   key={r.id}
                   style={{
                     display: 'flex',
-                    flexDirection: 'column',
-                    minHeight: 42,
+                    gap: 10,
                     borderBottom: '1px solid #f0f1ef',
-                    gap: 5,
                     fontSize: 11,
                     padding: '10px 0',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span
-                      style={{
-                        color: style ? style.color : '#2f9e63',
-                        background: style ? style.bg : '#e7f6ee',
-                        padding: '2px 6px',
-                        borderRadius: 4,
-                        fontWeight: 500,
-                      }}
-                    >
-                      {r.status === 'error' ? '失败' : r.anomaly_type ? r.anomaly_type : '正常'}
-                    </span>
-                    {r.confidence != null && r.status === 'success' && (
-                      <span style={{ color: '#8b9194' }}>置信度 {Math.round(r.confidence * 100)}%</span>
-                    )}
-                    <span style={{ flex: 1 }} />
-                    <time style={{ color: '#8b9194', whiteSpace: 'nowrap' }}>{formatTime(r.created_at)}</time>
-                  </div>
-                  <div style={{ color: '#4a5568', lineHeight: 1.6 }}>
-                    <span style={{ color: '#22395e', fontWeight: 500 }}>{cam?.name ?? `监控点 ${r.camera_id}`}</span>
-                    {r.status === 'error' ? ` · ${r.error || '巡检失败'}` : ` · ${r.summary || ''}`}
+                  {r.image_path && r.status === 'success' && <InspectionImage recordId={r.id} />}
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 5, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span
+                        style={{
+                          color: style ? style.color : '#2f9e63',
+                          background: style ? style.bg : '#e7f6ee',
+                          padding: '2px 6px',
+                          borderRadius: 4,
+                          fontWeight: 500,
+                        }}
+                      >
+                        {r.status === 'error' ? '失败' : r.anomaly_type ? r.anomaly_type : '正常'}
+                      </span>
+                      {r.confidence != null && r.status === 'success' && (
+                        <span style={{ color: '#8b9194' }}>置信度 {Math.round(r.confidence * 100)}%</span>
+                      )}
+                      <span style={{ flex: 1 }} />
+                      <time style={{ color: '#8b9194', whiteSpace: 'nowrap' }}>{formatTime(r.created_at)}</time>
+                    </div>
+                    <div style={{ color: '#4a5568', lineHeight: 1.6 }}>
+                      <span style={{ color: '#22395e', fontWeight: 500 }}>{cam?.name ?? `监控点 ${r.camera_id}`}</span>
+                      {r.status === 'error' ? ` · ${r.error || '巡检失败'}` : ` · ${r.summary || ''}`}
+                    </div>
                   </div>
                 </div>
               )
