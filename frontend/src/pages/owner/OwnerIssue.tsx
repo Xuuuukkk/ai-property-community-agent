@@ -264,11 +264,17 @@ export default function OwnerIssue() {
                     </div>
                   )}
                   <time style={{ color: '#a3a5a4', fontSize: 11 }}>{formatTime(i.created_at)}</time>
-                  {expandedId === i.id && i.reply && (
-                    <div style={{ background: '#f5f7fa', borderRadius: 8, padding: '10px 12px', fontSize: 12 }}>
-                      <div style={{ color: '#22395e', fontWeight: 500, marginBottom: 4 }}>物业答复</div>
-                      <div style={{ color: '#4a5568', lineHeight: 1.6 }}>{i.reply}</div>
-                    </div>
+                  {expandedId === i.id && (
+                    i.reply ? (
+                      <div style={{ background: '#f5f7fa', borderRadius: 8, padding: '10px 12px', fontSize: 12 }}>
+                        <div style={{ color: '#22395e', fontWeight: 500, marginBottom: 4 }}>物业答复</div>
+                        <div style={{ color: '#4a5568', lineHeight: 1.6 }}>{i.reply}</div>
+                      </div>
+                    ) : (
+                      <div style={{ background: '#f5f7fa', borderRadius: 8, padding: '10px 12px', fontSize: 12, color: '#8b9194' }}>
+                        等待物业答复中…
+                      </div>
+                    )
                   )}
                 </div>
               )
