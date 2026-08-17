@@ -30,7 +30,7 @@ def classify_intent_rule(text: str) -> str:
     # Notice: split into query (read) and publish (write) intents.
     # Publish verbs must be checked first because a phrase like "发布停水通知"
     # contains both "发布" and "通知".
-    if any(k in lowered for k in ("发布", "发公告", "发通知", "公布", "贴出", "张贴", "publish", "post")):
+    if any(k in lowered for k in ("发布", "发公告", "发通知", "公布", "贴出", "张贴", "生成公告", "草稿", "起草", "拟公告", "publish", "post")):
         return "notice_publish"
 
     # Query: community announcements / outage notifications (checked before
@@ -45,11 +45,11 @@ def classify_intent_rule(text: str) -> str:
         return "fee"
 
     # Knowledge: regulations, hours, FAQ.
-    if any(k in lowered for k in ("装修", "几点", "规定", "制度", "faq", "知识", "knowledge")):
+    if any(k in lowered for k in ("装修", "几点", "规定", "制度", "规则", "停车", "访客", "咨询", "faq", "知识", "knowledge")):
         return "knowledge"
 
     # Repair: breakdown reports (avoid matching the single character "修" alone).
-    if any(k in lowered for k in ("报修", "维修", "漏水", "跳闸", "坏了", "repair", "leak", "broken")):
+    if any(k in lowered for k in ("报修", "维修", "漏水", "跳闸", "坏了", "故障", "电梯", "repair", "leak", "broken")):
         return "repair"
 
     return "unknown"
