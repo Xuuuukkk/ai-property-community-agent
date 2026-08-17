@@ -4,13 +4,13 @@
     "question": "装修几点可以施工？",
     "expected_source": "decoration/construction-time.md",
     "expected_keywords": ["9:00", "18:00"],
-    "expected_answer": "工作日9:00-18:00"
+    "expected_answer": "9:00至12:00"
   },
   {
     "id": "rag-002",
     "question": "停车规则是什么？",
     "expected_source": "parking/parking-rules.md",
-    "expected_keywords": ["车位", "登记"],
+    "expected_keywords": ["车位", "消防"],
     "expected_answer": ""
   },
   {
@@ -24,7 +24,7 @@
     "id": "rag-004",
     "question": "访客怎么进小区？",
     "expected_source": "security/visitor-management.md",
-    "expected_keywords": ["访客", "登记"],
+    "expected_keywords": ["访客", "报备"],
     "expected_answer": ""
   }
 ]

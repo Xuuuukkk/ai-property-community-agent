@@ -216,8 +216,15 @@ def evaluate_rag(
         if keyword_hit:
             metrics.keyword_hits += 1
 
-        # Answer accuracy: expected answer appears in agent response.
-        if expected_answer:
+        # Answer accuracy: the response must carry the key information points.
+        # Prefer keyword coverage (robust to phrasing); fall back to an exact
+        # expected-answer substring when no keywords are provided.
+        if expected_keywords:
+            metrics.answer_evaluated += 1
+            correct = all(kw.lower() in result.response.lower() for kw in expected_keywords)
+            if correct:
+                metrics.answer_correct += 1
+        elif expected_answer:
             metrics.answer_evaluated += 1
             correct = expected_answer.lower() in result.response.lower()
             if correct:

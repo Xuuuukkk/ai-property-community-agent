@@ -22,7 +22,7 @@
 </head>
 <body>
   <h1>AI Agent Evaluation Report</h1>
-  <p>Generated at 2026-08-17 11:42:13 UTC</p>
+  <p>Generated at 2026-08-17 14:34:11 UTC</p>
   <div class="summary">
     <div class="card">
       <h3>Intent Accuracy</h3>
@@ -95,17 +95,17 @@
 
   <details>
     <summary>Workflow Details</summary>
-    <table><thead><tr><th>ID</th><th>Text</th><th>Expected Tool</th><th>Actual Tool</th><th>Success</th><th>Response</th></tr></thead><tbody><tr><td><pre>workflow-001</pre></td><td><pre>房屋：1 厨房水管漏水</pre></td><td><pre>create_repair_order</pre></td><td><pre></pre></td><td><pre>❌</pre></td><td><pre>好的，我来帮您报修。请问是什么东西坏了？可以简单描述一下位置和问题。</pre></td></tr><tr><td><pre>workflow-002</pre></td><td><pre>查一下我的物业费</pre></td><td><pre>query_payment_status</pre></td><td><pre>query_payment_status</pre></td><td><pre>✅</pre></td><td><pre>您的物业费共4笔账单，已缴2笔，未缴2笔，合计¥716.80。目前没有逾期账单。</pre></td></tr><tr><td><pre>workflow-003</pre></td><td><pre>生成公告草稿：本周六社区消防演练</pre></td><td><pre>generate_notice</pre></td><td><pre>generate_notice</pre></td><td><pre>✅</pre></td><td><pre>公告草稿已生成，标题为“社区通知”，内容为“生成公告草稿：本周六社区消防演练”，目前状态为草稿，等待人工审核后发布。</pre></td></tr><tr><td><pre>workflow-004</pre></td><td><pre>装修施工时间规定</pre></td><td><pre>search_knowledge</pre></td><td><pre>search_knowledge</pre></td><td><pre>✅</pre></td><td><pre>云溪花园的装修施工时间规定如下：
+    <table><thead><tr><th>ID</th><th>Text</th><th>Expected Tool</th><th>Actual Tool</th><th>Success</th><th>Response</th></tr></thead><tbody><tr><td><pre>workflow-001</pre></td><td><pre>房屋：1 厨房水管漏水</pre></td><td><pre>create_repair_order</pre></td><td><pre></pre></td><td><pre>❌</pre></td><td><pre>好的，我来帮您报修。请问是什么东西坏了？可以简单描述一下位置和问题。</pre></td></tr><tr><td><pre>workflow-002</pre></td><td><pre>查一下我的物业费</pre></td><td><pre>query_payment_status</pre></td><td><pre>query_payment_status</pre></td><td><pre>✅</pre></td><td><pre>您共有4笔物业费账单，其中已缴2笔，未缴2笔，合计未缴金额为716.80元，目前没有逾期账单。</pre></td></tr><tr><td><pre>workflow-003</pre></td><td><pre>生成公告草稿：本周六社区消防演练</pre></td><td><pre>generate_notice</pre></td><td><pre>generate_notice</pre></td><td><pre>✅</pre></td><td><pre>公告草稿已生成，标题为“社区通知”，内容为“生成公告草稿：本周六社区消防演练”，目前状态为草稿，等待人工审核后发布。</pre></td></tr><tr><td><pre>workflow-004</pre></td><td><pre>装修施工时间规定</pre></td><td><pre>search_knowledge</pre></td><td><pre>search_knowledge</pre></td><td><pre>✅</pre></td><td><pre>云溪花园的装修施工时间规定如下：
 - 工作日（周一至周五）：允许施工时间为09:00至12:00，14:00至18:00。
 - 双休日及法定节假日：允许施工时间为10:00至12:00，14:00至17:00。
 - 全面禁止施工时段：每日18:00至次日09:00，严禁一切敲击、钻孔、切割、电钻等噪音施工；春节、国庆等长假期间，物业可临时发布暂停装修通知；高考、中考考试周期，按属地统一要求全域暂停装修噪音作业。
 
-违规施工的后果包括被责令立即停工，多次违规将暂扣装修保证金直至整改完毕。</pre></td></tr></tbody></table>
+违规后果包括：超时施工被邻里投诉或物业巡查发现，将责令立即停工；多次违规将暂扣装修保证金直至整改完毕。</pre></td></tr></tbody></table>
   </details>
 
   <details>
     <summary>RAG Details</summary>
-    <table><thead><tr><th>ID</th><th>Question</th><th>Expected Source</th><th>Rank</th><th>Keywords</th><th>Answer Correct</th></tr></thead><tbody><tr><td><pre>rag-001</pre></td><td><pre>装修几点可以施工？</pre></td><td><pre>decoration/construction-time.md</pre></td><td><pre>1</pre></td><td><pre>✅</pre></td><td><pre>❌</pre></td></tr><tr><td><pre>rag-002</pre></td><td><pre>停车规则是什么？</pre></td><td><pre>parking/parking-rules.md</pre></td><td><pre>2</pre></td><td><pre>✅</pre></td><td><pre>-</pre></td></tr><tr><td><pre>rag-003</pre></td><td><pre>装修需要申请吗？</pre></td><td><pre>decoration/renovation-application.md</pre></td><td><pre>2</pre></td><td><pre>✅</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>rag-004</pre></td><td><pre>访客怎么进小区？</pre></td><td><pre>security/visitor-management.md</pre></td><td><pre>2</pre></td><td><pre>✅</pre></td><td><pre>-</pre></td></tr></tbody></table>
+    <table><thead><tr><th>ID</th><th>Question</th><th>Expected Source</th><th>Rank</th><th>Keywords</th><th>Answer Correct</th></tr></thead><tbody><tr><td><pre>rag-001</pre></td><td><pre>装修几点可以施工？</pre></td><td><pre>decoration/construction-time.md</pre></td><td><pre>1</pre></td><td><pre>✅</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>rag-002</pre></td><td><pre>停车规则是什么？</pre></td><td><pre>parking/parking-rules.md</pre></td><td><pre>2</pre></td><td><pre>✅</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>rag-003</pre></td><td><pre>装修需要申请吗？</pre></td><td><pre>decoration/renovation-application.md</pre></td><td><pre>2</pre></td><td><pre>✅</pre></td><td><pre>✅</pre></td></tr><tr><td><pre>rag-004</pre></td><td><pre>访客怎么进小区？</pre></td><td><pre>security/visitor-management.md</pre></td><td><pre>2</pre></td><td><pre>✅</pre></td><td><pre>✅</pre></td></tr></tbody></table>
   </details>
 </body>
 </html>

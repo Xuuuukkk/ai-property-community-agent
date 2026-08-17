@@ -459,7 +459,8 @@ def run_knowledge_agent(db: Session, state: AgentState) -> dict[str, Any]:
     llm = get_llm()
     if llm is not None:
         context_items = []
-        for idx, chunk in enumerate(chunks, start=1):
+        # Focus the answer on the top 5 chunks to avoid information overload.
+        for idx, chunk in enumerate(chunks[:5], start=1):
             source = chunk.get("source_path", "未知来源")
             content = chunk.get("content", "").replace("\n", " ")
             context_items.append(f"[{idx}] {content}（来源：{source}）")
@@ -467,12 +468,13 @@ def run_knowledge_agent(db: Session, state: AgentState) -> dict[str, Any]:
             "你是云溪花园小区的 AI 物业助手。请根据知识库检索到的内容，"
             "用自然、口语化的中文回答业主的问题。\n"
             "要求：\n"
-            "1. 直接给出答案，优先说明具体的时间、地点、规定等可执行信息；\n"
-            "2. 如果知识库内容不够完整，给出最接近的线索，并建议业主联系物业确认；\n"
-            "3. 不要编造知识库中没有的信息；\n"
-            "4. 回答控制在 200 字以内，方便微信/手机阅读。\n\n"
+            "1. 直接给出结论，把具体的时间、数字、地点、规定等关键信息原样写出来；\n"
+            "2. 只回答业主问到的点，不要罗列无关细节，不要展开背景说明；\n"
+            "3. 如果知识库内容不够完整，给出最接近的线索，并建议业主联系物业确认；\n"
+            "4. 不要编造知识库中没有的信息；\n"
+            "5. 回答务必控制在 120 字以内，方便微信/手机阅读。\n\n"
             f"业主问题：{user_text}\n\n"
-            "知识库片段：\n" + "\n".join(context_items) + "\n\n请回答业主。"
+            "知识库片段：\n" + "\n".join(context_items) + "\n\n请直接回答业主。"
         )
         try:
             from langchain_core.messages import HumanMessage, SystemMessage
