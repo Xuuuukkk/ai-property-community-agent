@@ -238,6 +238,9 @@ inspection-images/
 evaluation/output/
 evaluation/output-ci/
 
+# Generated PWA icon source (kept locally for re-resizing, not shipped)
+frontend/public/icons-raw/
+
 # Automated patrol inspection demo data
 inspection-demo/
 inspection-test/
