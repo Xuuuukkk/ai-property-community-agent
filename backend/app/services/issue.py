@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 
 from app.core.enums import IssueStatus
 from app.models.issue import ZONE_ASSIGNEES, IssueReport
+from app.services.notification import notify
 
 
 class IssueService:
@@ -38,6 +39,16 @@ class IssueService:
                 issue.assignee_id = assignee_id
                 issue.assigned_at = datetime.now()
                 issue.status = IssueStatus.PROCESSING.value
+                # Notify the assignee about the new report.
+                notify(
+                    db,
+                    user_id=assignee_id,
+                    type="issue_assigned",
+                    title="新的业主上报",
+                    content=f"{issue.zone} · {issue.location or ''}：{issue.description[:50]}",
+                    related_type="issue",
+                    related_id=issue.id,
+                )
 
         db.commit()
         db.refresh(issue)
@@ -132,6 +143,16 @@ class IssueService:
         issue.reply = reply
         issue.status = IssueStatus.RESOLVED.value
         issue.replied_at = datetime.now()
+        # Notify the owner that their report has been answered.
+        notify(
+            db,
+            user_id=issue.user_id,
+            type="issue_replied",
+            title="问题上报已答复",
+            content=reply[:100],
+            related_type="issue",
+            related_id=issue.id,
+        )
         db.commit()
         db.refresh(issue)
         return issue

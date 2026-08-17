@@ -16,6 +16,7 @@ import { api } from '../../api/client'
 import type { RepairOrder } from '../../api/types'
 import { useAuth } from '../../contexts/AuthContext'
 import AppHeader from '../../components/AppHeader'
+import NotificationBell from '../../components/NotificationBell'
 import BottomNav from '../../components/BottomNav'
 import { SectionTitle, ServiceItem, Stat } from '../../components/common'
 
@@ -68,7 +69,7 @@ export default function ManagementHome() {
 
   return (
     <div className="page dashboard-page">
-      <AppHeader title="物业管理系统" />
+      <AppHeader title="物业管理系统" right={<NotificationBell />} />
       <div className="dashboard-scroll">
         <div className="profile-card management-card">
           <div className="avatar">

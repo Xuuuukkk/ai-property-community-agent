@@ -12,6 +12,7 @@ from app.models.inspection import InspectionCamera, InspectionRecord
 from app.models.issue import IssueReport
 from app.models.knowledge import KnowledgeChunk, KnowledgeDocument
 from app.models.notice import Notice
+from app.models.notification import Notification
 from app.models.repair_order import RepairOrder
 from app.models.repair_record import RepairRecord
 from app.models.user import User
@@ -31,6 +32,7 @@ __all__ = [
     "MessageFeedback",
     "KnowledgeGap",
     "Notice",
+    "Notification",
     "InspectionCamera",
     "InspectionRecord",
     "IssueReport",

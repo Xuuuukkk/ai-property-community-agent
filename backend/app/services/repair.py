@@ -13,6 +13,7 @@ from app.models.repair_order import RepairOrder
 from app.models.worker import Worker
 from app.repositories.repair import repair_repository
 from app.schemas.repair import RepairCreate
+from app.services.notification import notify
 
 
 class RepairService:
@@ -81,6 +82,27 @@ class RepairService:
             repair.worker_id = worker.id
             repair.status = "ASSIGNED"
             db.flush()
+
+            # Notify the assigned worker about the new task.
+            notify(
+                db,
+                user_id=worker.user_id,
+                type="repair_assigned",
+                title="新的维修工单",
+                content=f"{repair.order_no} · {repair.type}",
+                related_type="repair",
+                related_id=repair.id,
+            )
+            # Notify the owner that their repair was picked up.
+            notify(
+                db,
+                user_id=repair.user_id,
+                type="repair_dispatched",
+                title="报修已接单",
+                content=f"工单 {repair.order_no} 已安排维修师傅处理",
+                related_type="repair",
+                related_id=repair.id,
+            )
 
         db.commit()
         db.refresh(repair)

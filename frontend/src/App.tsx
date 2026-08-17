@@ -15,6 +15,7 @@ import OwnerServices from './pages/owner/OwnerServices'
 import OwnerAiChat from './pages/owner/OwnerAiChat'
 import OwnerIssue from './pages/owner/OwnerIssue'
 import OwnerProfile from './pages/owner/OwnerProfile'
+import NotificationPage from './pages/NotificationPage'
 import ManagementHome from './pages/management/ManagementHome'
 import ManagementRepairs from './pages/management/ManagementRepairs'
 import ManagementNotices from './pages/management/ManagementNotices'
@@ -235,6 +236,7 @@ function AppRoutes() {
         <Route path="/owner/notices" element={<OwnerNotices />} />
         <Route path="/owner/ai" element={<OwnerAiChat />} />
         <Route path="/owner/issue" element={<OwnerIssue />} />
+        <Route path="/owner/notifications" element={<NotificationPage />} />
         <Route path="/owner/profile" element={<OwnerProfile />} />
       </Route>
 
@@ -242,6 +244,7 @@ function AppRoutes() {
         <Route path="/repair" element={<RepairHome />} />
         <Route path="/repair/orders" element={<RepairOrders />} />
         <Route path="/repair/messages" element={<RepairMessages />} />
+        <Route path="/repair/notifications" element={<NotificationPage />} />
         <Route path="/repair/profile" element={<RepairProfile />} />
       </Route>
 
@@ -255,6 +258,7 @@ function AppRoutes() {
         <Route path="/management/issue" element={<ManagementIssue />} />
         <Route path="/management/stats" element={<ManagementStats />} />
         <Route path="/management/knowledge-gaps" element={<ManagementKnowledgeGaps />} />
+        <Route path="/management/notifications" element={<NotificationPage />} />
         <Route path="/management/profile" element={<ManagementProfile />} />
       </Route>
 

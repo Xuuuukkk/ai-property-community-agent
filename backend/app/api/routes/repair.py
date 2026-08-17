@@ -10,6 +10,7 @@ from app.models.user import User
 from app.schemas.common import PageInfo
 from app.schemas.repair import RepairCreate, RepairListResponse, RepairResponse
 from app.services.repair import repair_service
+from app.services.notification import notify
 
 router = APIRouter(prefix="/repair", tags=["repair"])
 
@@ -169,6 +170,15 @@ def update_repair_status(
     if payload.status == "COMPLETED":
         from datetime import datetime
         repair.completed_at = datetime.now()
+        notify(
+            db,
+            user_id=repair.user_id,
+            type="repair_completed",
+            title="报修已完成",
+            content=f"工单 {repair.order_no} 已维修完成",
+            related_type="repair",
+            related_id=repair.id,
+        )
     db.commit()
     db.refresh(repair)
     return repair_service.get_repair(db, repair_id)

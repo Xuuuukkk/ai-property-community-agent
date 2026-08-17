@@ -19,6 +19,7 @@ from app.api.routes import (
     knowledge_router,
     maintenance_router,
     notices_router,
+    notification_router,
     repair_router,
     stats_router,
     users_router,
@@ -95,6 +96,9 @@ def create_app() -> FastAPI:
 
     # Data maintenance router
     app.include_router(maintenance_router, prefix=settings.API_PREFIX)
+
+    # Notification router
+    app.include_router(notification_router, prefix=settings.API_PREFIX)
 
     @app.get("/", tags=["root"])
     def root() -> dict:

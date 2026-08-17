@@ -10,6 +10,7 @@ from app.api.routes.issue import router as issue_router
 from app.api.routes.knowledge import router as knowledge_router
 from app.api.routes.maintenance import router as maintenance_router
 from app.api.routes.notices import router as notices_router
+from app.api.routes.notification import router as notification_router
 from app.api.routes.repair import router as repair_router
 from app.api.routes.stats import router as stats_router
 from app.api.routes.users import router as users_router
@@ -26,6 +27,7 @@ __all__ = [
     "knowledge_router",
     "maintenance_router",
     "notices_router",
+    "notification_router",
     "repair_router",
     "stats_router",
     "users_router",

@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom'
 interface AppHeaderProps {
   title?: string
   onBack?: () => void
+  right?: React.ReactNode
 }
 
-export default function AppHeader({ title, onBack }: AppHeaderProps) {
+export default function AppHeader({ title, onBack, right }: AppHeaderProps) {
   const navigate = useNavigate()
 
   return (
@@ -19,7 +20,7 @@ export default function AppHeader({ title, onBack }: AppHeaderProps) {
         <span className="header-spacer" />
       )}
       {title && <h1>{title}</h1>}
-      <span className="header-spacer" />
+      {right ?? <span className="header-spacer" />}
     </header>
   )
 }

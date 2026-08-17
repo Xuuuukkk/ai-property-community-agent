@@ -10,6 +10,7 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppHeader from '../../components/AppHeader'
+import NotificationBell from '../../components/NotificationBell'
 import BottomNav from '../../components/BottomNav'
 import { NoticeList, SectionTitle, ServiceItem } from '../../components/common'
 import { useAuth } from '../../contexts/AuthContext'
@@ -67,7 +68,7 @@ export default function OwnerHome() {
 
   return (
     <div className="page dashboard-page">
-      <AppHeader title="云溪花园智慧社区" />
+      <AppHeader title="云溪花园智慧社区" right={<NotificationBell />} />
       <div className="dashboard-scroll">
         <div className="profile-card">
           <div className="avatar">

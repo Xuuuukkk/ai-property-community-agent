@@ -5,6 +5,7 @@ import { api } from '../../api/client'
 import type { RepairOrder } from '../../api/types'
 import { useAuth } from '../../contexts/AuthContext'
 import AppHeader from '../../components/AppHeader'
+import NotificationBell from '../../components/NotificationBell'
 import BottomNav from '../../components/BottomNav'
 import { SectionTitle, Stat, Ticket } from '../../components/common'
 
@@ -90,7 +91,7 @@ export default function RepairHome() {
 
   return (
     <div className="page dashboard-page">
-      <AppHeader title="维修工作台" />
+      <AppHeader title="维修工作台" right={<NotificationBell />} />
       <div className="dashboard-scroll">
         <div className="profile-card repair-card">
           <div className="avatar">

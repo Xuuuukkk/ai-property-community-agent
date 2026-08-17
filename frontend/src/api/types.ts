@@ -283,6 +283,17 @@ export interface FeedbackStats {
   top_problems: { question: string; count: number }[]
 }
 
+export interface AppNotification {
+  id: number
+  type: string
+  title: string
+  content: string
+  related_type: string | null
+  related_id: number | null
+  is_read: boolean
+  created_at: string
+}
+
 
 
 

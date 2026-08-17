@@ -23,6 +23,7 @@ import type {
   DashboardInsights,
   KnowledgeGap,
   FeedbackStats,
+  AppNotification,
 } from './types'
 
 const API_BASE = '' // Vite dev proxy forwards /api to backend
@@ -246,6 +247,20 @@ export const api = {
     fetchJson<KnowledgeGap>(`/api/knowledge-gaps/${gapId}/reject`, { method: 'POST', body: '{}' }),
 
   getFeedbackStats: () => fetchJson<FeedbackStats>('/api/feedback/stats'),
+
+  listNotifications: (params: { page?: number; page_size?: number } = {}) => {
+    const search = new URLSearchParams()
+    if (params.page) search.append('page', String(params.page))
+    if (params.page_size) search.append('page_size', String(params.page_size))
+    return fetchJson<{ items: AppNotification[]; pagination: { total: number } }>(`/api/notifications?${search.toString()}`)
+  },
+
+  getUnreadCount: () => fetchJson<{ count: number }>('/api/notifications/unread-count'),
+
+  markNotificationRead: (id: number) =>
+    fetchJson<AppNotification>(`/api/notifications/${id}/read`, { method: 'POST' }),
+
+  markAllNotificationsRead: () => fetchJson<{ count: number }>('/api/notifications/read-all', { method: 'POST' }),
 }
 
 // Re-export types for convenience
