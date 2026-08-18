@@ -57,8 +57,12 @@ def main() -> int:
     # ``app.core.database`` imports ``get_settings`` at module load time.
     provider: EmbeddingProvider
     if args.embedding_model:
-        if args.embedding_model.lower() == "deterministic":
+        model = args.embedding_model.lower()
+        if model == "deterministic":
             provider = _DeterministicProvider()
+        elif model in {"embedding-3", "embedding-2"}:
+            # OpenAI-compatible (Zhipu) embeddings — reuse the shared router.
+            provider = get_embedding_provider()
         else:
             from app.core.embeddings import _SentenceTransformerProvider
 
