@@ -746,32 +746,15 @@ Worker App
 
 ---
 
-# 11. Current Priority
+# 11. Current Status
 
+MVP 阶段（Phase 0-5）已全部完成并上线：
 
-当前开发重点：
+- 在线演示：http://119.91.236.85
+- 后端 113 个测试 + 前端 30 个测试，全部通过
+- AI 评估：意图识别 100%、RAG 召回 Recall@5 100%、RAG 答案准确率 100%
 
-
-```
-Phase 0
-
-↓
-
-Phase 1
-
-↓
-
-Phase 2
-
-```
-
-
-优先完成：
-
-1. 模拟社区数据
-2. 核心物业业务
-3. AI Agent
-4. RAG知识系统
+当前方向：Phase 6 智慧社区扩展（IoT 接入 / AI 巡检增强 / 语音助手）
 
 
 ---
@@ -781,12 +764,12 @@ Phase 2
 
 | Phase | Goal |状态|
 |-|-|-|
-| Phase 0 | 项目基础 | Planning |
-| Phase 1 | 物业业务系统 | Pending |
-| Phase 2 | AI Agent | Pending |
-| Phase 3 | RAG知识库 | Pending |
-| Phase 4 | 多端应用 | Pending |
-| Phase 5 | 测试优化 | Pending |
+| Phase 0 | 项目基础 | ✅ Completed |
+| Phase 1 | 物业业务系统 | ✅ Completed |
+| Phase 2 | AI Agent | ✅ Completed |
+| Phase 3 | RAG知识库 | ✅ Completed |
+| Phase 4 | 多端应用 | ✅ Completed |
+| Phase 5 | 测试优化 | ✅ Completed |
 | Phase 6 | 智慧社区 | Future |
 | Phase 7 | 商业化 | Future |
 

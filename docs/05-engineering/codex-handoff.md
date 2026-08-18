@@ -5,6 +5,8 @@
 > AI Property Community Agent  
 > Development Instruction For Codex
 
+> ✅ **开发已完成，本文档归档**。项目 Phase 0-7 全部完成并上线，最新状态见 [docs/README.md](../README.md)。
+
 
 ---
 

@@ -4,6 +4,8 @@
 > 交接人：小七  
 > 接收人：项目队员  
 > 仓库：`Xuuuukkk/ai-property-community-agent`  
+
+> ⚠️ **历史快照**：本文档记录 2026-08-13 交接时状态，其中测试数（56）、RAG 召回（25%）、未实现功能等均已被后续迭代更新。**最新状态见 [docs/README.md](../README.md)**。
 > 分支：`main`
 
 ---

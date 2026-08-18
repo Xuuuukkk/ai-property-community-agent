@@ -214,7 +214,7 @@ AI-Property-Community-Agent/
 ├── data/
 │   └── seed/              # 8个PostgreSQL种子SQL文件
 ├── database/              # 数据库迁移脚本（Alembic）
-├── docs/                  # 项目文档（7个分类目录）
+├── docs/                  # 项目文档（9个分类目录）
 │   ├── 00-overview/       # 项目概述
 │   ├── 01-product/        # 产品需求
 │   ├── 02-architecture/   # 架构设计
@@ -742,8 +742,11 @@ DATABASE_URL=postgresql://admin:password@localhost:5432/property_agent
 REDIS_URL=redis://localhost:6379
 
 # AI
-LLM_API_KEY=
-EMBEDDING_MODEL=
+OPENAI_API_BASE=https://open.bigmodel.cn/api/paas/v4/
+LLM_API_KEY=<你的智谱API Key>
+LLM_MODEL=glm-4-flash
+EMBEDDING_MODEL=embedding-3
+EMBEDDING_DIMENSION=1024
 ```
 
 注意：

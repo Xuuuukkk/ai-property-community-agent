@@ -1,0 +1,15 @@
+<Slide style={{ width: '1280px', height: '720px', background: 'linear-gradient(135deg, #172133 0%, #22395E 100%)', position: 'relative' }}>
+  <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#FBFCFA' }}>
+    <div style={{ color: '#BD9B56', fontSize: 28, marginBottom: 24, letterSpacing: '0.4em' }}>✦</div>
+    <h1 style={{ fontSize: 64, fontWeight: 'bold', margin: 0, color: '#FBFCFA', letterSpacing: '0.12em' }}>感谢聆听</h1>
+    <div style={{ width: 80, height: 3, background: '#BD9B56', marginTop: 28, marginBottom: 28 }} />
+    <p style={{ fontSize: 22, color: 'rgba(189,155,86,0.9)', margin: 0, letterSpacing: '0.15em' }}>让 AI 真正走进社区</p>
+    <div style={{ marginTop: 56, padding: '22px 40px', background: 'rgba(189,155,86,0.08)', border: '1px solid rgba(189,155,86,0.3)', borderRadius: 8, textAlign: 'center' }}>
+      <div style={{ fontSize: 13, color: '#BD9B56', letterSpacing: '0.25em', marginBottom: 10 }}>ONLINE DEMO</div>
+      <div style={{ fontSize: 18, color: '#FBFCFA', fontFamily: 'Inter, sans-serif', marginBottom: 4 }}>http://119.91.236.85</div>
+      <div style={{ fontSize: 13, color: 'rgba(251,252,250,0.7)' }}>业主 guoyi378 · 物业 mayun420 · 维修 yangfei423（密码 123456）</div>
+    </div>
+  </div>
+  <div style={{ position: 'absolute', left: 64, bottom: 24, color: '#BD9B56', fontSize: 14, letterSpacing: '0.12em' }}>云溪花园 · 智慧社区</div>
+  <div style={{ position: 'absolute', right: 24, bottom: 24, color: 'rgba(189,155,86,0.75)', fontSize: 14 }}>17 / 17</div>
+</Slide>

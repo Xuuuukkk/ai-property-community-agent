@@ -108,16 +108,29 @@ AI助手
 
 
 ```
-Router Agent
+Router Agent（多意图路由）
 
-Repair Agent
+Repair / Fee / Notice / Knowledge Agent
 
-Fee Agent
+RAG 知识检索（pgvector）
 
-Knowledge Agent
+AI 巡检（抓拍 + 视觉识别异常）
 
-RAG
+消息通知系统
 
+反馈自进化闭环
+
+数据看板 + 智能洞察报告
+```
+
+## 已上线
+
+```
+在线演示：http://119.91.236.85
+
+后端 113 测试 + 前端 30 测试全绿
+
+AI 评估：意图 100% / RAG 召回 100% / RAG 答案 100%
 ```
 
 

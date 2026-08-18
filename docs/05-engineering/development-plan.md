@@ -5,6 +5,8 @@
 > AI Property Community Agent  
 > Engineering Development Roadmap
 
+> ✅ **本计划已全部执行完毕**（Phase 0-7 均完成并上线）。本文档为历史开发计划，最新状态见 [docs/README.md](../README.md)。
+
 
 ---
 
