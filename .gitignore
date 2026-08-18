@@ -249,3 +249,6 @@ data/inspection-test/
 
 # WorkBuddy project data (automations, memory) - not for git
 .workbuddy/
+
+# slidep runtime state (PPT build tool)
+ppt/**/.slidep/
