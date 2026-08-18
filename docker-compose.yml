@@ -5,6 +5,7 @@ services:
   postgres:
     image: pgvector/pgvector:pg16
     container_name: property-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-admin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
@@ -24,6 +25,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: property-redis
+    restart: unless-stopped
     ports:
       - "${REDIS_PORT:-6379}:6379"
     healthcheck:
@@ -37,6 +39,7 @@ services:
       context: .
       dockerfile: backend/Dockerfile
     container_name: property-backend
+    restart: unless-stopped
     environment:
       APP_ENV: ${APP_ENV:-docker}
       API_PREFIX: ${API_PREFIX:-/api}
@@ -68,6 +71,7 @@ services:
   frontend:
     build: ./frontend
     container_name: property-frontend
+    restart: unless-stopped
     ports:
       - "${FRONTEND_PORT:-3000}:80"
     depends_on:
