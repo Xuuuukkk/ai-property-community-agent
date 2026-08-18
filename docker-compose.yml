@@ -33,7 +33,9 @@ services:
       retries: 12
 
   backend:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: property-backend
     environment:
       APP_ENV: ${APP_ENV:-docker}
