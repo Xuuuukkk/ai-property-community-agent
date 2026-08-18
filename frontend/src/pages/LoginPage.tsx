@@ -20,23 +20,29 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [justLoggedIn, setJustLoggedIn] = useState(false)
 
+  // Only navigate after an explicit login action. This lets an already
+  // logged-in user stay on this page and tap a demo account to switch roles
+  // (on mobile there is no side-nav to switch between owner/staff/worker).
   useEffect(() => {
-    if (user) {
+    if (user && justLoggedIn) {
       navigate(roleHome(user.role), { replace: true })
+      setJustLoggedIn(false)
     }
-  }, [user, navigate])
+  }, [user, justLoggedIn, navigate])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
+    setJustLoggedIn(true)
     try {
       await login(username, password)
-      // navigation handled by useEffect after user state updates
     } catch (err) {
       setError(err instanceof Error ? err.message : '登录失败')
       setLoading(false)
+      setJustLoggedIn(false)
     }
   }
 
@@ -45,11 +51,13 @@ export default function LoginPage() {
     setPassword(p)
     setError('')
     setLoading(true)
+    setJustLoggedIn(true)
     try {
       await login(u, p)
     } catch (err) {
       setError(err instanceof Error ? err.message : '登录失败')
       setLoading(false)
+      setJustLoggedIn(false)
     }
   }
 
@@ -99,7 +107,7 @@ export default function LoginPage() {
           还没有账号？<button type="button">联系物业管理处</button>
         </p>
       </form>
-      <div style={{ margin: '20px 0 8px' }}>
+      <div style={{ margin: '20px 0 8px', padding: '0 22px' }}>
         <div style={{ fontSize: 12, color: '#7e8587', marginBottom: 10 }}>演示账号 · 点击一键登录</div>
         <div style={{ display: 'grid', gap: 8 }}>
           {demoAccounts.map((acc) => (
