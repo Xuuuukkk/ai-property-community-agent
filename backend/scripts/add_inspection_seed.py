@@ -12,6 +12,11 @@ Usage inside the backend container:
 
     docker compose exec backend python scripts/add_inspection_seed.py
 
+To wipe all existing cameras and records before re-seeding (use this when
+swapping the demo images to keep the gallery in sync), pass ``--reset``:
+
+    docker compose exec backend python scripts/add_inspection_seed.py --reset
+
 To customize which images to import, edit the ``RECORDS`` table below.
 Each entry is ``(camera_id, filename, anomaly_type, summary, confidence)``.
 ``anomaly_type = None`` means "no anomaly detected" (normal patrol result).
@@ -22,7 +27,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 if str(BACKEND_DIR) not in sys.path:
@@ -44,31 +49,31 @@ CAMERAS: list[tuple[int, str, str, str, str]] = [
 # anomaly_type = None  →  normal patrol run ("no anomaly").
 # Filenames are relative to inspection-images/camera_<id>/.
 RECORDS: list[tuple[int, str, str | None, str, float]] = [
-    # ---- Normal patrol runs (clean hallway / garage / garden scenes) ----
-    (1, "20260818_123105.jpg", None, "巡检未发现异常，画面整洁。", 0.96),
-    (1, "20260819_165718.jpg", None, "巡检未发现异常，画面整洁。", 0.96),
-    (2, "20260818_145738.jpg", None, "巡检未发现异常，画面整洁。", 0.96),
-    (2, "20260819_165723.jpg", None, "巡检未发现异常，画面整洁。", 0.96),
-    (3, "20260818_155742.jpg", None, "巡检未发现异常，画面整洁。", 0.96),
-    (3, "20260819_165728.jpg", None, "巡检未发现异常，画面整洁。", 0.96),
+    # ---- Normal patrol runs (clean scenes, content matches location) ----
+    (1, "20260819_190101.png", None, "巡检未发现异常，画面整洁。", 0.96),
+    (1, "20260819_190102.png", None, "巡检未发现异常，画面整洁。", 0.96),
+    (2, "20260819_190201.png", None, "巡检未发现异常，画面整洁。", 0.96),
+    (2, "20260819_190202.png", None, "巡检未发现异常，画面整洁。", 0.96),
+    (3, "20260819_190301.png", None, "巡检未发现异常，画面整洁。", 0.96),
+    (3, "20260819_190302.png", None, "巡检未发现异常，画面整洁。", 0.96),
     # ---- Anomaly runs (AI-generated demo scenes for showcase) ----
     (
         1,
-        "20260819_180015.png",
+        "20260819_190103.png",
         "garbage_pile",
         "大厅门口发现垃圾堆积，多个黑色垃圾袋散落未及时清运，已通知保洁处置。",
         0.93,
     ),
     (
         2,
-        "20260819_180016.png",
+        "20260819_190203.png",
         "obstruction",
         "电梯厅堆放大量纸箱杂物，堵塞消防通道，存在安全隐患，已通知业主清理。",
         0.95,
     ),
     (
         3,
-        "20260819_180017.png",
+        "20260819_190303.png",
         "vehicle_violation",
         "地下车库入口发现车辆违停，堵在禁停网格线上，已通知车主挪车。",
         0.94,
@@ -86,6 +91,13 @@ def main() -> None:
         sys.exit(1)
 
     with SessionLocal() as session:
+        # Optional: wipe all existing cameras + records before re-seeding.
+        if "--reset" in sys.argv:
+            session.execute(delete(InspectionRecord))
+            session.execute(delete(InspectionCamera))
+            session.flush()
+            print("[reset] cleared all cameras and records")
+
         # 1. Ensure all demo cameras exist.
         for cam_id, name, zone, location, manager in CAMERAS:
             existing = session.execute(
