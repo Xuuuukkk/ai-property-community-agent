@@ -60,6 +60,7 @@ services:
       - ./backend:/app
       - ./database:/app/database:ro
       - ./data/seed:/app/data/seed:ro
+      - ./inspection-images:/app/inspection-images:ro
       - ./knowledge-base:/app/knowledge-base:ro
       - ./evaluation:/app/evaluation:ro
     depends_on:
