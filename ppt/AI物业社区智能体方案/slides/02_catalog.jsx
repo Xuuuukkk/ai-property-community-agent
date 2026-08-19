@@ -1,41 +1,43 @@
-<Slide style={{ width: '1280px', height: '720px', background: '#FBFCFA', position: 'relative' }}>
-  <div style={{ position: 'absolute', left: 64, top: 60 }}>
-    <div style={{ color: '#BD9B56', fontSize: 18, letterSpacing: '0.3em', marginBottom: 16 }}>CONTENTS</div>
-    <h2 style={{ fontSize: 48, fontWeight: 'bold', color: '#172133', margin: 0 }}>目录</h2>
-    <div style={{ width: 64, height: 3, background: '#BD9B56', marginTop: 20 }} />
-    <p style={{ fontSize: 14, color: '#888780', marginTop: 24, letterSpacing: '0.1em' }}>AI PROPERTY</p>
-    <p style={{ fontSize: 14, color: '#888780', letterSpacing: '0.1em' }}>COMMUNITY AGENT</p>
+<Slide style={{ width: '1280px', height: '720px', background: '#FBFCFA', position: 'relative', padding: '40px 64px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
+  <div style={{ flexShrink: 0 }}>
+    <div style={{ color: '#BD9B56', fontSize: 14, letterSpacing: '0.3em', marginBottom: 10 }}>CONTENTS</div>
+    <h2 style={{ fontSize: 34, fontWeight: 'bold', color: '#172133', margin: 0 }}>目录</h2>
+    <div style={{ width: 64, height: 3, background: '#BD9B56', marginTop: 16 }} />
   </div>
-  <div style={{ position: 'absolute', left: 420, top: 96, right: 64 }}>
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: 36, paddingBottom: 20, borderBottom: '1px solid rgba(34,57,94,0.12)', marginBottom: 22 }}>
-      <span style={{ color: '#BD9B56', fontSize: 52, fontWeight: 'bold', lineHeight: 1, minWidth: 96 }}>01</span>
-      <div>
-        <div style={{ fontSize: 26, fontWeight: 'bold', color: '#172133' }}>项目背景与规模</div>
-        <div style={{ fontSize: 15, color: '#5F5E5A', marginTop: 6 }}>传统物业痛点 · 虚拟社区「云溪花园」· 方案定位</div>
+  <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 28, paddingBottom: 18, borderBottom: '1px solid rgba(34,57,94,0.12)' }}>
+        <span style={{ color: '#BD9B56', fontSize: 40, fontWeight: 'bold', lineHeight: 1, minWidth: 72, fontFamily: 'Inter, sans-serif' }}>01</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 22, fontWeight: 'bold', color: '#172133' }}>项目背景与规模</div>
+          <div style={{ fontSize: 14, color: '#6b7075', marginTop: 6 }}>传统物业痛点 · 虚拟社区「云溪花园」数据资产</div>
+        </div>
       </div>
-    </div>
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: 36, paddingBottom: 20, borderBottom: '1px solid rgba(34,57,94,0.12)', marginBottom: 22 }}>
-      <span style={{ color: '#BD9B56', fontSize: 52, fontWeight: 'bold', lineHeight: 1, minWidth: 96 }}>02</span>
-      <div>
-        <div style={{ fontSize: 26, fontWeight: 'bold', color: '#172133' }}>技术构建路线</div>
-        <div style={{ fontSize: 15, color: '#5F5E5A', marginTop: 6 }}>数据库 → 后端 → 前端 → Agent → RAG → 评估 → 部署</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 28, paddingBottom: 18, borderBottom: '1px solid rgba(34,57,94,0.12)' }}>
+        <span style={{ color: '#BD9B56', fontSize: 40, fontWeight: 'bold', lineHeight: 1, minWidth: 72, fontFamily: 'Inter, sans-serif' }}>02</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 22, fontWeight: 'bold', color: '#172133' }}>技术构建过程</div>
+          <div style={{ fontSize: 14, color: '#6b7075', marginTop: 6 }}>数据库设计 → 后端 → 前端 → AI Agent → RAG 知识库</div>
+        </div>
       </div>
-    </div>
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: 36, paddingBottom: 20, borderBottom: '1px solid rgba(34,57,94,0.12)', marginBottom: 22 }}>
-      <span style={{ color: '#BD9B56', fontSize: 52, fontWeight: 'bold', lineHeight: 1, minWidth: 96 }}>03</span>
-      <div>
-        <div style={{ fontSize: 26, fontWeight: 'bold', color: '#172133' }}>AI 能力与成果</div>
-        <div style={{ fontSize: 15, color: '#5F5E5A', marginTop: 6 }}>AI Agent · RAG 知识库 · 功能闭环 · 量化评估</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 28, paddingBottom: 18, borderBottom: '1px solid rgba(34,57,94,0.12)' }}>
+        <span style={{ color: '#BD9B56', fontSize: 40, fontWeight: 'bold', lineHeight: 1, minWidth: 72, fontFamily: 'Inter, sans-serif' }}>03</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 22, fontWeight: 'bold', color: '#172133' }}>成果与验证</div>
+          <div style={{ fontSize: 14, color: '#6b7075', marginTop: 6 }}>三条功能闭环 · 量化评估指标</div>
+        </div>
       </div>
-    </div>
-    <div style={{ display: 'flex', alignItems: 'baseline', gap: 36, paddingBottom: 20 }}>
-      <span style={{ color: '#BD9B56', fontSize: 52, fontWeight: 'bold', lineHeight: 1, minWidth: 96 }}>04</span>
-      <div>
-        <div style={{ fontSize: 26, fontWeight: 'bold', color: '#172133' }}>总结</div>
-        <div style={{ fontSize: 15, color: '#5F5E5A', marginTop: 6 }}>成果回顾 · 在线演示</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 28 }}>
+        <span style={{ color: '#BD9B56', fontSize: 40, fontWeight: 'bold', lineHeight: 1, minWidth: 72, fontFamily: 'Inter, sans-serif' }}>04</span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 22, fontWeight: 'bold', color: '#172133' }}>总结与展望</div>
+          <div style={{ fontSize: 14, color: '#6b7075', marginTop: 6 }}>项目价值 · 在线演示入口</div>
+        </div>
       </div>
     </div>
   </div>
-  <div style={{ position: 'absolute', left: 64, bottom: 24, color: '#BD9B56', fontSize: 14, letterSpacing: '0.12em' }}>云溪花园 · 智慧社区</div>
-  <div style={{ position: 'absolute', right: 24, bottom: 24, color: 'rgba(189,155,86,0.75)', fontSize: 14 }}>02 / 17</div>
+  <div style={{ flexShrink: 0, height: 44, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+    <span style={{ color: '#BD9B56', fontSize: 12, letterSpacing: '0.1em' }}>云溪花园 · 智慧社区</span>
+    <span style={{ color: '#a09b8c', fontSize: 12 }}>02 / 15</span>
+  </div>
 </Slide>
