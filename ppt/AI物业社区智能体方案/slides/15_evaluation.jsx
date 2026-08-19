@@ -68,6 +68,6 @@
   </div>
   <div style={{ flexShrink: 0, height: 32, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
     <span style={{ color: '#BD9B56', fontSize: 12, letterSpacing: '0.1em' }}>云溪花园 · 智慧社区</span>
-    <span style={{ color: '#a09b8c', fontSize: 12 }}>12 / 15</span>
+    <span style={{ color: '#a09b8c', fontSize: 12 }}>15 / 19</span>
   </div>
 </Slide>

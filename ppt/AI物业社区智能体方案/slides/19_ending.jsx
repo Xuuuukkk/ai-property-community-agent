@@ -11,5 +11,5 @@
     </div>
   </div>
   <div style={{ position: 'absolute', left: 64, bottom: 28, color: '#BD9B56', fontSize: 13, letterSpacing: '0.12em' }}>云溪花园 · 智慧社区</div>
-  <div style={{ position: 'absolute', right: 28, bottom: 28, color: 'rgba(189,155,86,0.75)', fontSize: 13 }}>15 / 15</div>
+  <div style={{ position: 'absolute', right: 28, bottom: 28, color: 'rgba(189,155,86,0.75)', fontSize: 13 }}>19 / 19</div>
 </Slide>
