@@ -1,5 +1,6 @@
 """Automated patrol inspection API endpoints."""
 
+import mimetypes
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -105,5 +106,6 @@ def get_record_image(
     if not path.is_file():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image file missing")
 
-    return FileResponse(path, media_type="image/jpeg")
+    media_type = mimetypes.guess_type(path.name)[0] or "application/octet-stream"
+    return FileResponse(path, media_type=media_type)
 
