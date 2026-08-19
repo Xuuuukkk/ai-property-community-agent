@@ -10,7 +10,7 @@ docker-compose).
 
 Usage inside the backend container:
 
-    docker compose exec backend python -m scripts.add_inspection_seed
+    docker compose exec backend python scripts/add_inspection_seed.py
 
 To customize which images to import, edit the ``PICKS`` mapping below.
 """
@@ -22,8 +22,12 @@ from pathlib import Path
 
 from sqlalchemy import select
 
-from app.core.database import SessionLocal
-from app.models.inspection import InspectionCamera, InspectionRecord
+BACKEND_DIR = Path(__file__).resolve().parent.parent
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
+
+from app.core.database import SessionLocal  # noqa: E402
+from app.models.inspection import InspectionCamera, InspectionRecord  # noqa: E402
 
 
 # (camera_id, name, zone, location, manager) — synthetic demo cameras.
