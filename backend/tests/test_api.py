@@ -155,6 +155,102 @@ def test_list_fees_as_staff(client: TestClient) -> None:
     assert response.status_code == 200
 
 
+def test_create_fee_as_staff(client: TestClient) -> None:
+    """POST /api/fee creates a bill as staff, resolving house from binding."""
+    payload = {
+        "user_id": 1,
+        "bill_type": "property_fee",
+        "period": "2026-09",
+        "amount": "500.00",
+        "due_date": "2026-09-30",
+    }
+    response = client.post("/api/fee", json=payload, headers=auth_headers(201, "ADMIN"))
+    assert response.status_code == 201
+    data = response.json()
+    assert data["user_id"] == 1
+    assert data["house_id"] == 577  # user 1's bound house (seed)
+    assert data["status"] == "UNPAID"
+    assert float(data["amount"]) == 500.0
+
+
+def test_create_fee_requires_staff(client: TestClient) -> None:
+    """POST /api/fee returns 403 for owners."""
+    payload = {"user_id": 1, "amount": "100.00"}
+    response = client.post("/api/fee", json=payload, headers=auth_headers(1, "OWNER"))
+    assert response.status_code == 403
+
+
+def test_bulk_create_fees(client: TestClient) -> None:
+    """POST /api/fee/bulk creates multiple bills in one request."""
+    payload = {
+        "items": [
+            {"user_id": 1, "bill_type": "property_fee", "amount": "300.00", "period": "2026-10"},
+            {"user_id": 2, "bill_type": "parking_fee", "amount": "200.00", "period": "2026-10"},
+        ]
+    }
+    response = client.post(
+        "/api/fee/bulk", json=payload, headers=auth_headers(201, "ADMIN")
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert isinstance(data, list)
+    assert len(data) == 2
+    assert all(item["status"] == "UNPAID" for item in data)
+
+
+def test_mark_fee_paid(client: TestClient) -> None:
+    """POST /api/fee/{id}/mark-paid flips UNPAID→PAID and stamps paid_at."""
+    created = client.post(
+        "/api/fee",
+        json={"user_id": 1, "amount": "150.00", "period": "2026-11"},
+        headers=auth_headers(201, "ADMIN"),
+    ).json()
+    response = client.post(
+        f"/api/fee/{created['id']}/mark-paid", headers=auth_headers(201, "ADMIN")
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "PAID"
+    assert data["paid_at"] is not None
+
+
+def test_mark_fee_paid_requires_staff(client: TestClient) -> None:
+    """POST /api/fee/{id}/mark-paid returns 403 for owners."""
+    created = client.post(
+        "/api/fee",
+        json={"user_id": 1, "amount": "150.00"},
+        headers=auth_headers(201, "ADMIN"),
+    ).json()
+    response = client.post(
+        f"/api/fee/{created['id']}/mark-paid", headers=auth_headers(1, "OWNER")
+    )
+    assert response.status_code == 403
+
+
+def test_list_all_fees_as_staff(client: TestClient) -> None:
+    """GET /api/fee returns all bills for staff."""
+    response = client.get("/api/fee", headers=auth_headers(201, "ADMIN"))
+    assert response.status_code == 200
+    data = response.json()
+    assert "items" in data
+    assert "pagination" in data
+    assert data["pagination"]["total"] > 0
+
+
+def test_list_all_fees_requires_staff(client: TestClient) -> None:
+    """GET /api/fee returns 403 for owners."""
+    response = client.get("/api/fee", headers=auth_headers(1, "OWNER"))
+    assert response.status_code == 403
+
+
+def test_list_all_fees_status_filter(client: TestClient) -> None:
+    """GET /api/fee?status=PAID returns only paid bills."""
+    response = client.get("/api/fee?status=PAID", headers=auth_headers(201, "ADMIN"))
+    assert response.status_code == 200
+    data = response.json()
+    assert all(item["status"] == "PAID" for item in data["items"])
+
+
 def test_list_notices(client: TestClient) -> None:
     """GET /api/notices returns a paginated list of notices (public)."""
     response = client.get("/api/notices")
