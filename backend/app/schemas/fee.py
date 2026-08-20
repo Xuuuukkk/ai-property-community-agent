@@ -29,3 +29,23 @@ class FeeListResponse(BaseModel):
 
     items: list[FeeBillResponse]
     pagination: PageInfo
+
+
+class FeeCreate(BaseModel):
+    """Payload to create a single fee bill (management only)."""
+
+    user_id: int
+    house_id: int | None = Field(
+        default=None,
+        description="Target house id; if omitted, resolve from the owner's binding.",
+    )
+    bill_type: str = Field(default="property_fee", description="FeeBillType value")
+    period: str | None = Field(default=None, description="Billing period, e.g. 2026-08")
+    amount: Decimal = Field(..., gt=0, description="Amount in CNY")
+    due_date: date | None = None
+
+
+class FeeBulkCreate(BaseModel):
+    """Payload to create multiple fee bills in one request."""
+
+    items: list[FeeCreate]

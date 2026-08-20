@@ -16,6 +16,7 @@ export default function OwnerFees() {
   const [fees, setFees] = useState<FeeBill[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [showPayTip, setShowPayTip] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -51,8 +52,43 @@ export default function OwnerFees() {
             <span>未缴费用总额（元）</span>
             <strong>{unpaidTotal.toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
           </div>
-          <button>去缴费</button>
+          <button onClick={() => setShowPayTip(!showPayTip)}>去缴费</button>
         </div>
+
+        <div
+          style={{
+            margin: '14px 16px 0',
+            padding: '13px 15px',
+            background: '#f8f1e4',
+            borderRadius: 10,
+            border: '1px solid #eadfc7',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 8,
+          }}
+        >
+          <span style={{ fontSize: 15, lineHeight: 1 }}>💡</span>
+          <div style={{ fontSize: 13, color: '#8a6a34', lineHeight: 1.6 }}>
+            本平台暂不支持在线支付，请到<strong>物业管理处</strong>进行线下缴费，缴费后由物业人员确认收款。
+          </div>
+        </div>
+
+        {showPayTip && (
+          <div
+            style={{
+              margin: '10px 16px 0',
+              padding: '12px 14px',
+              background: '#fff8e6',
+              border: '1px dashed #d9b96a',
+              borderRadius: 10,
+              fontSize: 12,
+              color: '#8a6a34',
+              lineHeight: 1.6,
+            }}
+          >
+            请携带户主信息前往小区物业管理处前台，线下缴纳物业相关费用。缴费完成后，账单状态将由物业人员在系统中确认更新。
+          </div>
+        )}
 
         {error && (
           <div

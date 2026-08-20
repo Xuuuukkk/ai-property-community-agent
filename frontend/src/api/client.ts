@@ -143,6 +143,23 @@ export const api = {
     return fetchJson<FeeListResponse>(`/api/fee/${userId}?${search.toString()}`)
   },
 
+  listAllFees: (params: { page?: number; page_size?: number; status?: string } = {}) => {
+    const search = new URLSearchParams()
+    if (params.page) search.append('page', String(params.page))
+    if (params.page_size) search.append('page_size', String(params.page_size))
+    if (params.status) search.append('status', params.status)
+    return fetchJson<FeeListResponse>(`/api/fee?${search.toString()}`)
+  },
+
+  createFee: (payload: { user_id: number; house_id?: number | null; bill_type?: string; period?: string | null; amount: string; due_date?: string | null }) =>
+    fetchJson<FeeBill>('/api/fee', { method: 'POST', body: JSON.stringify(payload) }),
+
+  bulkCreateFees: (payload: { items: { user_id: number; house_id?: number | null; bill_type?: string; period?: string | null; amount: string; due_date?: string | null }[] }) =>
+    fetchJson<FeeBill[]>('/api/fee/bulk', { method: 'POST', body: JSON.stringify(payload) }),
+
+  markFeePaid: (feeId: number) =>
+    fetchJson<FeeBill>(`/api/fee/${feeId}/mark-paid`, { method: 'POST' }),
+
   listNotices: (params: { page?: number; page_size?: number; status?: string } = {}) => {
     const search = new URLSearchParams()
     if (params.page) search.append('page', String(params.page))
