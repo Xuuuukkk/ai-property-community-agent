@@ -19,6 +19,12 @@ interface PendingRepair {
   image_urls?: string[]
 }
 
+interface PendingIssue {
+  step?: string
+  zone?: string
+  location?: string
+}
+
 export default function OwnerAiChat() {
   const { user } = useAuth()
   const [messages, setMessages] = useState<Message[]>([
@@ -28,6 +34,7 @@ export default function OwnerAiChat() {
   const [loading, setLoading] = useState(false)
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [pendingRepair, setPendingRepair] = useState<PendingRepair | null>(null)
+  const [pendingIssue, setPendingIssue] = useState<PendingIssue | null>(null)
   const [pendingImages, setPendingImages] = useState<string[]>([])
   const [feedback, setFeedback] = useState<Record<string, 'up' | 'down'>>({})
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -79,9 +86,11 @@ export default function OwnerAiChat() {
         user_id: user?.id ?? null,
         conversation_id: conversationId,
         pending_repair: pendingRepair as Record<string, unknown> | null,
+        pending_issue: pendingIssue as Record<string, unknown> | null,
       })
       setConversationId(res.conversation_id)
       setPendingRepair(res.pending_repair as PendingRepair | null)
+      setPendingIssue(res.pending_issue as PendingIssue | null)
       setMessages((prev) => [
         ...prev,
         { id: Date.now().toString() + 'r', role: 'assistant', content: res.response },
@@ -107,9 +116,11 @@ export default function OwnerAiChat() {
         user_id: user?.id ?? null,
         conversation_id: conversationId,
         pending_repair: pendingRepair as Record<string, unknown> | null,
+        pending_issue: pendingIssue as Record<string, unknown> | null,
       })
       setConversationId(res.conversation_id)
       setPendingRepair(res.pending_repair as PendingRepair | null)
+      setPendingIssue(res.pending_issue as PendingIssue | null)
       setMessages((prev) => [
         ...prev,
         { id: Date.now().toString() + 'r', role: 'assistant', content: res.response },

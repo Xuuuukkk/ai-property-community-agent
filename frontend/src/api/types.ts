@@ -141,6 +141,7 @@ export interface AgentChatRequest {
   user_id?: number | null
   conversation_id?: string | null
   pending_repair?: Record<string, unknown> | null
+  pending_issue?: Record<string, unknown> | null
 }
 
 export interface AgentChatResponse {
@@ -150,6 +151,7 @@ export interface AgentChatResponse {
   tool_results: Record<string, unknown>[]
   requires_human: boolean
   pending_repair: Record<string, unknown> | null
+  pending_issue: Record<string, unknown> | null
 }
 
 export interface InspectionCamera {

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-INTENTS = {"repair", "fee", "notice_query", "notice_publish", "knowledge", "unknown"}
+INTENTS = {"repair", "fee", "issue", "notice_query", "notice_publish", "knowledge", "unknown"}
 
 
 def classify_intent_rule(text: str) -> str:
@@ -32,6 +32,13 @@ def classify_intent_rule(text: str) -> str:
     # contains both "发布" and "通知".
     if any(k in lowered for k in ("发布", "发公告", "发通知", "公布", "贴出", "张贴", "生成公告", "草稿", "起草", "拟公告", "publish", "post")):
         return "notice_publish"
+
+    # Issue: public-area problem report (checked before repair so phrases like
+    # "上报电梯坏了" route to the issue agent, not the private-repair agent).
+    if any(k in lowered for k in ("上报", "小区里", "公共区域", "公共设施", "楼道", "垃圾", "违停", "乱停", "消防通道", "公共通道", "随手拍")):
+        return "issue"
+    if "小区" in lowered and any(k in lowered for k in ("问题", "故障", "坏了", "上报")):
+        return "issue"
 
     # Query: community announcements / outage notifications (checked before
     # repair because phrases like "停水维修" are announcements).
@@ -49,7 +56,9 @@ def classify_intent_rule(text: str) -> str:
         return "knowledge"
 
     # Repair: breakdown reports (avoid matching the single character "修" alone).
-    if any(k in lowered for k in ("报修", "维修", "漏水", "跳闸", "坏了", "故障", "电梯", "repair", "leak", "broken")):
+    # "电梯" is intentionally excluded here so that public-area 电梯 issues
+    # fall through to "issue" via the explicit "上报"/"小区里" triggers above.
+    if any(k in lowered for k in ("报修", "维修", "漏水", "跳闸", "坏了", "故障", "门锁", "水龙头", "水管", "repair", "leak", "broken")):
         return "repair"
 
     return "unknown"
@@ -97,7 +106,9 @@ def classify_intent(text: str, llm: "ChatOpenAI | None" = None) -> str:
     system_prompt = (
         "You are an intent classifier for a property community AI assistant. "
         "Classify the user's message into exactly one of: "
-        "repair, fee, notice_query, notice_publish, knowledge, unknown.\n"
+        "repair, fee, issue, notice_query, notice_publish, knowledge, unknown.\n"
+        "- issue: the user wants to REPORT a public-area problem (elevator, trash, illegal parking, corridor, etc.).\n"
+        "- repair: the user wants to report a PRIVATE repair inside their own home (leak, power trip, etc.).\n"
         "- notice_query: the user wants to READ or CHECK community notices.\n"
         "- notice_publish: the user wants to CREATE or SEND a community notice.\n"
         "- knowledge: the user asks about community regulations, hours, or FAQ.\n"

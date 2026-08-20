@@ -3,7 +3,7 @@
 The graph coordinates:
 
 1. Router node: classify user intent into one of
-   [repair, fee, notice_query, notice_publish, knowledge, unknown].
+   [repair, fee, issue, notice_query, notice_publish, knowledge, unknown].
 2. Domain agent node: extract parameters and call the appropriate tools.
 3. Response node: format the final answer for the user.
 
@@ -24,6 +24,7 @@ from sqlalchemy.orm import Session
 
 from app.agents.domain_agents import (
     run_fee_agent,
+    run_issue_agent,
     run_knowledge_agent,
     run_notice_publish_agent,
     run_notice_query_agent,
@@ -51,6 +52,7 @@ class AgentResult:
     tool_results: list[dict[str, Any]]
     requires_human: bool = False
     pending_repair: dict[str, Any] | None = None
+    pending_issue: dict[str, Any] | None = None
 
 
 def router_node(state: AgentState) -> AgentState:
@@ -61,10 +63,12 @@ def router_node(state: AgentState) -> AgentState:
             user_text = msg.content
             break
 
-    # If a multi-turn repair collection is in progress, stay in the repair flow
-    # even if the current message is ambiguous.
+    # If a multi-turn repair or issue collection is in progress, stay in that
+    # flow even if the current message is ambiguous.
     if state.get("pending_repair"):
         state["intent"] = "repair"
+    elif state.get("pending_issue"):
+        state["intent"] = "issue"
     else:
         llm = get_llm()
         state["intent"] = classify_intent(user_text, llm=llm)
@@ -82,6 +86,8 @@ def agent_node(state: AgentState) -> AgentState:
     try:
         if intent == "repair":
             result = run_repair_agent(db, state)
+        elif intent == "issue":
+            result = run_issue_agent(db, state)
         elif intent == "fee":
             result = run_fee_agent(db, state)
         elif intent == "notice_query":
@@ -92,7 +98,7 @@ def agent_node(state: AgentState) -> AgentState:
             result = run_knowledge_agent(db, state)
         else:
             result = {
-                "response": "抱歉，我不太理解您的需求。您可以尝试描述：报修、查物业费、发布公告或咨询社区规定。",
+                "response": "抱歉，我不太理解您的需求。您可以尝试描述：报修、上报小区问题、查物业费、发布公告或咨询社区规定。",
                 "tool_results": [],
                 "requires_human": False,
             }
@@ -100,6 +106,7 @@ def agent_node(state: AgentState) -> AgentState:
         state["tool_results"] = result.get("tool_results", [])
         state["requires_human"] = result.get("requires_human", False)
         state["pending_repair"] = result.get("pending_repair")
+        state["pending_issue"] = result.get("pending_issue")
         state["skip_llm_rewrite"] = result.get("skip_llm_rewrite", False)
     finally:
         if owns_session:
@@ -163,6 +170,7 @@ _builder.add_conditional_edges(
     {
         "repair": "agent",
         "fee": "agent",
+        "issue": "agent",
         "notice_query": "agent",
         "notice_publish": "agent",
         "knowledge": "agent",
@@ -182,6 +190,7 @@ def run_agent(
     user_id: int | None = None,
     conversation_id: str | None = None,
     pending_repair: dict[str, Any] | None = None,
+    pending_issue: dict[str, Any] | None = None,
     system_message: str | None = None,
     db: Session | None = None,
 ) -> AgentResult:
@@ -202,6 +211,7 @@ def run_agent(
         "conversation_id": session_id,
         "messages": messages,
         "pending_repair": pending_repair,
+        "pending_issue": pending_issue,
         "db": db,
     }
 
@@ -213,6 +223,7 @@ def run_agent(
         tool_results=final_state.get("tool_results", []),
         requires_human=final_state.get("requires_human", False),
         pending_repair=final_state.get("pending_repair"),
+        pending_issue=final_state.get("pending_issue"),
     )
 
     if db is not None:

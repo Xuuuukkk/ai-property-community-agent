@@ -20,6 +20,7 @@ class AgentChatRequest(BaseModel):
     user_id: int | None = Field(None, description="Optional user ID for context")
     conversation_id: str | None = Field(None, description="Optional conversation ID for continuity")
     pending_repair: dict | None = Field(None, description="Internal multi-turn repair collection state")
+    pending_issue: dict | None = Field(None, description="Internal multi-turn issue report collection state")
 
 
 class AgentChatResponse(BaseModel):
@@ -31,6 +32,7 @@ class AgentChatResponse(BaseModel):
     tool_results: list[dict]
     requires_human: bool = False
     pending_repair: dict | None = None
+    pending_issue: dict | None = None
 
 
 @router.post("/chat", response_model=AgentChatResponse)
@@ -55,7 +57,8 @@ def agent_chat(
             user_id=payload.user_id,
             conversation_id=payload.conversation_id,
             pending_repair=payload.pending_repair,
-            system_message="你是云溪花园小区的 AI 物业助手，负责帮助业主和物业人员处理报修、查费、发布公告和咨询。",
+            pending_issue=payload.pending_issue,
+            system_message="你是云溪花园小区的 AI 物业助手，负责帮助业主和物业人员处理报修、上报小区问题、查费、发布公告和咨询。",
             db=db,
         )
         return result

@@ -6,6 +6,7 @@ Each tool delegates to the existing service layer, preserving the rule:
 """
 
 from app.agents.tools.fee_tools import query_house_fee, query_payment_status
+from app.agents.tools.issue_tools import create_issue
 from app.agents.tools.knowledge_tools import retrieve_document, search_knowledge
 from app.agents.tools.notice_tools import generate_notice, list_notices, publish_notice
 from app.agents.tools.repair_tools import (
@@ -20,6 +21,7 @@ __all__ = [
     "query_repair_order",
     "assign_worker",
     "update_repair_status",
+    "create_issue",
     "query_house_fee",
     "query_payment_status",
     "generate_notice",

@@ -504,3 +504,127 @@ def run_knowledge_agent(db: Session, state: AgentState) -> dict[str, Any]:
         "response": answer,
         "tool_results": [result],
     }
+
+
+# ---------------------------------------------------------------------------
+# Issue Agent (public-area problem report, e.g. 电梯/垃圾/违停)
+# ---------------------------------------------------------------------------
+
+
+_ZONES = ("东区", "西区", "南区", "北区")
+_LOCATION_KEYWORDS = (
+    "电梯", "公共通道", "垃圾投放点", "消防通道", "楼道",
+    "非机动车棚", "地下车库", "绿化带", "单元门", "门禁", "其他",
+)
+_PUBLIC_FACILITY_LOCATIONS = {
+    "电梯", "消防通道", "非机动车棚", "地下车库", "单元门", "门禁",
+}
+
+
+def _extract_zone(text: str) -> str | None:
+    return next((z for z in _ZONES if z in text), None)
+
+
+def _extract_location(text: str) -> str | None:
+    for loc in _LOCATION_KEYWORDS:
+        if loc in text:
+            return loc
+    return None
+
+
+def run_issue_agent(db: Session, state: AgentState) -> dict[str, Any]:
+    """Handle public-area issue reports via multi-turn collection."""
+    user_text = ""
+    for msg in reversed(get_messages(state)):
+        if hasattr(msg, "content"):
+            user_text = str(msg.content)
+            break
+    user_id = _extract_user_id_from_state(state) or 1
+    pending = state.get("pending_issue") or {}
+
+    # Start a new issue collection.
+    if not pending:
+        return {
+            "response": (
+                "好的，我来帮您上报小区里的公共区域问题。"
+                "请告诉我【区域】（东区/西区/南区/北区）和【位置】"
+                "（如 电梯/楼道/垃圾投放点/消防通道 等）。"
+            ),
+            "tool_results": [],
+            "requires_human": False,
+            "pending_issue": {"step": "collect_zone_location"},
+            "skip_llm_rewrite": True,
+        }
+
+    step = pending.get("step")
+
+    if step == "collect_zone_location":
+        zone = pending.get("zone") or _extract_zone(user_text)
+        location = pending.get("location") or _extract_location(user_text)
+        if not zone:
+            return {
+                "response": "请告诉我【区域】，可选：东区 / 西区 / 南区 / 北区。",
+                "tool_results": [],
+                "pending_issue": {**pending, "step": "collect_zone_location"},
+                "skip_llm_rewrite": True,
+            }
+        if not location:
+            return {
+                "response": f"好的，区域【{zone}】。请告诉【位置】（如 电梯/楼道/垃圾投放点/消防通道 等）。",
+                "tool_results": [],
+                "pending_issue": {"step": "collect_zone_location", "zone": zone},
+                "skip_llm_rewrite": True,
+            }
+        return {
+            "response": f"好的，区域【{zone}】，位置【{location}】。请简单描述一下具体情况。",
+            "tool_results": [],
+            "pending_issue": {
+                "step": "collect_description",
+                "zone": zone,
+                "location": location,
+            },
+            "skip_llm_rewrite": True,
+        }
+
+    if step == "collect_description":
+        description = user_text.strip()
+        if len(description) < 4:
+            return {
+                "response": "请详细描述一下问题（至少几个字），我好帮您准确上报。",
+                "tool_results": [],
+                "pending_issue": pending,
+                "skip_llm_rewrite": True,
+            }
+        zone = pending.get("zone")
+        location = pending.get("location")
+        category = (
+            "public_facility" if location in _PUBLIC_FACILITY_LOCATIONS else "report"
+        )
+        result = agent_tools.create_issue(
+            db,
+            user_id=user_id,
+            category=category,
+            zone=zone,
+            location=location,
+            description=description,
+        )
+        output = _tool_output(result) or {}
+        issue_id = output.get("issue_id")
+        assignee = output.get("assignee_name") or "物业"
+        return {
+            "response": (
+                f"已为您上报，编号 #{issue_id}，已分配给{assignee}处理。"
+                f"{zone or ''} {location or ''} 的问题会尽快跟进。"
+            ),
+            "tool_results": [result],
+            "pending_issue": None,
+            "skip_llm_rewrite": True,
+        }
+
+    # Fallback to restart the collection.
+    return {
+        "response": "好的，请告诉我您要上报的小区问题（区域、位置、具体情况）。",
+        "tool_results": [],
+        "pending_issue": {"step": "collect_zone_location"},
+        "skip_llm_rewrite": True,
+    }
